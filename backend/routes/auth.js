@@ -9,7 +9,12 @@ const router = express.Router();
 // Register
 router.post('/signup', async (req, res) => {
   try {
-    const { username, email, password, bio, skills } = req.body;
+    const { username, email, password, primaryRole, bio, skills } = req.body;
+
+    // Validate primaryRole
+    if (!['helper', 'taskProvider'].includes(primaryRole)) {
+      return res.status(400).json({ message: 'Invalid primary role' });
+    }
 
     // Check if user exists
     let user = await User.findOne({ $or: [{ email }, { username }] });
@@ -26,8 +31,11 @@ router.post('/signup', async (req, res) => {
       username,
       email,
       passwordHash,
+      primaryRole,
       bio: bio || '',
-      skills: skills || []
+      skills: skills || [],
+      canCreateTasks: true, // Everyone can create tasks
+      canAcceptTasks: true  // Everyone can accept tasks
     });
 
     await user.save();
@@ -44,7 +52,11 @@ router.post('/signup', async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
-        credits: user.credits
+        primaryRole: user.primaryRole,
+        canCreateTasks: user.canCreateTasks,
+        canAcceptTasks: user.canAcceptTasks,
+        credits: user.credits,
+        skills: user.skills
       }
     });
   } catch (error) {
@@ -70,6 +82,11 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    // Update online status
+    user.isOnline = true;
+    user.lastSeen = new Date();
+    await user.save();
+
     // Generate JWT
     const payload = { userId: user.id };
     const token = jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', {
@@ -82,9 +99,28 @@ router.post('/login', async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
-        credits: user.credits
+        primaryRole: user.primaryRole,
+        canCreateTasks: user.canCreateTasks,
+        canAcceptTasks: user.canAcceptTasks,
+        credits: user.credits,
+        skills: user.skills
       }
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Logout
+router.post('/logout', auth, async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user.id, {
+      isOnline: false,
+      lastSeen: new Date()
+    });
+    
+    res.json({ message: 'Logged out successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

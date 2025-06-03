@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import UserTypeSelector from '../components/UserTypeSelector';
 
 const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
+    primaryRole: '',
     bio: '',
     skills: ''
   });
@@ -23,10 +25,23 @@ const Register = () => {
     });
   };
 
+  const handleRoleChange = (primaryRole) => {
+    setFormData({
+      ...formData,
+      primaryRole
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    if (!formData.primaryRole) {
+      setError('Please select your primary role');
+      setLoading(false);
+      return;
+    }
 
     try {
       const userData = {
@@ -45,7 +60,7 @@ const Register = () => {
 
   return (
     <div className="form-container">
-      <h2 className="text-center mb-2">Join TimeSlice</h2>
+      <h2 className="text-center mb-2">Join TimeSlice Community</h2>
       
       {error && <div className="error">{error}</div>}
       
@@ -82,6 +97,12 @@ const Register = () => {
             required
           />
         </div>
+
+        {/* Primary Role Selection */}
+        <UserTypeSelector
+          selectedType={formData.primaryRole}
+          onChange={handleRoleChange}
+        />
         
         <div className="form-group">
           <label>Bio:</label>
@@ -94,18 +115,21 @@ const Register = () => {
         </div>
         
         <div className="form-group">
-          <label>Skills (comma-separated):</label>
+          <label>Your Skills (comma-separated):</label>
           <input
             type="text"
             name="skills"
             value={formData.skills}
             onChange={handleChange}
-            placeholder="e.g., JavaScript, React, Node.js"
+            placeholder="e.g., JavaScript, React, Design, Writing, Data Analysis"
           />
+          <small style={{ color: '#666' }}>
+            Add skills you have OR skills you might need help with
+          </small>
         </div>
         
         <button type="submit" className="btn" disabled={loading} style={{ width: '100%' }}>
-          {loading ? 'Creating Account...' : 'Register'}
+          {loading ? 'Creating Account...' : 'Join TimeSlice'}
         </button>
       </form>
       

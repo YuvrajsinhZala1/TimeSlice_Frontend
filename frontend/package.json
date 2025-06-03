@@ -1,7 +1,7 @@
 {
   "name": "timeslice-frontend",
   "version": "1.0.0",
-  "description": "TimeSlice Frontend - React Application",
+  "description": "TimeSlice Frontend - Enhanced React Application",
   "private": true,
   "dependencies": {
     "react": "^18.2.0",
@@ -9,7 +9,8 @@
     "react-router-dom": "^6.15.0",
     "axios": "^1.5.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^3.4.0"
+    "web-vitals": "^3.4.0",
+    "socket.io-client": "^4.7.2"
   },
   "scripts": {
     "start": "react-scripts start",
