@@ -14,14 +14,16 @@ const RoleSwitcher = () => {
 
   return (
     <div style={{ 
-      background: '#f8f9fa', 
+      background: 'rgba(255, 255, 255, 0.1)', 
       padding: '0.5rem 1rem', 
-      borderRadius: '20px',
+      borderRadius: '25px',
       display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem'
+      gap: '0.5rem',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255, 255, 255, 0.2)'
     }}>
-      <span style={{ fontSize: '0.9rem', color: '#666' }}>Mode:</span>
+      <span style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.8)' }}>Mode:</span>
       
       <button
         onClick={() => handleModeSwitch('helper')}
@@ -29,7 +31,15 @@ const RoleSwitcher = () => {
         style={{ 
           padding: '0.25rem 0.75rem', 
           fontSize: '0.8rem',
-          borderRadius: '15px'
+          borderRadius: '15px',
+          background: currentMode === 'helper' 
+            ? 'linear-gradient(135deg, #50C878, #2E8B57)' 
+            : 'rgba(255, 255, 255, 0.2)',
+          border: 'none',
+          color: 'white',
+          boxShadow: currentMode === 'helper' 
+            ? '0 2px 10px rgba(80, 200, 120, 0.3)' 
+            : 'none'
         }}
       >
         🤝 Helper
@@ -41,7 +51,15 @@ const RoleSwitcher = () => {
         style={{ 
           padding: '0.25rem 0.75rem', 
           fontSize: '0.8rem',
-          borderRadius: '15px'
+          borderRadius: '15px',
+          background: currentMode === 'taskProvider' 
+            ? 'linear-gradient(135deg, #50C878, #2E8B57)' 
+            : 'rgba(255, 255, 255, 0.2)',
+          border: 'none',
+          color: 'white',
+          boxShadow: currentMode === 'taskProvider' 
+            ? '0 2px 10px rgba(80, 200, 120, 0.3)' 
+            : 'none'
         }}
       >
         📋 Task Provider

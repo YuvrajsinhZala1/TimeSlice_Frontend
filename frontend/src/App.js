@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ChatProvider } from './context/ChatContext';
 import Navbar from './components/Navbar';
+import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -21,21 +22,59 @@ function App() {
         <Router>
           <div className="App">
             <Navbar />
-            <div className="container">
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/create-task" element={<CreateTask />} />
-                <Route path="/browse-tasks" element={<BrowseTasks />} />
-                <Route path="/my-tasks" element={<MyTasks />} />
-                <Route path="/task-applications" element={<TaskApplications />} />
-                <Route path="/chat" element={<ChatPage />} />
-                <Route path="/my-bookings" element={<MyBookings />} />
-                <Route path="/" element={<Dashboard />} />
-              </Routes>
-            </div>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={
+                <div className="container">
+                  <Login />
+                </div>
+              } />
+              <Route path="/register" element={
+                <div className="container">
+                  <Register />
+                </div>
+              } />
+              <Route path="/dashboard" element={
+                <div className="container">
+                  <Dashboard />
+                </div>
+              } />
+              <Route path="/profile" element={
+                <div className="container">
+                  <Profile />
+                </div>
+              } />
+              <Route path="/create-task" element={
+                <div className="container">
+                  <CreateTask />
+                </div>
+              } />
+              <Route path="/browse-tasks" element={
+                <div className="container">
+                  <BrowseTasks />
+                </div>
+              } />
+              <Route path="/my-tasks" element={
+                <div className="container">
+                  <MyTasks />
+                </div>
+              } />
+              <Route path="/task-applications" element={
+                <div className="container">
+                  <TaskApplications />
+                </div>
+              } />
+              <Route path="/chat" element={
+                <div className="container">
+                  <ChatPage />
+                </div>
+              } />
+              <Route path="/my-bookings" element={
+                <div className="container">
+                  <MyBookings />
+                </div>
+              } />
+            </Routes>
           </div>
         </Router>
       </ChatProvider>

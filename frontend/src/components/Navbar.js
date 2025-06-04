@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import RoleSwitcher from './RoleSwitcher';
@@ -8,16 +8,26 @@ const Navbar = () => {
   const { currentUser, logout } = useAuth();
   const { unreadCount } = useChat();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Don't show navbar on homepage for non-logged in users
+  const isHomePage = location.pathname === '/';
+  const shouldShowNavbar = currentUser || !isHomePage;
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
+
+  // If we shouldn't show navbar, return null
+  if (!shouldShowNavbar) {
+    return null;
+  }
 
   return (
     <nav className="navbar">
       <div className="container">
-        <Link to="/" style={{ textDecoration: 'none' }}>
+        <Link to={currentUser ? "/dashboard" : "/"} style={{ textDecoration: 'none' }}>
           <h1>TimeSlice</h1>
         </Link>
         
@@ -87,6 +97,7 @@ const Navbar = () => {
           </ul>
         ) : (
           <ul className="nav-links">
+            <li><Link to="/">Home</Link></li>
             <li><Link to="/login">Login</Link></li>
             <li><Link to="/register">Register</Link></li>
           </ul>
