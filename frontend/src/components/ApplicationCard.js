@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatDuration } from '../utils/durationUtils';
 
 const ApplicationCard = ({ application, onRespond, showResponseOptions = false }) => {
   const [showResponseForm, setShowResponseForm] = useState(false);
@@ -19,6 +20,16 @@ const ApplicationCard = ({ application, onRespond, showResponseOptions = false }
       case 'withdrawn': return '#6c757d';
       default: return '#ffc107';
     }
+  };
+
+  const getExperienceLevel = (completedTasks, memberSince) => {
+    const monthsSince = Math.floor((new Date() - new Date(memberSince)) / (1000 * 60 * 60 * 24 * 30));
+    
+    if (completedTasks >= 50) return '🏆 Expert';
+    if (completedTasks >= 20) return '⭐ Experienced';
+    if (completedTasks >= 5) return '👍 Intermediate';
+    if (monthsSince >= 3) return '🌱 Beginner';
+    return '🆕 New Member';
   };
 
   const handleSubmitResponse = (e) => {
@@ -44,6 +55,9 @@ const ApplicationCard = ({ application, onRespond, showResponseOptions = false }
         <span className="rating ml-1">
           ★ {application.applicantId.rating ? application.applicantId.rating.toFixed(1) : 'New'}
         </span>
+        <span style={{ marginLeft: '1rem', fontSize: '0.9rem' }}>
+          {getExperienceLevel(application.applicantId.completedTasks, application.applicantId.createdAt)}
+        </span>
       </div>
 
       <div className="mb-1">
@@ -63,14 +77,21 @@ const ApplicationCard = ({ application, onRespond, showResponseOptions = false }
         <strong>Proposed Credits:</strong> {application.proposedCredits}
       </div>
 
+      {application.taskId && (
+        <div className="mb-1">
+          <strong>Task Duration:</strong> {formatDuration(application.taskId.duration)}
+        </div>
+      )}
+
       <div className="mb-1">
         <strong>Message:</strong>
         <div style={{ 
           background: '#f8f9fa', 
-          padding: '0.5rem', 
-          borderRadius: '4px',
+          padding: '1rem', 
+          borderRadius: '8px',
           fontStyle: 'italic',
-          marginTop: '0.25rem'
+          marginTop: '0.5rem',
+          border: '1px solid #e1e5e9'
         }}>
           "{application.message}"
         </div>
@@ -85,9 +106,10 @@ const ApplicationCard = ({ application, onRespond, showResponseOptions = false }
           <strong>Response:</strong>
           <div style={{ 
             background: application.status === 'accepted' ? '#d4edda' : '#f8d7da', 
-            padding: '0.5rem', 
-            borderRadius: '4px',
-            marginTop: '0.25rem'
+            padding: '1rem', 
+            borderRadius: '8px',
+            marginTop: '0.5rem',
+            border: `1px solid ${application.status === 'accepted' ? '#c3e6cb' : '#f5c6cb'}`
           }}>
             {application.responseMessage}
           </div>
@@ -100,13 +122,19 @@ const ApplicationCard = ({ application, onRespond, showResponseOptions = false }
             onClick={() => setShowResponseForm(!showResponseForm)}
             className="btn btn-success"
           >
-            Respond to Application
+            📝 Respond to Application
           </button>
         </div>
       )}
 
       {showResponseForm && (
-        <form onSubmit={handleSubmitResponse} style={{ marginTop: '1rem', padding: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}>
+        <form onSubmit={handleSubmitResponse} style={{ 
+          marginTop: '1.5rem', 
+          padding: '1.5rem', 
+          border: '2px solid #667eea', 
+          borderRadius: '8px',
+          backgroundColor: '#f8f9ff'
+        }}>
           <h5>Respond to Application</h5>
           
           <div className="form-group">
@@ -116,8 +144,8 @@ const ApplicationCard = ({ application, onRespond, showResponseOptions = false }
               onChange={(e) => setResponseData({ ...responseData, status: e.target.value })}
               required
             >
-              <option value="accepted">Accept</option>
-              <option value="rejected">Reject</option>
+              <option value="accepted">✅ Accept Application</option>
+              <option value="rejected">❌ Reject Application</option>
             </select>
           </div>
 
@@ -131,16 +159,23 @@ const ApplicationCard = ({ application, onRespond, showResponseOptions = false }
                 min="1"
                 required
               />
+              <small style={{ color: '#666' }}>
+                Helper proposed {application.proposedCredits} credits
+              </small>
             </div>
           )}
 
           <div className="form-group">
-            <label>Message (optional):</label>
+            <label>Message to applicant:</label>
             <textarea
               value={responseData.responseMessage}
               onChange={(e) => setResponseData({ ...responseData, responseMessage: e.target.value })}
-              placeholder="Add a message to the applicant..."
+              placeholder={responseData.status === 'accepted' 
+                ? "Welcome aboard! Looking forward to working with you. Here are the next steps..."
+                : "Thank you for your interest. We've decided to go with another applicant because..."
+              }
               rows="3"
+              required
             />
           </div>
 

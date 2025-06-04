@@ -2,9 +2,32 @@ const express = require('express');
 const Task = require('../models/Task');
 const Application = require('../models/Application');
 const User = require('../models/User');
+const Booking = require('../models/Booking');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
+
+// Helper function to convert duration string to minutes
+const parseDurationToMinutes = (durationStr) => {
+  const duration = durationStr.toLowerCase();
+  
+  if (duration.includes('minute')) {
+    return parseInt(duration) || 30;
+  } else if (duration.includes('hour')) {
+    const hours = parseInt(duration) || 1;
+    return hours * 60;
+  } else if (duration.includes('day')) {
+    const days = parseInt(duration) || 1;
+    return days * 24 * 60;
+  } else if (duration.includes('week')) {
+    const weeks = parseInt(duration) || 1;
+    return weeks * 7 * 24 * 60;
+  }
+  
+  // If just a number, assume minutes
+  const num = parseInt(duration);
+  return isNaN(num) ? 30 : num;
+};
 
 // Create task (Anyone can create now)
 router.post('/', auth, async (req, res) => {
@@ -15,6 +38,8 @@ router.post('/', auth, async (req, res) => {
 
     const { title, description, skillsRequired, dateTime, duration, credits, urgency } = req.body;
 
+    const durationInMinutes = parseDurationToMinutes(duration);
+
     const task = new Task({
       taskProviderId: req.user.id,
       title,
@@ -22,6 +47,7 @@ router.post('/', auth, async (req, res) => {
       skillsRequired: skillsRequired || [],
       dateTime,
       duration,
+      durationInMinutes,
       credits,
       urgency: urgency || 'medium'
     });
@@ -46,7 +72,8 @@ router.get('/', auth, async (req, res) => {
       search,
       skillRequired,
       urgency,
-      duration,
+      minDuration,
+      maxDuration,
       minCredits,
       maxCredits,
       sortBy = 'dateTime',
@@ -84,9 +111,11 @@ router.get('/', auth, async (req, res) => {
       query.urgency = urgency;
     }
 
-    // Filter by duration
-    if (duration) {
-      query.duration = parseInt(duration);
+    // Filter by duration (in minutes)
+    if (minDuration || maxDuration) {
+      query.durationInMinutes = {};
+      if (minDuration) query.durationInMinutes.$gte = parseInt(minDuration);
+      if (maxDuration) query.durationInMinutes.$lte = parseInt(maxDuration);
     }
 
     // Filter by credits range
@@ -153,7 +182,7 @@ router.get('/my-tasks', auth, async (req, res) => {
         path: 'applicants',
         populate: {
           path: 'applicantId',
-          select: 'username rating skills'
+          select: 'username rating skills completedTasks totalRatings bio createdAt'
         }
       })
       .sort({ dateTime: 1 });
@@ -175,7 +204,7 @@ router.get('/:taskId', auth, async (req, res) => {
         path: 'applicants',
         populate: {
           path: 'applicantId',
-          select: 'username rating skills completedTasks'
+          select: 'username rating skills completedTasks totalRatings bio createdAt'
         }
       });
 
@@ -184,6 +213,54 @@ router.get('/:taskId', auth, async (req, res) => {
     }
 
     res.json(task);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Mark task as completed by provider
+router.put('/:taskId/complete', auth, async (req, res) => {
+  try {
+    const { completionNote } = req.body;
+    const task = await Task.findById(req.params.taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    if (task.taskProviderId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    if (task.status !== 'in-progress') {
+      return res.status(400).json({ message: 'Task must be in progress to complete' });
+    }
+
+    // Update task
+    task.status = 'completed';
+    task.completedByProvider = true;
+    task.completionNote = completionNote || '';
+    await task.save();
+
+    // Update booking
+    const booking = await Booking.findOne({ taskId: task._id });
+    if (booking) {
+      booking.status = 'completed';
+      booking.completedAt = new Date();
+      booking.providerAcceptanceNote = completionNote || '';
+      await booking.save();
+
+      // Transfer credits
+      await User.findByIdAndUpdate(booking.taskProvider, { 
+        $inc: { credits: -booking.agreedCredits } 
+      });
+      await User.findByIdAndUpdate(booking.helper, { 
+        $inc: { credits: booking.agreedCredits, completedTasks: 1 } 
+      });
+    }
+
+    res.json({ message: 'Task marked as completed successfully', task });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -205,6 +282,11 @@ router.put('/:taskId', auth, async (req, res) => {
 
     if (task.status !== 'open') {
       return res.status(400).json({ message: 'Cannot update task that is not open' });
+    }
+
+    // Update duration in minutes if duration is changed
+    if (req.body.duration) {
+      req.body.durationInMinutes = parseDurationToMinutes(req.body.duration);
     }
 
     const updatedTask = await Task.findByIdAndUpdate(

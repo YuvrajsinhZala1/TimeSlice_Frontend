@@ -38,7 +38,7 @@ router.get('/', auth, async (req, res) => {
 // Update booking status
 router.put('/:bookingId/status', auth, async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, workNote } = req.body;
     const booking = await Booking.findById(req.params.bookingId);
 
     if (!booking) {
@@ -60,18 +60,12 @@ router.put('/:bookingId/status', auth, async (req, res) => {
       await Task.findByIdAndUpdate(booking.taskId, { status: 'in-progress' });
     }
 
-    if (status === 'completed') {
-      booking.completedAt = new Date();
-      
-      // Update task
-      await Task.findByIdAndUpdate(booking.taskId, { status: 'completed' });
-      
-      // Transfer credits from task provider to helper
-      await User.findByIdAndUpdate(booking.taskProvider, { 
-        $inc: { credits: -booking.agreedCredits } 
-      });
-      await User.findByIdAndUpdate(booking.helper, { 
-        $inc: { credits: booking.agreedCredits, completedTasks: 1 } 
+    // Helper submits work for review (doesn't automatically complete)
+    if (status === 'work-submitted') {
+      booking.workSubmissionNote = workNote || '';
+      // Update task to show work is submitted
+      await Task.findByIdAndUpdate(booking.taskId, { 
+        completedByHelper: true 
       });
     }
 

@@ -47,6 +47,14 @@ const BookingSchema = new mongoose.Schema({
   chatId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Chat'
+  },
+  workSubmissionNote: {
+    type: String,
+    default: ''
+  },
+  providerAcceptanceNote: {
+    type: String,
+    default: ''
   }
 }, {
   timestamps: true

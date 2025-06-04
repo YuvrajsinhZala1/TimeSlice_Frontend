@@ -23,9 +23,12 @@ const TaskSchema = new mongoose.Schema({
     required: true
   },
   duration: {
-    type: Number,
-    required: true,
-    enum: [30, 60]
+    type: String, // Changed from enum to flexible string
+    required: true
+  },
+  durationInMinutes: {
+    type: Number, // For calculations and filtering
+    required: true
   },
   credits: {
     type: Number,
@@ -57,6 +60,18 @@ const TaskSchema = new mongoose.Schema({
   maxApplications: {
     type: Number,
     default: 10
+  },
+  completedByHelper: {
+    type: Boolean,
+    default: false
+  },
+  completedByProvider: {
+    type: Boolean,
+    default: false
+  },
+  completionNote: {
+    type: String,
+    default: ''
   }
 }, {
   timestamps: true

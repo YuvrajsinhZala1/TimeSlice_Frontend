@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import DurationSelector from '../components/DurationSelector';
+import { validateCustomDuration } from '../utils/durationUtils';
 import api from '../utils/api';
 
 const CreateTask = () => {
@@ -11,10 +13,11 @@ const CreateTask = () => {
     description: '',
     skillsRequired: '',
     dateTime: '',
-    duration: 30,
+    duration: '',
     credits: 20,
     urgency: 'medium'
   });
+  const [durationError, setDurationError] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -33,17 +36,49 @@ const CreateTask = () => {
     });
   };
 
+  const handleDurationChange = (duration) => {
+    setFormData({
+      ...formData,
+      duration
+    });
+    
+    // Validate duration
+    if (duration) {
+      const validation = validateCustomDuration(duration);
+      if (!validation.isValid) {
+        setDurationError(validation.error);
+      } else {
+        setDurationError('');
+      }
+    } else {
+      setDurationError('');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
+    // Validate duration
+    if (!formData.duration) {
+      setDurationError('Duration is required');
+      setLoading(false);
+      return;
+    }
+
+    const durationValidation = validateCustomDuration(formData.duration);
+    if (!durationValidation.isValid) {
+      setDurationError(durationValidation.error);
+      setLoading(false);
+      return;
+    }
+
     try {
       const taskData = {
         ...formData,
         skillsRequired: formData.skillsRequired.split(',').map(skill => skill.trim()).filter(skill => skill),
-        credits: parseInt(formData.credits),
-        duration: parseInt(formData.duration)
+        credits: parseInt(formData.credits)
       };
 
       await api.post('/tasks', taskData);
@@ -63,7 +98,7 @@ const CreateTask = () => {
     <div className="form-container">
       <h2 className="text-center mb-2">Post a New Task</h2>
       <p className="text-center" style={{ color: '#666', marginBottom: '2rem' }}>
-        Describe what you need help with and let helpers apply!
+        Create a detailed task description and let qualified helpers apply!
       </p>
       
       {error && <div className="error">{error}</div>}
@@ -87,9 +122,9 @@ const CreateTask = () => {
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="Describe the task in detail, including any specific requirements, expected outcomes, and any context that would help helpers understand what you need..."
+            placeholder="Describe the task in detail, including any specific requirements, expected outcomes, deliverables, and any context that would help helpers understand what you need..."
             required
-            rows="4"
+            rows="5"
           />
         </div>
         
@@ -100,16 +135,16 @@ const CreateTask = () => {
             name="skillsRequired"
             value={formData.skillsRequired}
             onChange={handleChange}
-            placeholder="e.g., JavaScript, Design, Writing, Data Analysis"
+            placeholder="e.g., JavaScript, Design, Writing, Data Analysis, Project Management"
             required
           />
           <small style={{ color: '#666' }}>
-            Helpers with these skills will see your task first
+            Helpers with these skills will see your task first and can apply
           </small>
         </div>
         
         <div className="form-group">
-          <label>Scheduled Date & Time:</label>
+          <label>Preferred Start Date & Time:</label>
           <input
             type="datetime-local"
             name="dateTime"
@@ -119,22 +154,16 @@ const CreateTask = () => {
             required
           />
           <small style={{ color: '#666' }}>
-            When would you like to work on this task?
+            When would you like to start working on this task?
           </small>
         </div>
         
-        <div className="form-group">
-          <label>Estimated Duration:</label>
-          <select
-            name="duration"
-            value={formData.duration}
-            onChange={handleChange}
-            required
-          >
-            <option value={30}>30 minutes</option>
-            <option value={60}>60 minutes</option>
-          </select>
-        </div>
+        {/* Enhanced Duration Selector */}
+        <DurationSelector
+          value={formData.duration}
+          onChange={handleDurationChange}
+          error={durationError}
+        />
         
         <div className="form-group">
           <label>Credits to Pay:</label>
@@ -148,7 +177,7 @@ const CreateTask = () => {
             required
           />
           <small style={{ color: '#666' }}>
-            You have {currentUser.credits} credits available. Helpers can propose different amounts.
+            You have {currentUser.credits} credits available. Helpers can propose different amounts in their applications.
           </small>
         </div>
         
@@ -159,25 +188,27 @@ const CreateTask = () => {
             value={formData.urgency}
             onChange={handleChange}
           >
-            <option value="low">Low - Can wait</option>
-            <option value="medium">Medium - Normal priority</option>
-            <option value="high">High - Urgent</option>
+            <option value="low">🟢 Low - Flexible timeline</option>
+            <option value="medium">🟡 Medium - Normal priority</option>
+            <option value="high">🔴 High - Urgent, need soon</option>
           </select>
         </div>
         
-        <button type="submit" className="btn" disabled={loading} style={{ width: '100%' }}>
+        <button type="submit" className="btn" disabled={loading || durationError} style={{ width: '100%' }}>
           {loading ? 'Posting Task...' : 'Post Task & Accept Applications'}
         </button>
       </form>
       
-      <div style={{ marginTop: '1rem', padding: '1rem', background: '#f8f9fa', borderRadius: '4px' }}>
-        <h4>💡 How it works:</h4>
-        <ol style={{ marginLeft: '1rem' }}>
-          <li>Post your task with clear requirements</li>
-          <li>Helpers with matching skills will see and apply</li>
-          <li>Review applications and choose the best helper</li>
-          <li>Chat with your chosen helper</li>
-          <li>Complete the task together!</li>
+      <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#f8f9fa', borderRadius: '8px' }}>
+        <h4>💡 How the application process works:</h4>
+        <ol style={{ marginLeft: '1rem', lineHeight: '1.6' }}>
+          <li>Post your task with clear requirements and flexible duration</li>
+          <li>Helpers with matching skills will see and apply for your task</li>
+          <li>Review applications with detailed helper profiles</li>
+          <li>Accept the best application and start chatting</li>
+          <li>Work together to complete the task</li>
+          <li>Mark as completed when satisfied with the work</li>
+          <li>Leave reviews to help the community!</li>
         </ol>
       </div>
     </div>

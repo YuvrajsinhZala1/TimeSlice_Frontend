@@ -1,4 +1,4 @@
-/* Enhanced CSS styles for dual role system */
+/* Enhanced CSS styles for improved application system */
 * {
   margin: 0;
   padding: 0;
@@ -103,7 +103,6 @@ body {
 }
 
 .form-group textarea {
-  height: 100px;
   resize: vertical;
 }
 
@@ -188,7 +187,7 @@ body {
   box-shadow: 0 6px 30px rgba(0,0,0,0.12);
 }
 
-.card h3 {
+.card h3, .card h4 {
   margin-bottom: 1rem;
   color: #2c3e50;
   font-weight: 700;
@@ -241,8 +240,142 @@ body {
 /* Application and Task Status */
 .task-status-open { border-left: 4px solid #2ecc71; }
 .task-status-assigned { border-left: 4px solid #3498db; }
+.task-status-in-progress { border-left: 4px solid #6f42c1; }
 .task-status-completed { border-left: 4px solid #95a5a6; }
 .task-status-cancelled { border-left: 4px solid #e74c3c; }
+
+/* Helper Profile Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: auto;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.3s ease;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+/* Application Cards - Vertical Layout */
+.application-card-vertical {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid #e1e5e9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  margin-bottom: 1rem;
+}
+
+.application-card-vertical:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+}
+
+.helper-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-right: 1.5rem;
+  flex-shrink: 0;
+}
+
+.helper-info {
+  flex: 1;
+}
+
+.application-actions {
+  text-align: right;
+  margin-left: 1rem;
+  flex-shrink: 0;
+}
+
+/* Duration Selector */
+.duration-selector {
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #f8f9fa;
+}
+
+.duration-custom-input {
+  margin-top: 0.5rem;
+}
+
+.duration-error {
+  border-color: #dc3545 !important;
+  background-color: #fff5f5;
+}
+
+/* Task Completion Modal */
+.completion-modal {
+  background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+  border: 2px solid #28a745;
+}
+
+.completion-warning {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+/* Work Submission Styles */
+.work-submission-form {
+  border: 2px solid #28a745;
+  border-radius: 8px;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+}
+
+.work-submitted-status {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 1rem;
+}
 
 /* Chat Interface */
 .chat-window {
@@ -371,14 +504,88 @@ body {
   font-weight: 700;
 }
 
-/* Role Switcher */
-.role-switcher {
-  background: rgba(255,255,255,0.2);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
+/* Tab Navigation */
+.tab-nav {
   display: flex;
+  border-bottom: 2px solid #e1e5e9;
+  margin-bottom: 2rem;
+}
+
+.tab-nav button {
+  background: none;
+  border: none;
+  padding: 1rem 2rem;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.tab-nav button.active {
+  border-bottom-color: #667eea;
+  color: #667eea;
+}
+
+.tab-nav button:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+/* Application status indicators */
+.application-pending { border-left: 4px solid #f39c12; }
+.application-accepted { border-left: 4px solid #2ecc71; }
+.application-rejected { border-left: 4px solid #e74c3c; }
+.application-withdrawn { border-left: 4px solid #95a5a6; }
+
+/* Enhanced hover effects */
+.card:hover .btn {
+  transform: scale(1.02);
+}
+
+/* Loading states */
+.loading {
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+  padding: 2rem;
+  color: #666;
+}
+
+.loading::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ddd;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 0.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: slideIn 0.3s ease;
+}
+
+/* Status indicators with icons */
+.status-icon {
+  margin-right: 0.5rem;
 }
 
 /* Responsive Design */
@@ -414,6 +621,26 @@ body {
   .gap-1 {
     gap: 0.5rem;
   }
+
+  .application-card-vertical {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .helper-avatar {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+
+  .application-actions {
+    margin-left: 0;
+    margin-top: 1rem;
+  }
+
+  .modal-content {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -430,78 +657,3 @@ body {
     font-size: 0.9rem;
   }
 }
-
-/* Animations */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.card {
-  animation: slideIn 0.3s ease;
-}
-
-/* Loading states */
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-  color: #666;
-}
-
-.loading::after {
-  content: '';
-  width: 20px;
-  height: 20px;
-  border: 2px solid #ddd;
-  border-top-color: #667eea;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-left: 0.5rem;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Enhanced hover effects */
-.card:hover .btn {
-  transform: scale(1.02);
-}
-
-/* Tab navigation */
-.tab-nav {
-  display: flex;
-  border-bottom: 2px solid #e1e5e9;
-  margin-bottom: 2rem;
-}
-
-.tab-nav button {
-  background: none;
-  border: none;
-  padding: 1rem 2rem;
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: all 0.3s ease;
-}
-
-.tab-nav button.active {
-  border-bottom-color: #667eea;
-  color: #667eea;
-  font-weight: 600;
-}
-
-/* Application status indicators */
-.application-pending { border-left: 4px solid #f39c12; }
-.application-accepted { border-left: 4px solid #2ecc71; }
-.application-rejected { border-left: 4px solid #e74c3c; }
-.application-withdrawn { border-left: 4px solid #95a5a6; }

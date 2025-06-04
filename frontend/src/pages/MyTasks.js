@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import TaskCard from '../components/TaskCard';
 import ApplicantsList from '../components/ApplicantsList';
+import TaskCompletionModal from '../components/TaskCompletionModal';
 
 const MyTasks = () => {
   const { currentUser } = useAuth();
@@ -11,6 +12,8 @@ const MyTasks = () => {
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showApplications, setShowApplications] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [taskToComplete, setTaskToComplete] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -65,6 +68,29 @@ const MyTasks = () => {
   const handleViewApplications = (task) => {
     setSelectedTask(task);
     setShowApplications(true);
+  };
+
+  const handleCompleteTask = (task) => {
+    setTaskToComplete(task);
+    setShowCompletionModal(true);
+  };
+
+  const handleTaskCompletion = async (taskId, completionNote) => {
+    try {
+      setError('');
+      setSuccess('');
+      
+      await api.put(`/tasks/${taskId}/complete`, { completionNote });
+      setSuccess('Task marked as completed! Credits have been transferred to the helper.');
+      
+      // Refresh tasks
+      await fetchMyTasks();
+      
+      setTimeout(() => setSuccess(''), 5000);
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to complete task');
+      setTimeout(() => setError(''), 3000);
+    }
   };
 
   const handleRespondToApplication = async (applicationId, responseData) => {
@@ -158,7 +184,7 @@ const MyTasks = () => {
           {/* Open Tasks */}
           {openTasks.length > 0 && (
             <div className="mb-2">
-              <h2>Open Tasks - Accepting Applications ({openTasks.length})</h2>
+              <h2>📋 Open Tasks - Accepting Applications ({openTasks.length})</h2>
               <div className="card-grid">
                 {openTasks.map(task => (
                   <TaskCard
@@ -179,7 +205,7 @@ const MyTasks = () => {
           {/* In Review Tasks */}
           {inReviewTasks.length > 0 && (
             <div className="mb-2">
-              <h2>Under Review ({inReviewTasks.length})</h2>
+              <h2>👀 Under Review ({inReviewTasks.length})</h2>
               <div className="card-grid">
                 {inReviewTasks.map(task => (
                   <TaskCard
@@ -195,19 +221,65 @@ const MyTasks = () => {
             </div>
           )}
 
-          {/* Assigned Tasks */}
+          {/* Assigned/In Progress Tasks */}
           {assignedTasks.length > 0 && (
             <div className="mb-2">
-              <h2>Assigned Tasks ({assignedTasks.length})</h2>
+              <h2>🚀 Active Tasks ({assignedTasks.length})</h2>
               <div className="card-grid">
                 {assignedTasks.map(task => (
-                  <TaskCard
-                    key={task._id}
-                    task={task}
-                    showApplyButton={false}
-                    showEditDelete={false}
-                    showViewApplications={false}
-                  />
+                  <div key={task._id} className="card">
+                    <TaskCard
+                      task={task}
+                      showApplyButton={false}
+                      showEditDelete={false}
+                      showViewApplications={false}
+                    />
+                    
+                    {/* Task Provider Completion Controls */}
+                    {task.status === 'in-progress' && (
+                      <div style={{ 
+                        marginTop: '1rem', 
+                        padding: '1rem', 
+                        backgroundColor: '#f8f9fa', 
+                        borderRadius: '8px',
+                        border: '2px solid #28a745'
+                      }}>
+                        <h4 style={{ color: '#28a745', marginBottom: '0.5rem' }}>
+                          ✅ Task in Progress
+                        </h4>
+                        <p style={{ color: '#666', marginBottom: '1rem' }}>
+                          Working with: <strong>{task.selectedHelper?.username}</strong>
+                        </p>
+                        
+                        {task.completedByHelper && (
+                          <div style={{ 
+                            backgroundColor: '#d4edda', 
+                            padding: '0.75rem', 
+                            borderRadius: '4px',
+                            marginBottom: '1rem',
+                            border: '1px solid #c3e6cb'
+                          }}>
+                            <strong>🎉 Helper has completed their work!</strong>
+                            <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem' }}>
+                              Review the work and mark as completed when satisfied.
+                            </p>
+                          </div>
+                        )}
+                        
+                        <button
+                          onClick={() => handleCompleteTask(task)}
+                          className="btn btn-success"
+                          style={{ width: '100%' }}
+                        >
+                          Mark Task as Completed
+                        </button>
+                        
+                        <small style={{ display: 'block', marginTop: '0.5rem', color: '#666' }}>
+                          This will transfer credits to the helper and complete the task
+                        </small>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
@@ -216,22 +288,48 @@ const MyTasks = () => {
           {/* Completed Tasks */}
           {completedTasks.length > 0 && (
             <div className="mb-2">
-              <h2>Completed Tasks ({completedTasks.length})</h2>
+              <h2>✅ Completed Tasks ({completedTasks.length})</h2>
               <div className="card-grid">
                 {completedTasks.map(task => (
-                  <TaskCard
-                    key={task._id}
-                    task={task}
-                    showApplyButton={false}
-                    showEditDelete={false}
-                    showViewApplications={false}
-                  />
+                  <div key={task._id} className="card" style={{ opacity: 0.8 }}>
+                    <TaskCard
+                      task={task}
+                      showApplyButton={false}
+                      showEditDelete={false}
+                      showViewApplications={false}
+                    />
+                    
+                    {task.completionNote && (
+                      <div style={{ 
+                        marginTop: '1rem', 
+                        padding: '1rem', 
+                        backgroundColor: '#f8f9fa', 
+                        borderRadius: '8px' 
+                      }}>
+                        <strong>Completion Notes:</strong>
+                        <p style={{ margin: '0.5rem 0 0 0', fontStyle: 'italic' }}>
+                          "{task.completionNote}"
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
           )}
         </>
       )}
+
+      {/* Task Completion Modal */}
+      <TaskCompletionModal
+        task={taskToComplete}
+        isOpen={showCompletionModal}
+        onClose={() => {
+          setShowCompletionModal(false);
+          setTaskToComplete(null);
+        }}
+        onComplete={handleTaskCompletion}
+      />
     </div>
   );
 };

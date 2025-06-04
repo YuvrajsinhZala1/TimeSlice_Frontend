@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { DURATION_OPTIONS } from '../utils/durationUtils';
 import api from '../utils/api';
 
 const SearchFilters = ({ onFilterChange, filters }) => {
@@ -7,7 +8,8 @@ const SearchFilters = ({ onFilterChange, filters }) => {
     search: '',
     skillRequired: '',
     urgency: '',
-    duration: '',
+    minDuration: '',
+    maxDuration: '',
     minCredits: '',
     maxCredits: '',
     sortBy: 'dateTime',
@@ -39,7 +41,8 @@ const SearchFilters = ({ onFilterChange, filters }) => {
       search: '',
       skillRequired: '',
       urgency: '',
-      duration: '',
+      minDuration: '',
+      maxDuration: '',
       minCredits: '',
       maxCredits: '',
       sortBy: 'dateTime',
@@ -48,6 +51,19 @@ const SearchFilters = ({ onFilterChange, filters }) => {
     setLocalFilters(clearedFilters);
     onFilterChange(clearedFilters);
   };
+
+  // Duration options in minutes for filtering
+  const durationFilterOptions = [
+    { label: 'Any Duration', value: '' },
+    { label: '30 minutes', value: 30 },
+    { label: '1 hour', value: 60 },
+    { label: '2 hours', value: 120 },
+    { label: '4 hours', value: 240 },
+    { label: '8 hours (1 day)', value: 480 },
+    { label: '1 day', value: 1440 },
+    { label: '2-3 days', value: 2880 },
+    { label: '1 week+', value: 10080 }
+  ];
 
   return (
     <div className="card mb-2">
@@ -94,22 +110,38 @@ const SearchFilters = ({ onFilterChange, filters }) => {
             onChange={(e) => handleFilterChange('urgency', e.target.value)}
           >
             <option value="">Any Urgency</option>
-            <option value="high">🔴 High</option>
-            <option value="medium">🟡 Medium</option>
-            <option value="low">🟢 Low</option>
+            <option value="high">🔴 High - Urgent</option>
+            <option value="medium">🟡 Medium - Normal</option>
+            <option value="low">🟢 Low - Flexible</option>
           </select>
         </div>
 
-        {/* Duration Filter */}
+        {/* Duration Filters */}
         <div className="form-group">
-          <label>Duration:</label>
+          <label>Min Duration:</label>
           <select
-            value={localFilters.duration}
-            onChange={(e) => handleFilterChange('duration', e.target.value)}
+            value={localFilters.minDuration}
+            onChange={(e) => handleFilterChange('minDuration', e.target.value)}
           >
-            <option value="">Any Duration</option>
-            <option value="30">30 minutes</option>
-            <option value="60">60 minutes</option>
+            {durationFilterOptions.map((option, index) => (
+              <option key={index} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Max Duration:</label>
+          <select
+            value={localFilters.maxDuration}
+            onChange={(e) => handleFilterChange('maxDuration', e.target.value)}
+          >
+            {durationFilterOptions.map((option, index) => (
+              <option key={index} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -146,7 +178,7 @@ const SearchFilters = ({ onFilterChange, filters }) => {
             <option value="dateTime">📅 Date & Time</option>
             <option value="credits">💰 Credits</option>
             <option value="urgency">⚡ Urgency</option>
-            <option value="duration">⏰ Duration</option>
+            <option value="durationInMinutes">⏰ Duration</option>
             <option value="createdAt">🆕 Recently Posted</option>
           </select>
         </div>
@@ -162,6 +194,42 @@ const SearchFilters = ({ onFilterChange, filters }) => {
           </select>
         </div>
       </div>
+
+      {/* Active Filters Display */}
+      {Object.values(localFilters).some(value => value && value !== 'dateTime' && value !== 'asc') && (
+        <div style={{ 
+          marginTop: '1rem', 
+          padding: '0.75rem', 
+          backgroundColor: '#e3f2fd', 
+          borderRadius: '4px',
+          border: '1px solid #bbdefb'
+        }}>
+          <strong>Active Filters:</strong>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+            {localFilters.search && (
+              <span className="badge">Search: "{localFilters.search}"</span>
+            )}
+            {localFilters.skillRequired && (
+              <span className="badge">Skill: {localFilters.skillRequired}</span>
+            )}
+            {localFilters.urgency && (
+              <span className="badge">Urgency: {localFilters.urgency}</span>
+            )}
+            {localFilters.minDuration && (
+              <span className="badge">Min Duration: {durationFilterOptions.find(opt => opt.value == localFilters.minDuration)?.label}</span>
+            )}
+            {localFilters.maxDuration && (
+              <span className="badge">Max Duration: {durationFilterOptions.find(opt => opt.value == localFilters.maxDuration)?.label}</span>
+            )}
+            {localFilters.minCredits && (
+              <span className="badge">Min Credits: {localFilters.minCredits}</span>
+            )}
+            {localFilters.maxCredits && (
+              <span className="badge">Max Credits: {localFilters.maxCredits}</span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex gap-1 mt-1">

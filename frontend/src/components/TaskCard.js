@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatDuration } from '../utils/durationUtils';
 
 const TaskCard = ({ 
   task, 
@@ -41,6 +42,15 @@ const TaskCard = ({
     }
   };
 
+  const getUrgencyIcon = (urgency) => {
+    switch (urgency) {
+      case 'high': return '🔴';
+      case 'medium': return '🟡';
+      case 'low': return '🟢';
+      default: return '⚪';
+    }
+  };
+
   const handleSubmitApplication = (e) => {
     e.preventDefault();
     onApply(task._id, applicationData);
@@ -63,7 +73,7 @@ const TaskCard = ({
             className="badge" 
             style={{ backgroundColor: getUrgencyColor(task.urgency) }}
           >
-            {task.urgency}
+            {getUrgencyIcon(task.urgency)} {task.urgency}
           </span>
           <span 
             className="badge" 
@@ -94,7 +104,7 @@ const TaskCard = ({
       </div>
       
       <div className="mb-1">
-        <strong>Duration:</strong> {task.duration} minutes
+        <strong>Duration:</strong> {formatDuration(task.duration)}
       </div>
       
       {task.skillsRequired && task.skillsRequired.length > 0 && (
@@ -118,6 +128,20 @@ const TaskCard = ({
       {task.applicantCount !== undefined && (
         <div className="mb-1">
           <strong>Applications received:</strong> {task.applicantCount}
+        </div>
+      )}
+
+      {/* Task Status Indicators */}
+      {task.completedByHelper && task.status === 'in-progress' && (
+        <div className="mb-1" style={{ 
+          backgroundColor: '#d4edda', 
+          padding: '0.5rem', 
+          borderRadius: '4px',
+          border: '1px solid #c3e6cb'
+        }}>
+          <strong>✅ Work submitted by helper</strong>
+          <br />
+          <small>Awaiting task provider review</small>
         </div>
       )}
       
@@ -162,13 +186,14 @@ const TaskCard = ({
             onClick={() => onViewApplications(task)} 
             className="btn btn-secondary"
           >
-            View Applications ({task.applicants?.length || 0})
+            📥 View Applications ({task.applicants?.length || 0})
           </button>
         )}
         
         {!canApply && !userHasApplied && task.status !== 'open' && (
           <span style={{ color: '#6c757d' }}>
             {task.status === 'assigned' ? 'Task Assigned' : 
+             task.status === 'in-progress' ? 'Task In Progress' :
              task.status === 'completed' ? 'Task Completed' :
              task.status === 'cancelled' ? 'Task Cancelled' : 'Task Closed'}
           </span>
@@ -178,10 +203,11 @@ const TaskCard = ({
       {/* Application Form */}
       {showApplicationForm && (
         <form onSubmit={handleSubmitApplication} style={{ 
-          marginTop: '1rem', 
-          padding: '1rem', 
-          border: '1px solid #ddd', 
-          borderRadius: '4px' 
+          marginTop: '1.5rem', 
+          padding: '1.5rem', 
+          border: '2px solid #667eea', 
+          borderRadius: '8px',
+          backgroundColor: '#f8f9ff'
         }}>
           <h5>Apply for this Task</h5>
           
@@ -193,9 +219,9 @@ const TaskCard = ({
                 ...applicationData, 
                 message: e.target.value 
               })}
-              placeholder="Explain your relevant experience and why you'd like to help..."
+              placeholder="Explain your relevant experience, similar projects you've worked on, your approach to this task, and why you'd like to help..."
               required
-              rows="3"
+              rows="4"
             />
           </div>
 
@@ -213,7 +239,7 @@ const TaskCard = ({
               required
             />
             <small style={{ color: '#666' }}>
-              Task provider offered {task.credits} credits
+              Task provider offered {task.credits} credits (you can propose a different amount)
             </small>
           </div>
 
