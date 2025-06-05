@@ -3,115 +3,138 @@ import { Link } from 'react-router-dom';
 
 const HomePage = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [currentStat, setCurrentStat] = useState(0);
 
-  // Sample testimonials with realistic ratings
+  // Enhanced testimonials with more realistic data
   const testimonials = [
     {
       name: "Sarah Chen",
-      role: "Software Developer",
+      role: "Senior React Developer",
+      company: "TechFlow Inc.",
       avatar: "SC",
       rating: 5,
-      text: "TimeSlice helped me find amazing coding mentors! I learned React in just 2 weeks through their expert helpers.",
-      skills: ["JavaScript", "React", "Node.js"],
-      completedTasks: 12
+      text: "TimeSlice revolutionized how I find quality development work. The application system ensures I only work with serious clients, and the credit system is fair and transparent.",
+      skills: ["React", "Node.js", "TypeScript", "GraphQL"],
+      completedTasks: 47,
+      earnings: "15,000+ credits earned"
     },
     {
       name: "Marcus Johnson", 
-      role: "Graphic Designer",
+      role: "UX/UI Designer",
+      company: "Creative Studio",
       avatar: "MJ",
       rating: 5,
-      text: "As a freelancer, I love helping others with design projects. The credit system is fair and the community is amazing!",
-      skills: ["Design", "Photoshop", "Branding"],
-      completedTasks: 28
+      text: "Unlike other platforms, TimeSlice attracts high-quality projects. The dual-role system lets me both find great design work and get development help for my own projects.",
+      skills: ["Figma", "Adobe Creative Suite", "Prototyping", "User Research"],
+      completedTasks: 38,
+      earnings: "12,500+ credits earned"
     },
     {
       name: "Elena Rodriguez",
-      role: "Marketing Specialist", 
+      role: "Digital Marketing Strategist", 
+      company: "Growth Labs",
       avatar: "ER",
-      rating: 4,
-      text: "Got help with my business plan in just 1 hour! The application process ensures you get matched with the right expert.",
-      skills: ["Marketing", "Content Strategy"],
-      completedTasks: 7
+      rating: 5,
+      text: "The application process filters out time-wasters. I get matched with professionals who understand my needs and deliver exceptional results every time.",
+      skills: ["SEO", "Content Strategy", "Analytics", "PPC"],
+      completedTasks: 23,
+      earnings: "8,200+ credits earned"
     },
     {
       name: "David Kim",
-      role: "Data Analyst",
+      role: "Data Scientist",
+      company: "Analytics Pro",
       avatar: "DK", 
       rating: 5,
-      text: "I've completed 45+ tasks helping others with data analysis. It's rewarding to share knowledge and earn credits!",
-      skills: ["Python", "Data Analysis", "Excel"],
-      completedTasks: 45
-    },
-    {
-      name: "Priya Patel",
-      role: "UX Designer",
-      avatar: "PP",
-      rating: 5,
-      text: "The dual role system is brilliant! I can both get help with coding and offer my design expertise to others.",
-      skills: ["UX Design", "Figma", "Research"],
-      completedTasks: 19
-    }
-  ];
-
-  const features = [
-    {
-      icon: "🤝",
-      title: "Dual Role System",
-      description: "Be both a helper and task seeker. Switch roles anytime based on what you need or can offer.",
-      highlight: "Maximum Flexibility"
-    },
-    {
-      icon: "💰",
-      title: "Credit Economy", 
-      description: "Fair virtual currency system. Earn credits by helping others, spend them to get help yourself.",
-      highlight: "No Real Money"
-    },
-    {
-      icon: "⚡",
-      title: "Professional Applications",
-      description: "No instant booking. Helpers apply with detailed proposals, ensuring perfect skill matches.",
-      highlight: "Quality Guaranteed"
-    },
-    {
-      icon: "💬",
-      title: "Real-time Chat",
-      description: "Built-in messaging system for seamless communication throughout your task collaboration.",
-      highlight: "Stay Connected"
-    },
-    {
-      icon: "⭐",
-      title: "Reputation System",
-      description: "Mutual reviews build trust and help you find the best helpers or most interesting tasks.",
-      highlight: "Trust & Quality"
-    },
-    {
-      icon: "🎯",
-      title: "Smart Matching",
-      description: "Advanced filtering shows you tasks that match your skills and interests perfectly.",
-      highlight: "Find Your Match"
+      text: "TimeSlice's credit system and professional community make it the premium choice for data science consulting. Quality over quantity - exactly what I was looking for.",
+      skills: ["Python", "Machine Learning", "SQL", "Tableau"],
+      completedTasks: 56,
+      earnings: "22,100+ credits earned"
     }
   ];
 
   const stats = [
-    { number: "10,000+", label: "Active Users", icon: "👥" },
-    { number: "50,000+", label: "Tasks Completed", icon: "✅" },
-    { number: "4.8/5", label: "Average Rating", icon: "⭐" },
-    { number: "200+", label: "Skill Categories", icon: "🎯" }
+    { number: "50,000+", label: "Active Professionals", icon: "👥", color: "from-blue-500 to-cyan-500" },
+    { number: "250,000+", label: "Projects Completed", icon: "✅", color: "from-green-500 to-emerald-500" },
+    { number: "4.9/5", label: "Average Rating", icon: "⭐", color: "from-yellow-500 to-orange-500" },
+    { number: "500+", label: "Skill Categories", icon: "🎯", color: "from-purple-500 to-pink-500" }
+  ];
+
+  const features = [
+    {
+      icon: "🎯",
+      title: "Smart Matching System",
+      description: "Our AI-powered algorithm matches you with the perfect projects or helpers based on skills, experience, and preferences.",
+      highlight: "AI-Powered",
+      benefits: ["98% match accuracy", "Save 5+ hours weekly", "Better project outcomes"]
+    },
+    {
+      icon: "🛡️",
+      title: "Quality Assurance",
+      description: "Rigorous verification process and application-based system ensures only serious professionals join our platform.",
+      highlight: "Verified Professionals",
+      benefits: ["Background verified", "Skill assessments", "Portfolio reviews"]
+    },
+    {
+      icon: "💰",
+      title: "Fair Credit Economy", 
+      description: "Transparent, blockchain-inspired credit system with no hidden fees. Earn by helping, spend to get help.",
+      highlight: "Zero Platform Fees",
+      benefits: ["No commission fees", "Instant transactions", "Credit rewards program"]
+    },
+    {
+      icon: "⚡",
+      title: "Real-time Collaboration",
+      description: "Built-in project management tools, real-time chat, file sharing, and progress tracking for seamless collaboration.",
+      highlight: "All-in-One Platform",
+      benefits: ["Integrated chat", "File sharing", "Progress tracking"]
+    },
+    {
+      icon: "🏆",
+      title: "Reputation & Growth",
+      description: "Build your professional reputation with detailed reviews, skill badges, and achievement levels that matter.",
+      highlight: "Career Growth",
+      benefits: ["Skill certifications", "Achievement badges", "Portfolio building"]
+    },
+    {
+      icon: "🔒",
+      title: "Secure & Reliable",
+      description: "Enterprise-grade security, escrow protection, and 24/7 support ensure your projects and payments are always safe.",
+      highlight: "Bank-Level Security",
+      benefits: ["Escrow protection", "24/7 support", "Data encryption"]
+    }
   ];
 
   const skillCategories = [
-    "Programming", "Design", "Writing", "Marketing", "Data Analysis", 
-    "Business", "Languages", "Music", "Photography", "Tutoring",
-    "Cooking", "Fitness", "Legal Advice", "Career Coaching"
+    { name: "Software Development", count: "15,000+", icon: "💻", trending: true },
+    { name: "Design & Creative", count: "8,500+", icon: "🎨", trending: true },
+    { name: "Digital Marketing", count: "6,200+", icon: "📈", trending: false },
+    { name: "Data & Analytics", count: "4,800+", icon: "📊", trending: true },
+    { name: "Content & Writing", count: "7,300+", icon: "✍️", trending: false },
+    { name: "Business Consulting", count: "3,900+", icon: "💼", trending: false },
+    { name: "AI & Machine Learning", count: "2,100+", icon: "🤖", trending: true },
+    { name: "Blockchain & Web3", count: "1,800+", icon: "⛓️", trending: true },
+    { name: "Mobile Development", count: "5,200+", icon: "📱", trending: false },
+    { name: "DevOps & Cloud", count: "3,400+", icon: "☁️", trending: true },
+    { name: "Video & Animation", count: "2,900+", icon: "🎬", trending: false },
+    { name: "Music & Audio", count: "1,600+", icon: "🎵", trending: false }
   ];
 
   // Auto-rotate testimonials
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
+    }, 6000);
     return () => clearInterval(interval);
   }, [testimonials.length]);
+
+  // Auto-rotate stats
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentStat((prev) => (prev + 1) % stats.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [stats.length]);
 
   const renderStars = (rating) => {
     return "★".repeat(rating) + "☆".repeat(5 - rating);
@@ -121,78 +144,141 @@ const HomePage = () => {
     <div className="homepage">
       {/* Hero Section */}
       <section className="hero-section">
-        <div className="hero-background">
-          <div className="hero-overlay"></div>
-        </div>
-        <div className="container hero-content">
-          <div className="hero-text">
-            {/* Logo and Title */}
-            <div className="brand-container">
-              <div className="logo-container">
-                <div className="hourglass-logo">
-                  <div className="hourglass-top"></div>
-                  <div className="hourglass-middle"></div>
-                  <div className="hourglass-bottom"></div>
-                  <div className="sand"></div>
+        <div className="container">
+          <div className="hero-content">
+            <div className="hero-text">
+              <div className="brand-container">
+                <div className="logo-container">
+                  <span style={{ fontSize: '2rem' }}>⧗</span>
                 </div>
-              </div>
-              <h1 className="hero-title">TimeSlice</h1>
-            </div>
-            
-            <h2 className="hero-subtitle-main">
-              Share Skills. Get Help. 
-              <span className="hero-highlight"> Build Community.</span>
-            </h2>
-            <p className="hero-subtitle">
-              TimeSlice is the modern peer-to-peer marketplace where you can both offer your expertise 
-              and get help from skilled community members using our fair credit system.
-            </p>
-            <div className="hero-features">
-              <div className="hero-feature">
-                <span className="feature-icon">⚡</span>
-                <span>30-60 min quick tasks</span>
-              </div>
-              <div className="hero-feature">
-                <span className="feature-icon">🔄</span>
-                <span>Dual helper/seeker roles</span>
-              </div>
-              <div className="hero-feature">
-                <span className="feature-icon">💫</span>
-                <span>No money, just credits</span>
-              </div>
-            </div>
-            <div className="hero-actions">
-              <Link to="/register" className="btn btn-hero-primary">
-                Join TimeSlice Free
-              </Link>
-              <Link to="/login" className="btn btn-hero-secondary">
-                Sign In
-              </Link>
-            </div>
-          </div>
-          <div className="hero-visual">
-            <div className="floating-cards">
-              <div className="task-card floating-card">
-                <div className="task-header">
-                  <span className="task-icon">💻</span>
-                  <div>
-                    <h4>React Code Review</h4>
-                    <span className="task-credits">25 credits</span>
+                <div>
+                  <h1 className="hero-title">TimeSlice</h1>
+                  <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem', fontWeight: '500' }}>
+                    Premium Freelance Marketplace
                   </div>
-                </div>
-                <p>Need expert to review my React component...</p>
-                <div className="task-skills">
-                  <span className="skill-tag">React</span>
-                  <span className="skill-tag">JavaScript</span>
                 </div>
               </div>
               
-              <div className="helper-card floating-card">
-                <div className="helper-avatar">JD</div>
-                <div className="helper-info">
-                  <h4>John Doe</h4>
-                  <span className="helper-rating">★ 4.9 (120 reviews)</span>
-                  <p>Expert React Developer</p>
+              <h2 className="hero-subtitle-main">
+                Where Top Talent Meets 
+                <span style={{ 
+                  background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  display: 'block'
+                }}>
+                  Premium Projects
+                </span>
+              </h2>
+              
+              <p className="hero-subtitle">
+                Join the most exclusive freelance community where quality professionals collaborate 
+                on meaningful projects. No race to the bottom - just fair compensation and exceptional work.
+              </p>
+
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(2, 1fr)', 
+                gap: '1rem', 
+                margin: '2rem 0',
+                padding: '1.5rem',
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '1rem',
+                backdropFilter: 'blur(10px)'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00D4FF' }}>
+                    {stats[currentStat].number}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>
+                    {stats[currentStat].label}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#FF6B35' }}>
+                    $2.8M+
+                  </div>
+                  <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>
+                    Paid to Freelancers
+                  </div>
+                </div>
+              </div>
+              
+              <div className="hero-actions">
+                <Link to="/register" className="btn btn-primary btn-lg">
+                  Join as Professional
+                </Link>
+                <Link to="/login" className="btn btn-secondary btn-lg" style={{ 
+                  background: 'rgba(255,255,255,0.1)', 
+                  color: 'white', 
+                  border: '2px solid rgba(255,255,255,0.3)' 
+                }}>
+                  Sign In
+                </Link>
+              </div>
+              
+              <div style={{ 
+                display: 'flex', 
+                gap: '2rem', 
+                marginTop: '2rem', 
+                fontSize: '0.9rem',
+                opacity: 0.8 
+              }}>
+                <div>✅ No Platform Fees</div>
+                <div>✅ Verified Professionals</div>
+                <div>✅ Premium Projects Only</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <div style={{
+                width: '400px',
+                height: '500px',
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '2rem',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '2rem'
+              }}>
+                <div style={{ fontSize: '4rem' }}>⧗</div>
+                <div style={{ textAlign: 'center', color: 'white' }}>
+                  <h3 style={{ marginBottom: '0.5rem' }}>Premium Marketplace</h3>
+                  <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>
+                    Quality over quantity. Professional collaboration at its finest.
+                  </p>
+                </div>
+                
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '1rem',
+                  width: '100%',
+                  padding: '0 2rem'
+                }}>
+                  <div style={{ 
+                    background: 'rgba(0,212,255,0.2)', 
+                    padding: '1rem', 
+                    borderRadius: '1rem',
+                    border: '1px solid rgba(0,212,255,0.3)'
+                  }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>React Expert Needed</div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>$150/hour • Remote</div>
+                  </div>
+                  
+                  <div style={{ 
+                    background: 'rgba(255,107,53,0.2)', 
+                    padding: '1rem', 
+                    borderRadius: '1rem',
+                    border: '1px solid rgba(255,107,53,0.3)'
+                  }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>UX/UI Designer</div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>$120/hour • Contract</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -201,103 +287,86 @@ const HomePage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="stats-section">
+      <section style={{ padding: '4rem 0', background: 'white' }}>
         <div className="container">
-          <div className="stats-grid">
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(4, 1fr)', 
+            gap: '2rem',
+            maxWidth: '1000px',
+            margin: '0 auto'
+          }}>
             {stats.map((stat, index) => (
-              <div key={index} className="stat-card">
-                <div className="stat-icon">{stat.icon}</div>
-                <div className="stat-number">{stat.number}</div>
-                <div className="stat-label">{stat.label}</div>
+              <div key={index} style={{
+                textAlign: 'center',
+                padding: '2rem 1rem',
+                borderRadius: '1rem',
+                background: `linear-gradient(135deg, ${index === 0 ? '#00D4FF' : index === 1 ? '#10B981' : index === 2 ? '#F59E0B' : '#8B5CF6'}, ${index === 0 ? '#0066CC' : index === 1 ? '#059669' : index === 2 ? '#D97706' : '#7C3AED'})`,
+                color: 'white',
+                transform: currentStat === index ? 'scale(1.05)' : 'scale(1)',
+                transition: 'transform 0.3s ease'
+              }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{stat.icon}</div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                  {stat.number}
+                </div>
+                <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="how-it-works">
-        <div className="container">
-          <div className="section-header">
-            <h2>How TimeSlice Works</h2>
-            <p>Get started in 3 simple steps and join our thriving community</p>
-          </div>
-          
-          <div className="steps-container">
-            <div className="step">
-              <div className="step-number">1</div>
-              <div className="step-content">
-                <h3>Create Your Profile</h3>
-                <p>Sign up and add your skills. Choose to be a Helper, Task Provider, or both!</p>
-                <div className="step-visual">
-                  <div className="profile-preview">
-                    <div className="profile-avatar">YOU</div>
-                    <div className="profile-skills">
-                      <span className="skill-badge">React</span>
-                      <span className="skill-badge">Design</span>
-                      <span className="skill-badge">+3</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="step">
-              <div className="step-number">2</div>
-              <div className="step-content">
-                <h3>Browse & Apply</h3>
-                <p>Find tasks matching your skills or post your own. Apply with detailed proposals.</p>
-                <div className="step-visual">
-                  <div className="browse-preview">
-                    <div className="task-item">
-                      <span className="task-title">Website Redesign</span>
-                      <span className="task-credit">30 ⭐</span>
-                    </div>
-                    <div className="task-item">
-                      <span className="task-title">Python Tutoring</span>
-                      <span className="task-credit">45 ⭐</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="step">
-              <div className="step-number">3</div>
-              <div className="step-content">
-                <h3>Collaborate & Earn</h3>
-                <p>Work together via real-time chat. Complete tasks and earn credits or get help!</p>
-                <div className="step-visual">
-                  <div className="chat-preview">
-                    <div className="chat-message received">
-                      <span>Let's start with the homepage design...</span>
-                    </div>
-                    <div className="chat-message sent">
-                      <span>Perfect! I'll share my mockups 🎨</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Features Section */}
-      <section className="features-section">
+      <section style={{ padding: '6rem 0', background: '#F9FAFB' }}>
         <div className="container">
-          <div className="section-header">
-            <h2>Why Choose TimeSlice?</h2>
-            <p>Built for the modern knowledge sharing economy</p>
+          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem', color: '#1F2937' }}>
+              Why Top Professionals Choose TimeSlice
+            </h2>
+            <p style={{ fontSize: '1.2rem', color: '#6B7280', maxWidth: '600px', margin: '0 auto' }}>
+              Built by freelancers, for freelancers. Every feature designed to maximize your success.
+            </p>
           </div>
           
-          <div className="features-grid">
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(3, 1fr)', 
+            gap: '2rem'
+          }}>
             {features.map((feature, index) => (
-              <div key={index} className="feature-card">
-                <div className="feature-icon-large">{feature.icon}</div>
-                <div className="feature-highlight">{feature.highlight}</div>
-                <h3>{feature.title}</h3>
-                <p>{feature.description}</p>
+              <div key={index} className="card" style={{ textAlign: 'center', height: 'fit-content' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{feature.icon}</div>
+                <div style={{ 
+                  background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
+                  color: 'white',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '1rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  display: 'inline-block',
+                  marginBottom: '1rem'
+                }}>
+                  {feature.highlight}
+                </div>
+                <h3 style={{ marginBottom: '1rem', color: '#1F2937' }}>{feature.title}</h3>
+                <p style={{ color: '#6B7280', marginBottom: '1.5rem', lineHeight: '1.6' }}>
+                  {feature.description}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {feature.benefits.map((benefit, idx) => (
+                    <div key={idx} style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.5rem',
+                      fontSize: '0.875rem',
+                      color: '#059669'
+                    }}>
+                      <span>✓</span>
+                      <span>{benefit}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -305,49 +374,100 @@ const HomePage = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="testimonials-section">
+      <section style={{ padding: '6rem 0', background: 'linear-gradient(135deg, #0A0E27, #1A1F3A)' }}>
         <div className="container">
-          <div className="section-header">
-            <h2>Loved by Our Community</h2>
-            <p>Real reviews from real users who've found success on TimeSlice</p>
+          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem', color: 'white' }}>
+              Success Stories from Our Community
+            </h2>
+            <p style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.8)', maxWidth: '600px', margin: '0 auto' }}>
+              Real results from real professionals who've transformed their careers on TimeSlice
+            </p>
           </div>
           
-          <div className="testimonials-container">
-            <div className="testimonial-card active">
-              <div className="testimonial-content">
-                <div className="quote-icon">"</div>
-                <p className="testimonial-text">{testimonials[currentTestimonial].text}</p>
-                <div className="testimonial-rating">
-                  {renderStars(testimonials[currentTestimonial].rating)}
-                </div>
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <div style={{
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '2rem',
+              padding: '3rem',
+              color: 'white',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>"</div>
+              <p style={{ fontSize: '1.3rem', lineHeight: '1.6', marginBottom: '2rem', fontStyle: 'italic' }}>
+                {testimonials[currentTestimonial].text}
+              </p>
+              <div style={{ fontSize: '1.5rem', color: '#F59E0B', marginBottom: '2rem' }}>
+                {renderStars(testimonials[currentTestimonial].rating)}
               </div>
               
-              <div className="testimonial-author">
-                <div className="author-avatar">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '1.2rem'
+                }}>
                   {testimonials[currentTestimonial].avatar}
                 </div>
-                <div className="author-info">
-                  <h4>{testimonials[currentTestimonial].name}</h4>
-                  <p>{testimonials[currentTestimonial].role}</p>
-                  <span className="author-stats">
-                    {testimonials[currentTestimonial].completedTasks} tasks completed
-                  </span>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                    {testimonials[currentTestimonial].name}
+                  </div>
+                  <div style={{ opacity: 0.8, fontSize: '0.9rem' }}>
+                    {testimonials[currentTestimonial].role}
+                  </div>
+                  <div style={{ opacity: 0.6, fontSize: '0.8rem' }}>
+                    {testimonials[currentTestimonial].company}
+                  </div>
                 </div>
               </div>
               
-              <div className="testimonial-skills">
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>
+                  {testimonials[currentTestimonial].completedTasks} tasks completed
+                </div>
+                <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>
+                  {testimonials[currentTestimonial].earnings}
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>
                 {testimonials[currentTestimonial].skills.map((skill, idx) => (
-                  <span key={idx} className="skill-tag">{skill}</span>
+                  <span key={idx} style={{
+                    background: 'rgba(0,212,255,0.2)',
+                    border: '1px solid rgba(0,212,255,0.3)',
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '1rem',
+                    fontSize: '0.8rem'
+                  }}>
+                    {skill}
+                  </span>
                 ))}
               </div>
             </div>
             
-            <div className="testimonial-dots">
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '2rem' }}>
               {testimonials.map((_, index) => (
                 <button
                   key={index}
-                  className={`dot ${index === currentTestimonial ? 'active' : ''}`}
                   onClick={() => setCurrentTestimonial(index)}
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    border: 'none',
+                    background: index === currentTestimonial ? '#00D4FF' : 'rgba(255,255,255,0.3)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
                 />
               ))}
             </div>
@@ -356,83 +476,170 @@ const HomePage = () => {
       </section>
 
       {/* Skills Categories */}
-      <section className="skills-section">
+      <section style={{ padding: '6rem 0', background: 'white' }}>
         <div className="container">
-          <div className="section-header">
-            <h2>Explore Skills & Categories</h2>
-            <p>From coding to cooking, find help or offer expertise in hundreds of categories</p>
+          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem', color: '#1F2937' }}>
+              Explore In-Demand Skills
+            </h2>
+            <p style={{ fontSize: '1.2rem', color: '#6B7280', maxWidth: '600px', margin: '0 auto' }}>
+              From emerging technologies to established expertise - find or offer skills that matter
+            </p>
           </div>
           
-          <div className="skills-grid">
-            {skillCategories.map((skill, index) => (
-              <div key={index} className="skill-category">
-                <span className="skill-name">{skill}</span>
-                <span className="skill-count">{Math.floor(Math.random() * 500) + 100}+ experts</span>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+            gap: '1rem'
+          }}>
+            {skillCategories.map((category, index) => (
+              <div
+                key={index}
+                style={{
+                  background: 'white',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '1rem',
+                  padding: '1.5rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-4px)';
+                  e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+                  e.target.style.borderColor = '#00D4FF';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = 'none';
+                  e.target.style.borderColor = '#E5E7EB';
+                }}
+              >
+                {category.trending && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    right: '1rem',
+                    background: 'linear-gradient(135deg, #10B981, #059669)',
+                    color: 'white',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.7rem',
+                    fontWeight: 'bold'
+                  }}>
+                    TRENDING
+                  </div>
+                )}
+                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>{category.icon}</div>
+                <h3 style={{ marginBottom: '0.5rem', color: '#1F2937', fontSize: '1.1rem' }}>
+                  {category.name}
+                </h3>
+                <p style={{ color: '#6B7280', fontSize: '0.9rem' }}>
+                  {category.count} professionals
+                </p>
               </div>
             ))}
-          </div>
-          
-          <div className="skills-cta">
-            <p>Don't see your skill? <strong>We welcome all expertise!</strong></p>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="cta-section">
+      <section style={{ 
+        padding: '6rem 0', 
+        background: 'linear-gradient(135deg, #0A0E27, #1A1F3A)',
+        textAlign: 'center' 
+      }}>
         <div className="container">
-          <div className="cta-content">
-            <h2>Ready to Join the Community?</h2>
-            <p>Start with 100 free credits. No credit card required.</p>
-            <div className="cta-features">
-              <div className="cta-feature">
-                <span className="cta-icon">✨</span>
-                <span>100 Free Credits</span>
-              </div>
-              <div className="cta-feature">
-                <span className="cta-icon">🚀</span>
-                <span>Instant Access</span>
-              </div>
-              <div className="cta-feature">
-                <span className="cta-icon">🛡️</span>
-                <span>Safe & Secure</span>
-              </div>
+          <h2 style={{ 
+            fontSize: '3rem', 
+            fontWeight: 'bold', 
+            marginBottom: '1rem', 
+            color: 'white'
+          }}>
+            Ready to Join the Elite?
+          </h2>
+          <p style={{ 
+            fontSize: '1.3rem', 
+            marginBottom: '3rem', 
+            color: 'rgba(255,255,255,0.8)',
+            maxWidth: '600px',
+            margin: '0 auto 3rem'
+          }}>
+            Start with 100 free credits. No credit card required. Join thousands of professionals who've elevated their careers.
+          </p>
+          
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: '1rem', 
+            marginBottom: '3rem',
+            flexWrap: 'wrap'
+          }}>
+            <Link to="/register" className="btn btn-primary btn-lg">
+              Join as Professional
+            </Link>
+            <Link to="/register" className="btn btn-secondary btn-lg" style={{ 
+              background: 'rgba(255,255,255,0.1)', 
+              color: 'white', 
+              border: '2px solid rgba(255,255,255,0.3)' 
+            }}>
+              Post a Project
+            </Link>
+          </div>
+          
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: '3rem',
+            flexWrap: 'wrap',
+            opacity: 0.8
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'white' }}>
+              <span style={{ fontSize: '1.2rem' }}>✨</span>
+              <span>100 Free Credits</span>
             </div>
-            <div className="cta-actions">
-              <Link to="/register" className="btn btn-cta-primary">
-                Get Started Free
-              </Link>
-              <Link to="/login" className="btn btn-cta-secondary">
-                Already a Member?
-              </Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'white' }}>
+              <span style={{ fontSize: '1.2rem' }}>🚀</span>
+              <span>Instant Access</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'white' }}>
+              <span style={{ fontSize: '1.2rem' }}>🛡️</span>
+              <span>Verified Community</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="homepage-footer">
+      <footer style={{ 
+        background: '#1F2937', 
+        color: 'white', 
+        padding: '3rem 0 1rem',
+        textAlign: 'center'
+      }}>
         <div className="container">
-          <div className="footer-content">
-            <div className="footer-brand">
-              <h3>TimeSlice</h3>
-              <p>The peer-to-peer knowledge marketplace</p>
-            </div>
-            <div className="footer-links">
-              <div className="footer-column">
-                <h4>Platform</h4>
-                <Link to="/register">Sign Up</Link>
-                <Link to="/login">Sign In</Link>
-              </div>
-              <div className="footer-column">
-                <h4>Community</h4>
-                <a href="#how-it-works">How It Works</a>
-                <a href="#features">Features</a>
-              </div>
-            </div>
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ 
+              background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              marginBottom: '0.5rem'
+            }}>
+              TimeSlice
+            </h3>
+            <p style={{ opacity: 0.8 }}>The premium freelance marketplace</p>
           </div>
-          <div className="footer-bottom">
-            <p>&copy; 2024 TimeSlice. Building the future of skill sharing.</p>
+          
+          <div style={{ 
+            borderTop: '1px solid rgba(255,255,255,0.1)', 
+            paddingTop: '2rem',
+            opacity: 0.7
+          }}>
+            <p>&copy; 2024 TimeSlice. Elevating freelance collaboration worldwide.</p>
           </div>
         </div>
       </footer>
