@@ -51,7 +51,7 @@ const Dashboard = () => {
           change: '+12%',
           changeType: 'positive',
           icon: '💰',
-          color: 'from-blue-500 to-cyan-500'
+          color: 'var(--primary-gradient)'
         },
         {
           title: 'Success Rate',
@@ -59,7 +59,7 @@ const Dashboard = () => {
           change: '+5%',
           changeType: 'positive',
           icon: '🎯',
-          color: 'from-green-500 to-emerald-500'
+          color: 'linear-gradient(135deg, var(--success), #059669)'
         },
         {
           title: 'Rating',
@@ -67,7 +67,7 @@ const Dashboard = () => {
           change: data.totalRatings > 0 ? `${data.totalRatings} reviews` : 'No reviews yet',
           changeType: 'neutral',
           icon: '⭐',
-          color: 'from-yellow-500 to-orange-500'
+          color: 'linear-gradient(135deg, var(--warning), #D97706)'
         },
         {
           title: 'Tasks Completed',
@@ -75,7 +75,7 @@ const Dashboard = () => {
           change: 'This month',
           changeType: 'neutral',
           icon: '✅',
-          color: 'from-purple-500 to-pink-500'
+          color: 'linear-gradient(135deg, #8B5CF6, #EC4899)'
         }
       ]);
     } catch (error) {
@@ -95,25 +95,12 @@ const Dashboard = () => {
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center', 
-        minHeight: '400px',
+        minHeight: '60vh',
         flexDirection: 'column',
-        gap: '1rem'
+        gap: 'var(--space-lg)'
       }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          border: '4px solid #f3f4f6',
-          borderTop: '4px solid #00D4FF',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }}></div>
-        <p style={{ color: '#6B7280' }}>Loading your dashboard...</p>
-        <style jsx>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
+        <div className="loading-spinner"></div>
+        <p style={{ color: 'var(--text-secondary)' }}>Loading your dashboard...</p>
       </div>
     );
   }
@@ -125,24 +112,25 @@ const Dashboard = () => {
       to={link}
       style={{
         textDecoration: 'none',
-        background: 'white',
-        borderRadius: '1rem',
-        padding: '1.5rem',
-        border: '1px solid #E5E7EB',
-        transition: 'all 0.3s ease',
+        background: 'var(--bg-card)',
+        borderRadius: 'var(--radius-lg)',
+        padding: 'var(--space-xl)',
+        border: '1px solid var(--border-primary)',
+        transition: 'all var(--transition-normal)',
         display: 'block',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        height: '100%'
       }}
       onMouseEnter={(e) => {
-        e.target.style.transform = 'translateY(-4px)';
-        e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
-        e.target.style.borderColor = color || '#00D4FF';
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+        e.currentTarget.style.borderColor = 'var(--border-accent)';
       }}
       onMouseLeave={(e) => {
-        e.target.style.transform = 'translateY(0)';
-        e.target.style.boxShadow = 'none';
-        e.target.style.borderColor = '#E5E7EB';
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+        e.currentTarget.style.borderColor = 'var(--border-primary)';
       }}
     >
       <div style={{
@@ -151,50 +139,38 @@ const Dashboard = () => {
         left: 0,
         right: 0,
         height: '4px',
-        background: `linear-gradient(135deg, ${color || '#00D4FF'}, ${color || '#FF6B35'})`,
-        opacity: 0,
-        transition: 'opacity 0.3s ease'
-      }} className="card-accent"></div>
+        background: color || 'var(--primary-gradient)'
+      }}></div>
       
-      <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>{icon}</div>
+      <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-lg)' }}>{icon}</div>
       <h3 style={{ 
-        color: '#1F2937', 
-        marginBottom: '0.5rem',
-        fontSize: '1.1rem',
-        fontWeight: '600'
+        color: 'var(--text-primary)', 
+        marginBottom: 'var(--space-sm)',
+        fontSize: '1.2rem',
+        fontWeight: '700'
       }}>
         {title}
       </h3>
       <p style={{ 
-        color: '#6B7280', 
+        color: 'var(--text-secondary)', 
         fontSize: '0.9rem',
-        lineHeight: '1.5',
+        lineHeight: '1.6',
         margin: 0
       }}>
         {description}
       </p>
-      
-      <style jsx>{`
-        .quick-action-card:hover .card-accent {
-          opacity: 1 !important;
-        }
-      `}</style>
     </Link>
   );
 
   const StatCard = ({ stat }) => (
     <div style={{
-      background: `linear-gradient(135deg, ${
-        stat.color === 'from-blue-500 to-cyan-500' ? '#3B82F6, #06B6D4' :
-        stat.color === 'from-green-500 to-emerald-500' ? '#10B981, #059669' :
-        stat.color === 'from-yellow-500 to-orange-500' ? '#F59E0B, #EA580C' :
-        '#8B5CF6, #EC4899'
-      })`,
+      background: stat.color,
       color: 'white',
-      borderRadius: '1rem',
-      padding: '1.5rem',
+      borderRadius: 'var(--radius-lg)',
+      padding: 'var(--space-xl)',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      boxShadow: 'var(--shadow-md)'
     }}>
       <div style={{
         position: 'absolute',
@@ -202,7 +178,7 @@ const Dashboard = () => {
         right: '-50%',
         width: '100%',
         height: '100%',
-        background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)',
         animation: 'float 6s ease-in-out infinite'
       }}></div>
       
@@ -211,12 +187,12 @@ const Dashboard = () => {
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'flex-start',
-          marginBottom: '1rem'
+          marginBottom: 'var(--space-lg)'
         }}>
-          <span style={{ fontSize: '2rem' }}>{stat.icon}</span>
+          <span style={{ fontSize: '2.5rem' }}>{stat.icon}</span>
           <div style={{
-            padding: '0.25rem 0.5rem',
-            borderRadius: '1rem',
+            padding: 'var(--space-xs) var(--space-sm)',
+            borderRadius: 'var(--radius-xl)',
             background: 'rgba(255,255,255,0.2)',
             fontSize: '0.75rem',
             fontWeight: '600'
@@ -225,10 +201,10 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+        <div style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: 'var(--space-xs)' }}>
           {stat.value}
         </div>
-        <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>
+        <div style={{ fontSize: '1rem', opacity: 0.9, fontWeight: '500' }}>
           {stat.title}
         </div>
       </div>
@@ -236,363 +212,312 @@ const Dashboard = () => {
   );
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-          <div>
-            <h1 style={{ 
-              fontSize: '2rem', 
-              fontWeight: 'bold', 
-              color: '#1F2937',
-              marginBottom: '0.5rem'
-            }}>
-              Welcome back, {currentUser.username}! 👋
-            </h1>
-            <p style={{ 
-              color: '#6B7280', 
-              fontSize: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
-              <span style={{
-                padding: '0.25rem 0.75rem',
-                borderRadius: '1rem',
-                background: isPrimaryHelper ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)',
-                color: isPrimaryHelper ? '#10B981' : '#3B82F6',
-                fontSize: '0.8rem',
-                fontWeight: '600'
+    <div className="page-container">
+      <div className="container">
+        {/* Header */}
+        <div style={{ marginBottom: 'var(--space-2xl)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-lg)' }}>
+            <div>
+              <h1 style={{ 
+                fontSize: '2.5rem', 
+                fontWeight: '800', 
+                color: 'var(--text-primary)',
+                marginBottom: 'var(--space-sm)'
               }}>
-                {isPrimaryHelper ? '🤝 Helper Mode' : '📋 Client Mode'}
-              </span>
-              Ready to tackle today's opportunities
-            </p>
-          </div>
-          
-          {unreadCount > 0 && (
-            <Link 
-              to="/chat"
-              style={{
-                background: 'linear-gradient(135deg, #EF4444, #DC2626)',
-                color: 'white',
-                textDecoration: 'none',
-                padding: '0.75rem 1rem',
-                borderRadius: '1rem',
-                fontWeight: '600',
-                fontSize: '0.9rem',
+                Welcome back, {currentUser.username}! 👋
+              </h1>
+              <p style={{ 
+                color: 'var(--text-secondary)', 
+                fontSize: '1.1rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                animation: 'pulse 2s infinite'
-              }}
-            >
-              💬 {unreadCount} New Message{unreadCount !== 1 ? 's' : ''}
-            </Link>
-          )}
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-        gap: '1rem',
-        marginBottom: '2rem'
-      }}>
-        {quickStats.map((stat, index) => (
-          <StatCard key={index} stat={stat} />
-        ))}
-      </div>
-
-      {/* Main Content Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '2fr 1fr', 
-        gap: '2rem',
-        marginBottom: '2rem'
-      }}>
-        {/* Quick Actions */}
-        <div>
-          <h2 style={{ 
-            fontSize: '1.5rem', 
-            fontWeight: 'bold', 
-            color: '#1F2937',
-            marginBottom: '1rem'
-          }}>
-            Quick Actions
-          </h2>
-          
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-            gap: '1rem'
-          }}>
-            <QuickActionCard
-              title="Browse Premium Tasks"
-              description="Discover high-quality projects that match your expertise and interests"
-              icon="🔍"
-              link="/browse-tasks"
-              color="#3B82F6"
-            />
-            
-            <QuickActionCard
-              title="Post a New Project"
-              description="Get help from verified professionals in our exclusive community"
-              icon="✏️"
-              link="/create-task"
-              color="#10B981"
-            />
-            
-            <QuickActionCard
-              title="View Applications"
-              description="Review and respond to applications for your posted projects"
-              icon="📥"
-              link="/task-applications"
-              color="#F59E0B"
-            />
-            
-            <QuickActionCard
-              title="My Active Bookings"
-              description="Manage ongoing collaborations and track project progress"
-              icon="📁"
-              link="/my-bookings"
-              color="#8B5CF6"
-            />
-          </div>
-        </div>
-
-        {/* Recent Activity & Insights */}
-        <div>
-          <h2 style={{ 
-            fontSize: '1.5rem', 
-            fontWeight: 'bold', 
-            color: '#1F2937',
-            marginBottom: '1rem'
-          }}>
-            Recent Activity
-          </h2>
-          
-          <div style={{
-            background: 'white',
-            borderRadius: '1rem',
-            border: '1px solid #E5E7EB',
-            overflow: 'hidden'
-          }}>
-            {recentBookings.length > 0 ? (
-              <div>
-                {recentBookings.map((booking, index) => (
-                  <div key={booking._id} style={{
-                    padding: '1rem',
-                    borderBottom: index < recentBookings.length - 1 ? '1px solid #F3F4F6' : 'none',
-                    transition: 'background-color 0.2s ease'
-                  }}>
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'flex-start',
-                      marginBottom: '0.5rem'
-                    }}>
-                      <h4 style={{ 
-                        fontSize: '0.9rem', 
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        margin: 0,
-                        lineHeight: '1.4'
-                      }}>
-                        {booking.taskId.title}
-                      </h4>
-                      <span style={{
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '0.5rem',
-                        background: booking.status === 'completed' ? '#D1FAE5' : 
-                                   booking.status === 'in-progress' ? '#DBEAFE' : '#F3F4F6',
-                        color: booking.status === 'completed' ? '#065F46' : 
-                               booking.status === 'in-progress' ? '#1E40AF' : '#374151',
-                        fontSize: '0.7rem',
-                        fontWeight: '600'
-                      }}>
-                        {booking.status}
-                      </span>
-                    </div>
-                    <p style={{ 
-                      fontSize: '0.8rem', 
-                      color: '#6B7280',
-                      margin: '0 0 0.5rem 0'
-                    }}>
-                      {booking.helper._id === currentUser.id 
-                        ? `Client: ${booking.taskProvider.username}` 
-                        : `Helper: ${booking.helper.username}`
-                      }
-                    </p>
-                    <div style={{ 
-                      fontSize: '0.75rem', 
-                      color: '#9CA3AF',
-                      display: 'flex',
-                      justifyContent: 'space-between'
-                    }}>
-                      <span>{booking.agreedCredits} credits</span>
-                      <span>{new Date(booking.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                ))}
-                
-                <div style={{ padding: '1rem', textAlign: 'center' }}>
-                  <Link 
-                    to="/my-bookings"
-                    style={{
-                      color: '#00D4FF',
-                      textDecoration: 'none',
-                      fontSize: '0.9rem',
-                      fontWeight: '600'
-                    }}
-                  >
-                    View All Activity →
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <div style={{ 
-                padding: '2rem', 
-                textAlign: 'center',
-                color: '#6B7280'
+                gap: 'var(--space-sm)'
               }}>
-                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📋</div>
-                <p style={{ marginBottom: '1rem' }}>No recent activity</p>
-                <Link 
-                  to={isPrimaryHelper ? "/browse-tasks" : "/create-task"}
-                  style={{
-                    color: '#00D4FF',
-                    textDecoration: 'none',
-                    fontWeight: '600'
-                  }}
-                >
-                  {isPrimaryHelper ? 'Browse Tasks' : 'Post Your First Task'} →
-                </Link>
-              </div>
+                <span style={{
+                  padding: 'var(--space-xs) var(--space-md)',
+                  borderRadius: 'var(--radius-xl)',
+                  background: isPrimaryHelper ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                  color: isPrimaryHelper ? 'var(--success)' : 'var(--info)',
+                  fontSize: '0.8rem',
+                  fontWeight: '600',
+                  border: `1px solid ${isPrimaryHelper ? 'rgba(16, 185, 129, 0.3)' : 'rgba(59, 130, 246, 0.3)'}`
+                }}>
+                  {isPrimaryHelper ? '🤝 Helper Mode' : '📋 Client Mode'}
+                </span>
+                Ready to tackle today's opportunities
+              </p>
+            </div>
+            
+            {unreadCount > 0 && (
+              <Link 
+                to="/chat"
+                className="btn btn-primary"
+                style={{
+                  background: 'linear-gradient(135deg, var(--error), #DC2626)',
+                  animation: 'pulse 2s infinite'
+                }}
+              >
+                💬 {unreadCount} New Message{unreadCount !== 1 ? 's' : ''}
+              </Link>
             )}
           </div>
         </div>
-      </div>
 
-      {/* Performance Insights */}
-      <div style={{
-        background: 'white',
-        borderRadius: '1rem',
-        border: '1px solid #E5E7EB',
-        padding: '1.5rem',
-        marginBottom: '2rem'
-      }}>
-        <h2 style={{ 
-          fontSize: '1.5rem', 
-          fontWeight: 'bold', 
-          color: '#1F2937',
-          marginBottom: '1rem'
-        }}>
-          Performance Insights
-        </h2>
-        
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-          gap: '1.5rem'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3B82F6' }}>
-              {stats.applicationsSubmitted}
+        {/* Stats Grid */}
+        <div className="grid grid-4" style={{ marginBottom: 'var(--space-2xl)' }}>
+          {quickStats.map((stat, index) => (
+            <StatCard key={index} stat={stat} />
+          ))}
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-2" style={{ marginBottom: 'var(--space-2xl)' }}>
+          {/* Quick Actions */}
+          <div>
+            <h2 style={{ 
+              fontSize: '1.8rem', 
+              fontWeight: '700', 
+              color: 'var(--text-primary)',
+              marginBottom: 'var(--space-xl)'
+            }}>
+              Quick Actions
+            </h2>
+            
+            <div className="grid grid-2" style={{ gap: 'var(--space-lg)' }}>
+              <QuickActionCard
+                title="Browse Premium Tasks"
+                description="Discover high-quality projects that match your expertise and interests"
+                icon="🔍"
+                link="/browse-tasks"
+                color="linear-gradient(135deg, #3B82F6, #1E40AF)"
+              />
+              
+              <QuickActionCard
+                title="Post a New Project"
+                description="Get help from verified professionals in our exclusive community"
+                icon="✏️"
+                link="/create-task"
+                color="linear-gradient(135deg, var(--success), #059669)"
+              />
+              
+              <QuickActionCard
+                title="View Applications"
+                description="Review and respond to applications for your posted projects"
+                icon="📥"
+                link="/task-applications"
+                color="linear-gradient(135deg, var(--warning), #D97706)"
+              />
+              
+              <QuickActionCard
+                title="My Active Bookings"
+                description="Manage ongoing collaborations and track project progress"
+                icon="📁"
+                link="/my-bookings"
+                color="linear-gradient(135deg, #8B5CF6, #7C3AED)"
+              />
             </div>
-            <div style={{ fontSize: '0.9rem', color: '#6B7280' }}>Applications Sent</div>
           </div>
-          
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10B981' }}>
-              {stats.applicationsAccepted}
+
+          {/* Recent Activity & Insights */}
+          <div>
+            <h2 style={{ 
+              fontSize: '1.8rem', 
+              fontWeight: '700', 
+              color: 'var(--text-primary)',
+              marginBottom: 'var(--space-xl)'
+            }}>
+              Recent Activity
+            </h2>
+            
+            <div className="card" style={{ padding: 0 }}>
+              {recentBookings.length > 0 ? (
+                <div>
+                  {recentBookings.map((booking, index) => (
+                    <div key={booking._id} style={{
+                      padding: 'var(--space-lg)',
+                      borderBottom: index < recentBookings.length - 1 ? '1px solid var(--border-primary)' : 'none'
+                    }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'flex-start',
+                        marginBottom: 'var(--space-sm)'
+                      }}>
+                        <h4 style={{ 
+                          fontSize: '1rem', 
+                          fontWeight: '600',
+                          color: 'var(--text-primary)',
+                          margin: 0,
+                          lineHeight: '1.4'
+                        }}>
+                          {booking.taskId.title}
+                        </h4>
+                        <span className={`badge badge-${
+                          booking.status === 'completed' ? 'success' : 
+                          booking.status === 'in-progress' ? 'primary' : 'secondary'
+                        }`}>
+                          {booking.status}
+                        </span>
+                      </div>
+                      <p style={{ 
+                        fontSize: '0.9rem', 
+                        color: 'var(--text-secondary)',
+                        margin: '0 0 var(--space-sm) 0'
+                      }}>
+                        {booking.helper._id === currentUser.id 
+                          ? `Client: ${booking.taskProvider.username}` 
+                          : `Helper: ${booking.helper.username}`
+                        }
+                      </p>
+                      <div style={{ 
+                        fontSize: '0.8rem', 
+                        color: 'var(--text-muted)',
+                        display: 'flex',
+                        justifyContent: 'space-between'
+                      }}>
+                        <span>{booking.agreedCredits} credits</span>
+                        <span>{new Date(booking.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div style={{ padding: 'var(--space-lg)', textAlign: 'center' }}>
+                    <Link 
+                      to="/my-bookings"
+                      style={{
+                        color: 'var(--primary-cyan)',
+                        textDecoration: 'none',
+                        fontSize: '0.9rem',
+                        fontWeight: '600'
+                      }}
+                    >
+                      View All Activity →
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ 
+                  padding: 'var(--space-2xl)', 
+                  textAlign: 'center',
+                  color: 'var(--text-secondary)'
+                }}>
+                  <div style={{ fontSize: '3rem', marginBottom: 'var(--space-lg)' }}>📋</div>
+                  <p style={{ marginBottom: 'var(--space-lg)' }}>No recent activity</p>
+                  <Link 
+                    to={isPrimaryHelper ? "/browse-tasks" : "/create-task"}
+                    className="btn btn-primary"
+                  >
+                    {isPrimaryHelper ? 'Browse Tasks' : 'Post Your First Task'} →
+                  </Link>
+                </div>
+              )}
             </div>
-            <div style={{ fontSize: '0.9rem', color: '#6B7280' }}>Applications Accepted</div>
-          </div>
-          
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#F59E0B' }}>
-              {stats.tasksCreated}
-            </div>
-            <div style={{ fontSize: '0.9rem', color: '#6B7280' }}>Tasks Created</div>
-          </div>
-          
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8B5CF6' }}>
-              {stats.totalBookings}
-            </div>
-            <div style={{ fontSize: '0.9rem', color: '#6B7280' }}>Total Collaborations</div>
           </div>
         </div>
-      </div>
 
-      {/* Tips Based on Role */}
-      <div style={{
-        background: isPrimaryHelper ? 'linear-gradient(135deg, #D1FAE5, #A7F3D0)' : 'linear-gradient(135deg, #DBEAFE, #BFDBFE)',
-        borderRadius: '1rem',
-        padding: '1.5rem',
-        border: `1px solid ${isPrimaryHelper ? '#A7F3D0' : '#BFDBFE'}`
-      }}>
-        <h3 style={{ 
-          color: isPrimaryHelper ? '#065F46' : '#1E40AF',
-          marginBottom: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem'
+        {/* Performance Insights */}
+        <div className="card">
+          <h2 style={{ 
+            fontSize: '1.8rem', 
+            fontWeight: '700', 
+            color: 'var(--text-primary)',
+            marginBottom: 'var(--space-xl)'
+          }}>
+            Performance Insights
+          </h2>
+          
+          <div className="grid grid-4">
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--info)', marginBottom: 'var(--space-sm)' }}>
+                {stats.applicationsSubmitted}
+              </div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Applications Sent</div>
+            </div>
+            
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--success)', marginBottom: 'var(--space-sm)' }}>
+                {stats.applicationsAccepted}
+              </div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Applications Accepted</div>
+            </div>
+            
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--warning)', marginBottom: 'var(--space-sm)' }}>
+                {stats.tasksCreated}
+              </div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Tasks Created</div>
+            </div>
+            
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--primary-cyan)', marginBottom: 'var(--space-sm)' }}>
+                {stats.totalBookings}
+              </div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Total Collaborations</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tips Based on Role */}
+        <div style={{
+          background: isPrimaryHelper 
+            ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(167, 243, 208, 0.1))' 
+            : 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(191, 219, 254, 0.1))',
+          borderRadius: 'var(--radius-lg)',
+          padding: 'var(--space-xl)',
+          border: `1px solid ${isPrimaryHelper ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)'}`
         }}>
-          💡 {isPrimaryHelper ? 'Helper Tips' : 'Client Tips'}
-        </h3>
-        
-        {isPrimaryHelper ? (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-            gap: '1rem',
-            color: '#065F46'
+          <h3 style={{ 
+            color: isPrimaryHelper ? 'var(--success)' : 'var(--info)',
+            marginBottom: 'var(--space-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-sm)',
+            fontSize: '1.3rem',
+            fontWeight: '700'
           }}>
-            <div>
-              <strong>Increase Your Success Rate:</strong>
-              <ul style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
-                <li>Write detailed, personalized applications</li>
-                <li>Showcase relevant portfolio pieces</li>
-                <li>Respond to applications quickly</li>
-              </ul>
+            💡 {isPrimaryHelper ? 'Helper Tips' : 'Client Tips'}
+          </h3>
+          
+          {isPrimaryHelper ? (
+            <div className="grid grid-2">
+              <div style={{ color: 'var(--text-primary)' }}>
+                <strong style={{ display: 'block', marginBottom: 'var(--space-sm)' }}>Increase Your Success Rate:</strong>
+                <ul style={{ marginLeft: 'var(--space-lg)', color: 'var(--text-secondary)' }}>
+                  <li>Write detailed, personalized applications</li>
+                  <li>Showcase relevant portfolio pieces</li>
+                  <li>Respond to applications quickly</li>
+                </ul>
+              </div>
+              <div style={{ color: 'var(--text-primary)' }}>
+                <strong style={{ display: 'block', marginBottom: 'var(--space-sm)' }}>Build Your Reputation:</strong>
+                <ul style={{ marginLeft: 'var(--space-lg)', color: 'var(--text-secondary)' }}>
+                  <li>Deliver high-quality work consistently</li>
+                  <li>Communicate proactively with clients</li>
+                  <li>Ask for reviews after successful projects</li>
+                </ul>
+              </div>
             </div>
-            <div>
-              <strong>Build Your Reputation:</strong>
-              <ul style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
-                <li>Deliver high-quality work consistently</li>
-                <li>Communicate proactively with clients</li>
-                <li>Ask for reviews after successful projects</li>
-              </ul>
+          ) : (
+            <div className="grid grid-2">
+              <div style={{ color: 'var(--text-primary)' }}>
+                <strong style={{ display: 'block', marginBottom: 'var(--space-sm)' }}>Attract Top Talent:</strong>
+                <ul style={{ marginLeft: 'var(--space-lg)', color: 'var(--text-secondary)' }}>
+                  <li>Write clear, detailed project descriptions</li>
+                  <li>Set realistic budgets and timelines</li>
+                  <li>Respond to applications promptly</li>
+                </ul>
+              </div>
+              <div style={{ color: 'var(--text-primary)' }}>
+                <strong style={{ display: 'block', marginBottom: 'var(--space-sm)' }}>Ensure Project Success:</strong>
+                <ul style={{ marginLeft: 'var(--space-lg)', color: 'var(--text-secondary)' }}>
+                  <li>Review helper profiles thoroughly</li>
+                  <li>Provide clear feedback and requirements</li>
+                  <li>Leave honest reviews to help the community</li>
+                </ul>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-            gap: '1rem',
-            color: '#1E40AF'
-          }}>
-            <div>
-              <strong>Attract Top Talent:</strong>
-              <ul style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
-                <li>Write clear, detailed project descriptions</li>
-                <li>Set realistic budgets and timelines</li>
-                <li>Respond to applications promptly</li>
-              </ul>
-            </div>
-            <div>
-              <strong>Ensure Project Success:</strong>
-              <ul style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
-                <li>Review helper profiles thoroughly</li>
-                <li>Provide clear feedback and requirements</li>
-                <li>Leave honest reviews to help the community</li>
-              </ul>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* CSS Animations */}
@@ -611,22 +536,18 @@ const Dashboard = () => {
             opacity: 1;
           }
           50% {
-            opacity: 0.7;
+            opacity: 0.8;
           }
         }
         
         @media (max-width: 1024px) {
-          .dashboard-grid {
+          .grid-2 {
             grid-template-columns: 1fr !important;
           }
         }
         
         @media (max-width: 768px) {
-          .stats-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-          
-          .performance-grid {
+          .grid-4 {
             grid-template-columns: repeat(2, 1fr) !important;
           }
         }

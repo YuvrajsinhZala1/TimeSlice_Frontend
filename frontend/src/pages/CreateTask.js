@@ -55,9 +55,9 @@ const CreateTask = () => {
   };
 
   const urgencyOptions = [
-    { value: 'low', label: '🟢 Flexible', description: 'No rush, quality over speed', color: '#10B981' },
-    { value: 'medium', label: '🟡 Normal', description: 'Standard timeline, balanced approach', color: '#F59E0B' },
-    { value: 'high', label: '🔴 Urgent', description: 'Time-sensitive, needs quick delivery', color: '#EF4444' }
+    { value: 'low', label: '🟢 Flexible', description: 'No rush, quality over speed', color: 'var(--success)' },
+    { value: 'medium', label: '🟡 Normal', description: 'Standard timeline, balanced approach', color: 'var(--warning)' },
+    { value: 'high', label: '🔴 Urgent', description: 'Time-sensitive, needs quick delivery', color: 'var(--error)' }
   ];
 
   const durationUnits = [
@@ -210,34 +210,25 @@ const CreateTask = () => {
   };
 
   const StepIndicator = () => (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      marginBottom: '2rem'
-    }}>
+    <div className="step-indicator">
       {[1, 2, 3, 4].map((step) => (
         <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            background: step <= currentStep ? 'linear-gradient(135deg, #00D4FF, #FF6B35)' : '#E5E7EB',
-            color: step <= currentStep ? 'white' : '#9CA3AF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 'bold',
-            fontSize: '0.9rem'
-          }}>
+          <div 
+            className={`step ${step <= currentStep ? 'active' : 'inactive'}`}
+            style={{
+              background: step <= currentStep ? 'var(--primary-gradient)' : 'var(--bg-tertiary)',
+              color: step <= currentStep ? 'white' : 'var(--text-muted)'
+            }}
+          >
             {step < currentStep ? '✓' : step}
           </div>
           {step < 4 && (
-            <div style={{
-              width: '60px',
-              height: '2px',
-              background: step < currentStep ? 'linear-gradient(135deg, #00D4FF, #FF6B35)' : '#E5E7EB',
-              margin: '0 0.5rem'
-            }}></div>
+            <div 
+              className={`connector ${step < currentStep ? 'completed' : ''}`}
+              style={{
+                background: step < currentStep ? 'var(--primary-gradient)' : 'var(--border-primary)'
+              }}
+            ></div>
           )}
         </div>
       ))}
@@ -257,16 +248,8 @@ const CreateTask = () => {
   const renderStep1 = () => (
     <div>
       {/* Title */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '0.5rem',
-          fontWeight: '600',
-          color: '#374151',
-          fontSize: '0.9rem'
-        }}>
-          Project Title *
-        </label>
+      <div className="form-group">
+        <label>Project Title *</label>
         <input
           type="text"
           name="title"
@@ -275,50 +258,44 @@ const CreateTask = () => {
           placeholder="e.g., Build a responsive e-commerce website with React"
           style={{
             width: '100%',
-            padding: '1rem',
-            border: '2px solid #E5E7EB',
-            borderRadius: '0.75rem',
+            padding: 'var(--space-md)',
+            background: 'var(--bg-input)',
+            border: '2px solid var(--border-primary)',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--text-primary)',
             fontSize: '1rem',
             outline: 'none',
-            transition: 'border-color 0.3s ease'
+            transition: 'border-color var(--transition-normal)'
           }}
-          onFocus={(e) => e.target.style.borderColor = '#00D4FF'}
-          onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
+          onFocus={(e) => e.target.style.borderColor = 'var(--border-accent)'}
+          onBlur={(e) => e.target.style.borderColor = 'var(--border-primary)'}
         />
-        <div style={{ fontSize: '0.8rem', color: '#6B7280', marginTop: '0.25rem' }}>
+        <small style={{ color: 'var(--text-muted)' }}>
           {formData.title.length}/100 characters
-        </div>
+        </small>
       </div>
 
       {/* Category */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '0.75rem',
-          fontWeight: '600',
-          color: '#374151',
-          fontSize: '0.9rem'
-        }}>
-          Category *
-        </label>
+      <div className="form-group">
+        <label>Category *</label>
         
         {/* Popular Categories First */}
-        <div style={{ marginBottom: '1rem' }}>
-          <div style={{ fontSize: '0.8rem', color: '#6B7280', marginBottom: '0.5rem' }}>
+        <div style={{ marginBottom: 'var(--space-lg)' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 'var(--space-sm)' }}>
             🔥 Popular Categories
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-sm)' }}>
             {categories.filter(cat => cat.popular).map(category => (
               <label key={category.value} style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem',
-                border: `2px solid ${formData.category === category.value ? '#00D4FF' : '#E5E7EB'}`,
-                borderRadius: '0.5rem',
+                gap: 'var(--space-sm)',
+                padding: 'var(--space-md)',
+                border: `2px solid ${formData.category === category.value ? 'var(--border-accent)' : 'var(--border-primary)'}`,
+                borderRadius: 'var(--radius-md)',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                background: formData.category === category.value ? '#F0F9FF' : 'white'
+                transition: 'all var(--transition-normal)',
+                background: formData.category === category.value ? 'rgba(0, 212, 255, 0.1)' : 'var(--bg-input)'
               }}>
                 <input
                   type="radio"
@@ -335,22 +312,22 @@ const CreateTask = () => {
         </div>
 
         {/* All Categories */}
-        <details style={{ marginTop: '1rem' }}>
-          <summary style={{ cursor: 'pointer', color: '#6B7280', fontSize: '0.8rem' }}>
+        <details style={{ marginTop: 'var(--space-lg)' }}>
+          <summary style={{ cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
             📂 All Categories
           </summary>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.5rem', marginTop: '0.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-sm)', marginTop: 'var(--space-sm)' }}>
             {categories.filter(cat => !cat.popular).map(category => (
               <label key={category.value} style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem',
-                border: `2px solid ${formData.category === category.value ? '#00D4FF' : '#E5E7EB'}`,
-                borderRadius: '0.5rem',
+                gap: 'var(--space-sm)',
+                padding: 'var(--space-md)',
+                border: `2px solid ${formData.category === category.value ? 'var(--border-accent)' : 'var(--border-primary)'}`,
+                borderRadius: 'var(--radius-md)',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                background: formData.category === category.value ? '#F0F9FF' : 'white'
+                transition: 'all var(--transition-normal)',
+                background: formData.category === category.value ? 'rgba(0, 212, 255, 0.1)' : 'var(--bg-input)'
               }}>
                 <input
                   type="radio"
@@ -368,16 +345,8 @@ const CreateTask = () => {
       </div>
 
       {/* Description */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '0.5rem',
-          fontWeight: '600',
-          color: '#374151',
-          fontSize: '0.9rem'
-        }}>
-          Project Description *
-        </label>
+      <div className="form-group">
+        <label>Project Description *</label>
         <textarea
           name="description"
           value={formData.description}
@@ -386,39 +355,36 @@ const CreateTask = () => {
           rows="6"
           style={{
             width: '100%',
-            padding: '1rem',
-            border: '2px solid #E5E7EB',
-            borderRadius: '0.75rem',
+            padding: 'var(--space-md)',
+            background: 'var(--bg-input)',
+            border: '2px solid var(--border-primary)',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--text-primary)',
             fontSize: '1rem',
             outline: 'none',
-            transition: 'border-color 0.3s ease',
+            transition: 'border-color var(--transition-normal)',
             resize: 'vertical'
           }}
-          onFocus={(e) => e.target.style.borderColor = '#00D4FF'}
-          onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
+          onFocus={(e) => e.target.style.borderColor = 'var(--border-accent)'}
+          onBlur={(e) => e.target.style.borderColor = 'var(--border-primary)'}
         />
-        <div style={{ fontSize: '0.8rem', color: '#6B7280', marginTop: '0.25rem' }}>
+        <small style={{ color: 'var(--text-muted)' }}>
           {formData.description.length}/2000 characters
-        </div>
+        </small>
       </div>
 
       {/* Pro Tips */}
-      <div style={{
-        background: '#F0F9FF',
-        border: '1px solid #BAE6FD',
-        borderRadius: '0.75rem',
-        padding: '1rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <span>💡</span>
-          <strong style={{ color: '#0C4A6E' }}>Pro Tips for Better Results:</strong>
+      <div className="alert alert-info">
+        <span>💡</span>
+        <div>
+          <strong>Pro Tips for Better Results:</strong>
+          <ul style={{ margin: '0.5rem 0 0 1rem', paddingLeft: '1rem' }}>
+            <li>Be specific about what you want to achieve</li>
+            <li>Include examples or references if helpful</li>
+            <li>Mention any technical requirements or preferences</li>
+            <li>Explain the context and purpose of the project</li>
+          </ul>
         </div>
-        <ul style={{ margin: 0, paddingLeft: '1rem', color: '#0369A1', fontSize: '0.9rem' }}>
-          <li>Be specific about what you want to achieve</li>
-          <li>Include examples or references if helpful</li>
-          <li>Mention any technical requirements or preferences</li>
-          <li>Explain the context and purpose of the project</li>
-        </ul>
       </div>
     </div>
   );
@@ -426,35 +392,22 @@ const CreateTask = () => {
   const renderStep2 = () => (
     <div>
       {/* Skills Required */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '0.75rem',
-          fontWeight: '600',
-          color: '#374151',
-          fontSize: '0.9rem'
-        }}>
-          Required Skills *
-        </label>
+      <div className="form-group">
+        <label>Required Skills *</label>
         
         {/* Selected Skills */}
         {formData.skillsRequired.length > 0 && (
-          <div style={{ marginBottom: '1rem' }}>
-            <div style={{ fontSize: '0.8rem', color: '#6B7280', marginBottom: '0.5rem' }}>
+          <div style={{ marginBottom: 'var(--space-lg)' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 'var(--space-sm)' }}>
               Selected Skills:
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
               {formData.skillsRequired.map(skill => (
-                <span key={skill} style={{
-                  background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
-                  color: 'white',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '1rem',
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
+                <span key={skill} className="badge badge-primary" style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem'
+                  gap: 'var(--space-sm)',
+                  padding: 'var(--space-sm) var(--space-md)'
                 }}>
                   {skill}
                   <button
@@ -463,9 +416,10 @@ const CreateTask = () => {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: 'white',
+                      color: 'inherit',
                       cursor: 'pointer',
-                      fontSize: '1rem'
+                      fontSize: '1rem',
+                      fontWeight: 'bold'
                     }}
                   >
                     ×
@@ -478,26 +432,23 @@ const CreateTask = () => {
 
         {/* Popular Skills for Selected Category */}
         {formData.category && popularSkills[formData.category]?.length > 0 && (
-          <div style={{ marginBottom: '1rem' }}>
-            <div style={{ fontSize: '0.8rem', color: '#6B7280', marginBottom: '0.5rem' }}>
+          <div style={{ marginBottom: 'var(--space-lg)' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 'var(--space-sm)' }}>
               🔥 Popular for {categories.find(c => c.value === formData.category)?.label}:
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
               {popularSkills[formData.category].map(skill => (
                 <button
                   key={skill}
                   type="button"
                   onClick={() => handleSkillAdd(skill)}
                   disabled={formData.skillsRequired.includes(skill)}
+                  className="btn btn-secondary"
                   style={{
-                    background: formData.skillsRequired.includes(skill) ? '#F3F4F6' : 'white',
-                    color: formData.skillsRequired.includes(skill) ? '#9CA3AF' : '#374151',
-                    border: '2px solid #E5E7EB',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '1rem',
-                    fontSize: '0.9rem',
+                    opacity: formData.skillsRequired.includes(skill) ? 0.5 : 1,
                     cursor: formData.skillsRequired.includes(skill) ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.3s ease'
+                    fontSize: '0.8rem',
+                    padding: 'var(--space-sm) var(--space-md)'
                   }}
                 >
                   {skill} {formData.skillsRequired.includes(skill) ? '✓' : '+'}
@@ -515,9 +466,11 @@ const CreateTask = () => {
             onKeyPress={handleCustomSkillAdd}
             style={{
               width: '100%',
-              padding: '0.75rem 1rem',
-              border: '2px solid #E5E7EB',
-              borderRadius: '0.5rem',
+              padding: 'var(--space-md)',
+              background: 'var(--bg-input)',
+              border: '2px solid var(--border-primary)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
               fontSize: '0.9rem',
               outline: 'none'
             }}
@@ -526,16 +479,8 @@ const CreateTask = () => {
       </div>
 
       {/* Credits Budget */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '0.5rem',
-          fontWeight: '600',
-          color: '#374151',
-          fontSize: '0.9rem'
-        }}>
-          Budget (Credits) *
-        </label>
+      <div className="form-group">
+        <label>Budget (Credits) *</label>
         <div style={{ position: 'relative' }}>
           <input
             type="number"
@@ -547,53 +492,50 @@ const CreateTask = () => {
             placeholder="How many credits are you willing to spend?"
             style={{
               width: '100%',
-              padding: '1rem',
+              padding: 'var(--space-md)',
               paddingRight: '6rem',
-              border: '2px solid #E5E7EB',
-              borderRadius: '0.75rem',
+              background: 'var(--bg-input)',
+              border: '2px solid var(--border-primary)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
               fontSize: '1rem',
               outline: 'none',
-              transition: 'border-color 0.3s ease'
+              transition: 'border-color var(--transition-normal)'
             }}
-            onFocus={(e) => e.target.style.borderColor = '#00D4FF'}
-            onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
+            onFocus={(e) => e.target.style.borderColor = 'var(--border-accent)'}
+            onBlur={(e) => e.target.style.borderColor = 'var(--border-primary)'}
           />
           <div style={{
             position: 'absolute',
-            right: '1rem',
+            right: 'var(--space-lg)',
             top: '50%',
             transform: 'translateY(-50%)',
-            background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
+            background: 'var(--primary-gradient)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            fontWeight: 'bold',
+            fontWeight: '700',
             fontSize: '0.9rem'
           }}>
             credits
           </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#6B7280', marginTop: '0.25rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 'var(--space-xs)' }}>
           <span>Available: {currentUser.credits} credits</span>
           <span>Min: 1 credit</span>
         </div>
       </div>
 
       {/* Credit Guide */}
-      <div style={{
-        background: '#F0FDF4',
-        border: '1px solid #BBF7D0',
-        borderRadius: '0.75rem',
-        padding: '1rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <span>💰</span>
-          <strong style={{ color: '#166534' }}>Credit Pricing Guide:</strong>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.5rem', color: '#15803D', fontSize: '0.8rem' }}>
-          <div>🚀 Simple tasks: 5-25</div>
-          <div>🔧 Medium projects: 25-100</div>
-          <div>🏗️ Complex work: 100-500+</div>
+      <div className="alert alert-success">
+        <span>💰</span>
+        <div>
+          <strong>Credit Pricing Guide:</strong>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 'var(--space-sm)', marginTop: 'var(--space-sm)', fontSize: '0.8rem' }}>
+            <div>🚀 Simple tasks: 5-25</div>
+            <div>🔧 Medium projects: 25-100</div>
+            <div>🏗️ Complex work: 100-500+</div>
+          </div>
         </div>
       </div>
     </div>
@@ -602,17 +544,9 @@ const CreateTask = () => {
   const renderStep3 = () => (
     <div>
       {/* Duration */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '0.5rem',
-          fontWeight: '600',
-          color: '#374151',
-          fontSize: '0.9rem'
-        }}>
-          Estimated Duration *
-        </label>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.5rem' }}>
+      <div className="form-group">
+        <label>Estimated Duration *</label>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 'var(--space-sm)' }}>
           <input
             type="number"
             name="duration.value"
@@ -621,9 +555,11 @@ const CreateTask = () => {
             min="1"
             placeholder="e.g., 2"
             style={{
-              padding: '1rem',
-              border: '2px solid #E5E7EB',
-              borderRadius: '0.75rem',
+              padding: 'var(--space-md)',
+              background: 'var(--bg-input)',
+              border: '2px solid var(--border-primary)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
               fontSize: '1rem',
               outline: 'none'
             }}
@@ -633,12 +569,13 @@ const CreateTask = () => {
             value={formData.duration.unit}
             onChange={handleChange}
             style={{
-              padding: '1rem',
-              border: '2px solid #E5E7EB',
-              borderRadius: '0.75rem',
+              padding: 'var(--space-md)',
+              background: 'var(--bg-input)',
+              border: '2px solid var(--border-primary)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
               fontSize: '1rem',
-              outline: 'none',
-              background: 'white'
+              outline: 'none'
             }}
           >
             {durationUnits.map(unit => (
@@ -649,16 +586,8 @@ const CreateTask = () => {
       </div>
 
       {/* Completion Date */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '0.5rem',
-          fontWeight: '600',
-          color: '#374151',
-          fontSize: '0.9rem'
-        }}>
-          Needed By *
-        </label>
+      <div className="form-group">
+        <label>Needed By *</label>
         <input
           type="datetime-local"
           name="dateTime"
@@ -667,41 +596,35 @@ const CreateTask = () => {
           min={new Date().toISOString().slice(0, 16)}
           style={{
             width: '100%',
-            padding: '1rem',
-            border: '2px solid #E5E7EB',
-            borderRadius: '0.75rem',
+            padding: 'var(--space-md)',
+            background: 'var(--bg-input)',
+            border: '2px solid var(--border-primary)',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--text-primary)',
             fontSize: '1rem',
             outline: 'none',
-            transition: 'border-color 0.3s ease'
+            transition: 'border-color var(--transition-normal)'
           }}
-          onFocus={(e) => e.target.style.borderColor = '#00D4FF'}
-          onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
+          onFocus={(e) => e.target.style.borderColor = 'var(--border-accent)'}
+          onBlur={(e) => e.target.style.borderColor = 'var(--border-primary)'}
         />
       </div>
 
       {/* Urgency */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '0.75rem',
-          fontWeight: '600',
-          color: '#374151',
-          fontSize: '0.9rem'
-        }}>
-          Project Urgency *
-        </label>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div className="form-group">
+        <label>Project Urgency *</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
           {urgencyOptions.map(option => (
             <label key={option.value} style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '1rem',
-              padding: '1rem',
-              border: `2px solid ${formData.urgency === option.value ? option.color : '#E5E7EB'}`,
-              borderRadius: '0.75rem',
+              gap: 'var(--space-lg)',
+              padding: 'var(--space-lg)',
+              border: `2px solid ${formData.urgency === option.value ? option.color : 'var(--border-primary)'}`,
+              borderRadius: 'var(--radius-md)',
               cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              background: formData.urgency === option.value ? `${option.color}10` : 'white'
+              transition: 'all var(--transition-normal)',
+              background: formData.urgency === option.value ? `${option.color}20` : 'var(--bg-input)'
             }}>
               <input
                 type="radio"
@@ -712,8 +635,8 @@ const CreateTask = () => {
                 style={{ display: 'none' }}
               />
               <div>
-                <div style={{ fontWeight: '600', fontSize: '1rem' }}>{option.label}</div>
-                <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>{option.description}</div>
+                <div style={{ fontWeight: '700', fontSize: '1rem', color: 'var(--text-primary)' }}>{option.label}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{option.description}</div>
               </div>
             </label>
           ))}
@@ -721,16 +644,8 @@ const CreateTask = () => {
       </div>
 
       {/* Additional Info */}
-      <div>
-        <label style={{
-          display: 'block',
-          marginBottom: '0.5rem',
-          fontWeight: '600',
-          color: '#374151',
-          fontSize: '0.9rem'
-        }}>
-          Additional Information (Optional)
-        </label>
+      <div className="form-group">
+        <label>Additional Information (Optional)</label>
         <textarea
           name="additionalInfo"
           value={formData.additionalInfo}
@@ -739,9 +654,11 @@ const CreateTask = () => {
           rows="4"
           style={{
             width: '100%',
-            padding: '1rem',
-            border: '2px solid #E5E7EB',
-            borderRadius: '0.75rem',
+            padding: 'var(--space-md)',
+            background: 'var(--bg-input)',
+            border: '2px solid var(--border-primary)',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--text-primary)',
             fontSize: '1rem',
             outline: 'none',
             resize: 'vertical'
@@ -753,15 +670,14 @@ const CreateTask = () => {
 
   const renderStep4 = () => (
     <div>
-      <div style={{
-        background: '#F9FAFB',
-        borderRadius: '1rem',
-        padding: '1.5rem',
-        border: '1px solid #E5E7EB'
+      <div className="card" style={{
+        background: 'var(--bg-secondary)',
+        padding: 'var(--space-xl)',
+        marginBottom: 'var(--space-xl)'
       }}>
-        <h3 style={{ marginBottom: '1.5rem', color: '#1F2937' }}>Review Your Project</h3>
+        <h3 style={{ marginBottom: 'var(--space-xl)', color: 'var(--text-primary)' }}>Review Your Project</h3>
         
-        <div style={{ display: 'grid', gap: '1rem' }}>
+        <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
           <div>
             <strong>Title:</strong> {formData.title}
           </div>
@@ -773,13 +689,14 @@ const CreateTask = () => {
           <div>
             <strong>Description:</strong>
             <div style={{ 
-              marginTop: '0.5rem', 
-              padding: '1rem', 
-              background: 'white', 
-              borderRadius: '0.5rem',
-              border: '1px solid #E5E7EB',
+              marginTop: 'var(--space-sm)', 
+              padding: 'var(--space-lg)', 
+              background: 'var(--bg-tertiary)', 
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-primary)',
               fontSize: '0.9rem',
-              lineHeight: '1.6'
+              lineHeight: '1.6',
+              color: 'var(--text-secondary)'
             }}>
               {formData.description}
             </div>
@@ -787,22 +704,16 @@ const CreateTask = () => {
           
           <div>
             <strong>Skills Required:</strong>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)', marginTop: 'var(--space-sm)' }}>
               {formData.skillsRequired.map(skill => (
-                <span key={skill} style={{
-                  background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
-                  color: 'white',
-                  padding: '0.25rem 0.75rem',
-                  borderRadius: '1rem',
-                  fontSize: '0.8rem'
-                }}>
+                <span key={skill} className="badge badge-primary">
                   {skill}
                 </span>
               ))}
             </div>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-lg)' }}>
             <div>
               <strong>Budget:</strong> {formData.credits} credits
             </div>
@@ -821,12 +732,13 @@ const CreateTask = () => {
             <div>
               <strong>Additional Information:</strong>
               <div style={{ 
-                marginTop: '0.5rem', 
-                padding: '1rem', 
-                background: 'white', 
-                borderRadius: '0.5rem',
-                border: '1px solid #E5E7EB',
-                fontSize: '0.9rem'
+                marginTop: 'var(--space-sm)', 
+                padding: 'var(--space-lg)', 
+                background: 'var(--bg-tertiary)', 
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-primary)',
+                fontSize: '0.9rem',
+                color: 'var(--text-secondary)'
               }}>
                 {formData.additionalInfo}
               </div>
@@ -835,168 +747,105 @@ const CreateTask = () => {
         </div>
       </div>
       
-      <div style={{
-        background: '#EBF8FF',
-        border: '1px solid #BAE6FD',
-        borderRadius: '0.75rem',
-        padding: '1rem',
-        marginTop: '1rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <span>🚀</span>
-          <strong style={{ color: '#0C4A6E' }}>Ready to Post!</strong>
+      <div className="alert alert-info">
+        <span>🚀</span>
+        <div>
+          <strong>Ready to Post!</strong>
+          <p style={{ margin: '0.5rem 0 0 0' }}>
+            Your project will be visible to verified professionals immediately. You'll start receiving applications within minutes!
+          </p>
         </div>
-        <p style={{ margin: 0, color: '#0369A1', fontSize: '0.9rem' }}>
-          Your project will be visible to verified professionals immediately. You'll start receiving applications within minutes!
-        </p>
       </div>
     </div>
   );
 
   return (
-    <div style={{
-      maxWidth: '800px',
-      margin: '0 auto',
-      padding: '2rem 1rem'
-    }}>
-      {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <h1 style={{
-          fontSize: '2.5rem',
-          fontWeight: 'bold',
-          background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
-          backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          marginBottom: '0.5rem'
-        }}>
-          Post a Project
-        </h1>
-        <p style={{ color: '#6B7280', fontSize: '1.1rem' }}>
-          Connect with skilled professionals for your next project
-        </p>
-      </div>
+    <div className="page-container">
+      <div className="container" style={{ maxWidth: '800px' }}>
+        {/* Header */}
+        <div className="page-header">
+          <h1 className="page-title">Post a Project</h1>
+          <p className="page-subtitle">
+            Connect with skilled professionals for your next project
+          </p>
+        </div>
 
-      {/* Form Container */}
-      <div style={{
-        background: 'white',
-        borderRadius: '1.5rem',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        border: '1px solid #E5E7EB',
-        padding: '2rem'
-      }}>
-        <StepIndicator />
-        
-        <h2 style={{
-          textAlign: 'center',
-          marginBottom: '2rem',
-          color: '#1F2937',
-          fontSize: '1.3rem'
-        }}>
-          {getStepTitle()}
-        </h2>
-
-        {error && (
-          <div style={{
-            background: '#FEF2F2',
-            border: '1px solid #FECACA',
-            color: '#B91C1C',
-            padding: '1rem',
-            borderRadius: '0.75rem',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
+        {/* Form Container */}
+        <div className="card" style={{ padding: 'var(--space-2xl)' }}>
+          <StepIndicator />
+          
+          <h2 style={{
+            textAlign: 'center',
+            marginBottom: 'var(--space-xl)',
+            color: 'var(--text-primary)',
+            fontSize: '1.3rem'
           }}>
-            <span>⚠️</span>
-            {error}
-          </div>
-        )}
+            {getStepTitle()}
+          </h2>
 
-        <form onSubmit={currentStep === 4 ? handleSubmit : (e) => e.preventDefault()}>
-          {currentStep === 1 && renderStep1()}
-          {currentStep === 2 && renderStep2()}
-          {currentStep === 3 && renderStep3()}
-          {currentStep === 4 && renderStep4()}
+          {error && (
+            <div className="alert alert-error" style={{ marginBottom: 'var(--space-xl)' }}>
+              <span>⚠️</span>
+              {error}
+            </div>
+          )}
 
-          {/* Navigation Buttons */}
-          <div style={{
-            display: 'flex',
-            gap: '1rem',
-            marginTop: '2rem',
-            paddingTop: '2rem',
-            borderTop: '1px solid #E5E7EB'
-          }}>
-            {currentStep > 1 && (
+          <form onSubmit={currentStep === 4 ? handleSubmit : (e) => e.preventDefault()}>
+            {currentStep === 1 && renderStep1()}
+            {currentStep === 2 && renderStep2()}
+            {currentStep === 3 && renderStep3()}
+            {currentStep === 4 && renderStep4()}
+
+            {/* Navigation Buttons */}
+            <div style={{
+              display: 'flex',
+              gap: 'var(--space-lg)',
+              marginTop: 'var(--space-2xl)',
+              paddingTop: 'var(--space-xl)',
+              borderTop: '1px solid var(--border-primary)'
+            }}>
+              {currentStep > 1 && (
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  ← Back
+                </button>
+              )}
+              
               <button
-                type="button"
-                onClick={prevStep}
+                type={currentStep === 4 ? "submit" : "button"}
+                onClick={currentStep === 4 ? undefined : nextStep}
+                disabled={loading}
+                className="btn btn-primary"
                 style={{
                   flex: 1,
-                  background: '#F3F4F6',
-                  color: '#374151',
-                  border: '1px solid #D1D5DB',
-                  padding: '1rem',
-                  borderRadius: '0.75rem',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
+                  background: loading ? 'var(--text-muted)' : 'var(--primary-gradient)',
+                  cursor: loading ? 'not-allowed' : 'pointer'
                 }}
               >
-                ← Back
+                {loading ? (
+                  <>
+                    <div className="loading-spinner" style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      borderTop: '2px solid white'
+                    }}></div>
+                    Creating Project...
+                  </>
+                ) : currentStep === 4 ? (
+                  <>🚀 Post Project</>
+                ) : (
+                  <>Continue →</>
+                )}
               </button>
-            )}
-            
-            <button
-              type={currentStep === 4 ? "submit" : "button"}
-              onClick={currentStep === 4 ? undefined : nextStep}
-              disabled={loading}
-              style={{
-                flex: 1,
-                background: loading ? '#9CA3AF' : 'linear-gradient(135deg, #00D4FF, #FF6B35)',
-                color: 'white',
-                border: 'none',
-                padding: '1rem',
-                borderRadius: '0.75rem',
-                fontSize: '1rem',
-                fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              {loading ? (
-                <>
-                  <div style={{
-                    width: '16px',
-                    height: '16px',
-                    border: '2px solid rgba(255,255,255,0.3)',
-                    borderTop: '2px solid white',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
-                  }}></div>
-                  Creating Project...
-                </>
-              ) : currentStep === 4 ? (
-                <>🚀 Post Project</>
-              ) : (
-                <>Continue →</>
-              )}
-            </button>
-          </div>
-        </form>
+            </div>
+          </form>
+        </div>
       </div>
-
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 };

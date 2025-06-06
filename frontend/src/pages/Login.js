@@ -37,20 +37,19 @@ const Login = () => {
   };
 
   const InputField = ({ label, type, name, value, onChange, placeholder, icon, required = false }) => (
-    <div style={{ marginBottom: '1.5rem' }}>
+    <div className="form-group">
       <label style={{
-        display: 'block',
-        marginBottom: '0.5rem',
-        fontWeight: '600',
-        color: '#374151',
-        fontSize: '0.875rem',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.5rem'
+        gap: 'var(--space-sm)',
+        marginBottom: 'var(--space-sm)',
+        fontWeight: '600',
+        color: 'var(--text-primary)',
+        fontSize: '0.9rem'
       }}>
         <span style={{ fontSize: '1rem' }}>{icon}</span>
         {label}
-        {required && <span style={{ color: '#EF4444' }}>*</span>}
+        {required && <span style={{ color: 'var(--error)' }}>*</span>}
       </label>
       <div style={{ position: 'relative' }}>
         <input
@@ -62,21 +61,22 @@ const Login = () => {
           required={required}
           style={{
             width: '100%',
-            padding: '0.75rem 1rem',
-            paddingRight: type === 'password' ? '3rem' : '1rem',
-            border: '2px solid #E5E7EB',
-            borderRadius: '0.75rem',
+            padding: 'var(--space-md) var(--space-lg)',
+            paddingRight: type === 'password' ? '3rem' : 'var(--space-lg)',
+            background: 'var(--bg-input)',
+            border: '2px solid var(--border-primary)',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--text-primary)',
             fontSize: '1rem',
-            transition: 'all 0.3s ease',
-            outline: 'none',
-            background: 'white'
+            transition: 'all var(--transition-normal)',
+            outline: 'none'
           }}
           onFocus={(e) => {
-            e.target.style.borderColor = '#00D4FF';
+            e.target.style.borderColor = 'var(--border-accent)';
             e.target.style.boxShadow = '0 0 0 3px rgba(0, 212, 255, 0.1)';
           }}
           onBlur={(e) => {
-            e.target.style.borderColor = '#E5E7EB';
+            e.target.style.borderColor = 'var(--border-primary)';
             e.target.style.boxShadow = 'none';
           }}
         />
@@ -86,14 +86,14 @@ const Login = () => {
             onClick={() => setShowPassword(!showPassword)}
             style={{
               position: 'absolute',
-              right: '1rem',
+              right: 'var(--space-lg)',
               top: '50%',
               transform: 'translateY(-50%)',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
               fontSize: '1.2rem',
-              color: '#6B7280'
+              color: 'var(--text-muted)'
             }}
           >
             {showPassword ? '🙈' : '👁️'}
@@ -106,26 +106,40 @@ const Login = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #F9FAFB 100%)',
+      background: 'var(--bg-primary)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '2rem 1rem'
+      padding: 'var(--space-xl) var(--space-md)',
+      position: 'relative'
     }}>
+      {/* Background Pattern */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 20% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 107, 53, 0.1) 0%, transparent 50%)',
+        pointerEvents: 'none'
+      }}></div>
+
       <div style={{
         width: '100%',
-        maxWidth: '400px',
-        background: 'white',
-        borderRadius: '1.5rem',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        border: '1px solid #E5E7EB',
-        overflow: 'hidden'
+        maxWidth: '450px',
+        background: 'var(--bg-card)',
+        borderRadius: 'var(--radius-xl)',
+        boxShadow: 'var(--shadow-xl)',
+        border: '1px solid var(--border-primary)',
+        overflow: 'hidden',
+        position: 'relative',
+        zIndex: 1
       }}>
         {/* Header */}
         <div style={{
-          background: 'linear-gradient(135deg, #0A0E27, #1A1F3A)',
+          background: 'linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))',
           color: 'white',
-          padding: '2rem',
+          padding: 'var(--space-2xl)',
           textAlign: 'center',
           position: 'relative',
           overflow: 'hidden'
@@ -145,35 +159,37 @@ const Login = () => {
             zIndex: 1
           }}>
             <div style={{
-              width: '60px',
-              height: '60px',
-              borderRadius: '1rem',
-              background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
+              width: '80px',
+              height: '80px',
+              borderRadius: 'var(--radius-lg)',
+              background: 'var(--primary-gradient)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '1.5rem',
-              margin: '0 auto 1rem'
+              fontSize: '2rem',
+              margin: '0 auto var(--space-lg)',
+              boxShadow: 'var(--shadow-lg)'
             }}>
+              {/* Placeholder for your logo */}
               ⧗
             </div>
             
             <h1 style={{
-              fontSize: '1.5rem',
-              fontWeight: '700',
-              marginBottom: '0.5rem',
-              background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
+              fontSize: '2rem',
+              fontWeight: '800',
+              marginBottom: 'var(--space-sm)',
+              background: 'var(--primary-gradient)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              margin: 0
+              WebkitTextFillColor: 'transparent'
             }}>
               Welcome Back
             </h1>
             <p style={{ 
               opacity: 0.9, 
-              fontSize: '0.9rem',
-              margin: 0
+              fontSize: '1rem',
+              margin: 0,
+              color: 'var(--text-secondary)'
             }}>
               Sign in to your TimeSlice account
             </p>
@@ -181,20 +197,9 @@ const Login = () => {
         </div>
 
         {/* Form */}
-        <div style={{ padding: '2rem' }}>
+        <div style={{ padding: 'var(--space-2xl)' }}>
           {error && (
-            <div style={{
-              background: '#FEF2F2',
-              border: '1px solid #FECACA',
-              color: '#B91C1C',
-              padding: '0.75rem 1rem',
-              borderRadius: '0.75rem',
-              marginBottom: '1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              fontSize: '0.9rem'
-            }}>
+            <div className="alert alert-error" style={{ marginBottom: 'var(--space-xl)' }}>
               <span>⚠️</span>
               {error}
             </div>
@@ -226,45 +231,45 @@ const Login = () => {
             <button 
               type="submit" 
               disabled={loading}
+              className="btn btn-primary"
               style={{
                 width: '100%',
-                background: loading ? '#9CA3AF' : 'linear-gradient(135deg, #00D4FF, #FF6B35)',
+                background: loading ? 'var(--text-muted)' : 'var(--primary-gradient)',
                 color: 'white',
                 border: 'none',
-                padding: '0.875rem 1rem',
-                borderRadius: '0.75rem',
+                padding: 'var(--space-lg) var(--space-lg)',
+                borderRadius: 'var(--radius-md)',
                 fontSize: '1rem',
-                fontWeight: '600',
+                fontWeight: '700',
                 cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s ease',
+                transition: 'all var(--transition-normal)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '0.5rem',
-                marginBottom: '1.5rem'
+                gap: 'var(--space-sm)',
+                marginBottom: 'var(--space-xl)',
+                boxShadow: loading ? 'none' : 'var(--shadow-md)'
               }}
               onMouseEnter={(e) => {
                 if (!loading) {
                   e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 10px 20px rgba(0, 212, 255, 0.3)';
+                  e.target.style.boxShadow = '0 10px 25px rgba(0, 212, 255, 0.4)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!loading) {
                   e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
+                  e.target.style.boxShadow = 'var(--shadow-md)';
                 }
               }}
             >
               {loading ? (
                 <>
-                  <div style={{
+                  <div className="loading-spinner" style={{
                     width: '16px',
                     height: '16px',
                     border: '2px solid rgba(255,255,255,0.3)',
-                    borderTop: '2px solid white',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
+                    borderTop: '2px solid white'
                   }}></div>
                   Signing in...
                 </>
@@ -277,21 +282,21 @@ const Login = () => {
 
             <div style={{
               textAlign: 'center',
-              padding: '1rem',
-              background: '#F9FAFB',
-              borderRadius: '0.75rem',
-              border: '1px solid #E5E7EB'
+              padding: 'var(--space-lg)',
+              background: 'var(--bg-secondary)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-primary)'
             }}>
               <p style={{ 
                 margin: 0, 
-                color: '#6B7280',
+                color: 'var(--text-secondary)',
                 fontSize: '0.9rem'
               }}>
                 Don't have an account?{' '}
                 <Link 
                   to="/register" 
                   style={{
-                    color: '#00D4FF',
+                    color: 'var(--primary-cyan)',
                     textDecoration: 'none',
                     fontWeight: '600'
                   }}
@@ -307,40 +312,33 @@ const Login = () => {
 
         {/* Footer */}
         <div style={{
-          padding: '1rem 2rem',
-          background: '#F9FAFB',
-          borderTop: '1px solid #E5E7EB',
+          padding: 'var(--space-lg) var(--space-2xl)',
+          background: 'var(--bg-secondary)',
+          borderTop: '1px solid var(--border-primary)',
           textAlign: 'center'
         }}>
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            gap: '2rem',
+            gap: 'var(--space-2xl)',
             fontSize: '0.8rem',
-            color: '#6B7280'
+            color: 'var(--text-muted)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
               <span>🛡️</span>
               Secure Login
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
               <span>🔒</span>
               Encrypted
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
               <span>⚡</span>
               Fast Access
             </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 };

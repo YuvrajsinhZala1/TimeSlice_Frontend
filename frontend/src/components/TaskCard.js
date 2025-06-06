@@ -32,31 +32,35 @@ const TaskCard = ({
     switch (urgency) {
       case 'high': 
         return { 
-          color: '#EF4444', 
-          bg: '#FEF2F2', 
+          color: 'var(--error)', 
+          bg: 'rgba(239, 68, 68, 0.15)', 
           icon: '🔴', 
-          label: 'Urgent' 
+          label: 'Urgent',
+          border: 'rgba(239, 68, 68, 0.3)'
         };
       case 'medium': 
         return { 
-          color: '#F59E0B', 
-          bg: '#FFFBEB', 
+          color: 'var(--warning)', 
+          bg: 'rgba(245, 158, 11, 0.15)', 
           icon: '🟡', 
-          label: 'Normal' 
+          label: 'Normal',
+          border: 'rgba(245, 158, 11, 0.3)'
         };
       case 'low': 
         return { 
-          color: '#10B981', 
-          bg: '#F0FDF4', 
+          color: 'var(--success)', 
+          bg: 'rgba(16, 185, 129, 0.15)', 
           icon: '🟢', 
-          label: 'Flexible' 
+          label: 'Flexible',
+          border: 'rgba(16, 185, 129, 0.3)'
         };
       default: 
         return { 
-          color: '#6B7280', 
-          bg: '#F9FAFB', 
+          color: 'var(--text-muted)', 
+          bg: 'var(--bg-tertiary)', 
           icon: '⚪', 
-          label: 'Standard' 
+          label: 'Standard',
+          border: 'var(--border-muted)'
         };
     }
   };
@@ -65,45 +69,52 @@ const TaskCard = ({
     switch (status) {
       case 'open': 
         return { 
-          color: '#10B981', 
-          bg: '#D1FAE5', 
-          label: 'Open' 
+          color: 'var(--success)', 
+          bg: 'rgba(16, 185, 129, 0.15)', 
+          label: 'Open',
+          border: 'rgba(16, 185, 129, 0.3)'
         };
       case 'in-review': 
         return { 
-          color: '#F59E0B', 
-          bg: '#FEF3C7', 
-          label: 'In Review' 
+          color: 'var(--warning)', 
+          bg: 'rgba(245, 158, 11, 0.15)', 
+          label: 'In Review',
+          border: 'rgba(245, 158, 11, 0.3)'
         };
       case 'assigned': 
         return { 
-          color: '#3B82F6', 
-          bg: '#DBEAFE', 
-          label: 'Assigned' 
+          color: 'var(--info)', 
+          bg: 'rgba(59, 130, 246, 0.15)', 
+          label: 'Assigned',
+          border: 'rgba(59, 130, 246, 0.3)'
         };
       case 'in-progress': 
         return { 
           color: '#8B5CF6', 
-          bg: '#EDE9FE', 
-          label: 'In Progress' 
+          bg: 'rgba(139, 92, 246, 0.15)', 
+          label: 'In Progress',
+          border: 'rgba(139, 92, 246, 0.3)'
         };
       case 'completed': 
         return { 
-          color: '#6B7280', 
-          bg: '#F3F4F6', 
-          label: 'Completed' 
+          color: 'var(--text-muted)', 
+          bg: 'var(--bg-tertiary)', 
+          label: 'Completed',
+          border: 'var(--border-muted)'
         };
       case 'cancelled': 
         return { 
-          color: '#EF4444', 
-          bg: '#FEF2F2', 
-          label: 'Cancelled' 
+          color: 'var(--error)', 
+          bg: 'rgba(239, 68, 68, 0.15)', 
+          label: 'Cancelled',
+          border: 'rgba(239, 68, 68, 0.3)'
         };
       default: 
         return { 
-          color: '#6B7280', 
-          bg: '#F9FAFB', 
-          label: status 
+          color: 'var(--text-muted)', 
+          bg: 'var(--bg-tertiary)', 
+          label: status,
+          border: 'var(--border-muted)'
         };
     }
   };
@@ -124,24 +135,10 @@ const TaskCard = ({
   const statusConfig = getStatusConfig(task.status);
 
   return (
-    <div style={{
-      background: 'white',
-      borderRadius: '1rem',
-      padding: '1.5rem',
-      border: '1px solid #E5E7EB',
-      transition: 'all 0.3s ease',
+    <div className="card" style={{
       position: 'relative',
-      overflow: 'hidden'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'translateY(-4px)';
-      e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-      e.currentTarget.style.borderColor = '#00D4FF';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.boxShadow = 'none';
-      e.currentTarget.style.borderColor = '#E5E7EB';
+      overflow: 'hidden',
+      transition: 'all var(--transition-normal)'
     }}>
       {/* Top Border Accent */}
       <div style={{
@@ -150,7 +147,7 @@ const TaskCard = ({
         left: 0,
         right: 0,
         height: '4px',
-        background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
+        background: task.status === 'open' ? 'var(--primary-gradient)' : 'var(--border-muted)',
         opacity: task.status === 'open' ? 1 : 0.5
       }}></div>
 
@@ -159,23 +156,23 @@ const TaskCard = ({
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'flex-start',
-        marginBottom: '1rem'
+        marginBottom: 'var(--space-lg)'
       }}>
         <h3 style={{ 
-          color: '#1F2937',
-          fontSize: '1.2rem',
+          color: 'var(--text-primary)',
+          fontSize: '1.3rem',
           fontWeight: '700',
           margin: 0,
           lineHeight: '1.4',
           flex: 1,
-          marginRight: '1rem'
+          marginRight: 'var(--space-lg)'
         }}>
           {task.title}
         </h3>
         
         <div style={{ 
           display: 'flex', 
-          gap: '0.5rem', 
+          gap: 'var(--space-sm)', 
           alignItems: 'center',
           flexShrink: 0
         }}>
@@ -183,13 +180,14 @@ const TaskCard = ({
           <div style={{
             background: urgencyConfig.bg,
             color: urgencyConfig.color,
-            padding: '0.25rem 0.75rem',
-            borderRadius: '1rem',
-            fontSize: '0.75rem',
+            padding: 'var(--space-xs) var(--space-md)',
+            borderRadius: 'var(--radius-xl)',
+            fontSize: '0.8rem',
             fontWeight: '600',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.25rem'
+            gap: 'var(--space-xs)',
+            border: `1px solid ${urgencyConfig.border}`
           }}>
             <span>{urgencyConfig.icon}</span>
             {urgencyConfig.label}
@@ -199,10 +197,11 @@ const TaskCard = ({
           <div style={{
             background: statusConfig.bg,
             color: statusConfig.color,
-            padding: '0.25rem 0.75rem',
-            borderRadius: '1rem',
-            fontSize: '0.75rem',
-            fontWeight: '600'
+            padding: 'var(--space-xs) var(--space-md)',
+            borderRadius: 'var(--radius-xl)',
+            fontSize: '0.8rem',
+            fontWeight: '600',
+            border: `1px solid ${statusConfig.border}`
           }}>
             {statusConfig.label}
           </div>
@@ -211,10 +210,10 @@ const TaskCard = ({
       
       {/* Task Description */}
       <p style={{ 
-        color: '#4B5563',
+        color: 'var(--text-secondary)',
         lineHeight: '1.6',
-        marginBottom: '1rem',
-        fontSize: '0.9rem'
+        marginBottom: 'var(--space-lg)',
+        fontSize: '0.95rem'
       }}>
         {task.description.length > 150 
           ? `${task.description.substring(0, 150)}...` 
@@ -226,33 +225,34 @@ const TaskCard = ({
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(2, 1fr)', 
-        gap: '1rem',
-        marginBottom: '1rem',
-        padding: '1rem',
-        background: '#F9FAFB',
-        borderRadius: '0.75rem'
+        gap: 'var(--space-lg)',
+        marginBottom: 'var(--space-lg)',
+        padding: 'var(--space-lg)',
+        background: 'var(--bg-secondary)',
+        borderRadius: 'var(--radius-md)',
+        border: '1px solid var(--border-primary)'
       }}>
         <div>
           <div style={{ 
             fontSize: '0.75rem', 
-            color: '#6B7280', 
+            color: 'var(--text-muted)', 
             fontWeight: '600',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            marginBottom: '0.25rem'
+            marginBottom: 'var(--space-xs)'
           }}>
             Posted By
           </div>
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: '0.5rem'
+            gap: 'var(--space-sm)'
           }}>
             <div style={{
               width: '32px',
               height: '32px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
+              background: 'var(--primary-gradient)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -263,19 +263,19 @@ const TaskCard = ({
               {task.taskProviderId.username.charAt(0).toUpperCase()}
             </div>
             <div>
-              <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>
+              <div style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                 {task.taskProviderId.username}
               </div>
               <div style={{ 
                 fontSize: '0.75rem', 
-                color: '#F59E0B',
+                color: 'var(--warning)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.25rem'
+                gap: 'var(--space-xs)'
               }}>
                 ⭐ {task.taskProviderId.rating ? task.taskProviderId.rating.toFixed(1) : 'New'}
                 {task.taskProviderId.isOnline && (
-                  <span style={{ color: '#10B981' }}>● Online</span>
+                  <span style={{ color: 'var(--success)' }}>● Online</span>
                 )}
               </div>
             </div>
@@ -285,18 +285,18 @@ const TaskCard = ({
         <div>
           <div style={{ 
             fontSize: '0.75rem', 
-            color: '#6B7280', 
+            color: 'var(--text-muted)', 
             fontWeight: '600',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            marginBottom: '0.25rem'
+            marginBottom: 'var(--space-xs)'
           }}>
             Credits Offered
           </div>
           <div style={{ 
-            fontSize: '1.5rem', 
-            fontWeight: 'bold',
-            background: 'linear-gradient(135deg, #00D4FF, #FF6B35)',
+            fontSize: '1.8rem', 
+            fontWeight: '800',
+            background: 'var(--primary-gradient)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
@@ -308,15 +308,15 @@ const TaskCard = ({
         <div>
           <div style={{ 
             fontSize: '0.75rem', 
-            color: '#6B7280', 
+            color: 'var(--text-muted)', 
             fontWeight: '600',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            marginBottom: '0.25rem'
+            marginBottom: 'var(--space-xs)'
           }}>
             Duration
           </div>
-          <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>
+          <div style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
             {formatDuration(task.duration)}
           </div>
         </div>
@@ -324,15 +324,15 @@ const TaskCard = ({
         <div>
           <div style={{ 
             fontSize: '0.75rem', 
-            color: '#6B7280', 
+            color: 'var(--text-muted)', 
             fontWeight: '600',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            marginBottom: '0.25rem'
+            marginBottom: 'var(--space-xs)'
           }}>
             Start Date
           </div>
-          <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>
+          <div style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
             {formatDate(task.dateTime)}
           </div>
         </div>
@@ -340,28 +340,20 @@ const TaskCard = ({
       
       {/* Skills Required */}
       {task.skillsRequired && task.skillsRequired.length > 0 && (
-        <div style={{ marginBottom: '1rem' }}>
+        <div style={{ marginBottom: 'var(--space-lg)' }}>
           <div style={{ 
             fontSize: '0.75rem', 
-            color: '#6B7280', 
+            color: 'var(--text-muted)', 
             fontWeight: '600',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            marginBottom: '0.5rem'
+            marginBottom: 'var(--space-sm)'
           }}>
             Skills Required
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
             {task.skillsRequired.map((skill, index) => (
-              <span key={index} style={{
-                background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 107, 53, 0.1))',
-                color: '#1F2937',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '1rem',
-                fontSize: '0.8rem',
-                fontWeight: '500',
-                border: '1px solid rgba(0, 212, 255, 0.2)'
-              }}>
+              <span key={index} className="badge badge-primary">
                 {skill}
               </span>
             ))}
@@ -372,29 +364,29 @@ const TaskCard = ({
       {/* Additional Info */}
       {task.selectedHelper && (
         <div style={{ 
-          marginBottom: '1rem',
-          padding: '0.75rem',
-          background: '#EBF8FF',
-          borderRadius: '0.5rem',
-          border: '1px solid #BEE3F8'
+          marginBottom: 'var(--space-lg)',
+          padding: 'var(--space-md)',
+          background: 'rgba(59, 130, 246, 0.15)',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid rgba(59, 130, 246, 0.3)'
         }}>
-          <strong style={{ color: '#2B6CB0' }}>Assigned to:</strong> {task.selectedHelper.username}
+          <strong style={{ color: 'var(--info)' }}>Assigned to:</strong> {task.selectedHelper.username}
         </div>
       )}
 
       {task.applicantCount !== undefined && task.status === 'open' && (
         <div style={{ 
-          marginBottom: '1rem',
-          padding: '0.75rem',
-          background: '#F0FDF4',
-          borderRadius: '0.5rem',
-          border: '1px solid #BBF7D0',
+          marginBottom: 'var(--space-lg)',
+          padding: 'var(--space-md)',
+          background: 'rgba(16, 185, 129, 0.15)',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid rgba(16, 185, 129, 0.3)',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.5rem'
+          gap: 'var(--space-sm)'
         }}>
-          <span style={{ fontSize: '1rem' }}>📥</span>
-          <strong style={{ color: '#166534' }}>
+          <span style={{ fontSize: '1.2rem' }}>📥</span>
+          <strong style={{ color: 'var(--success)' }}>
             {task.applicantCount} application{task.applicantCount !== 1 ? 's' : ''} received
           </strong>
         </div>
@@ -403,25 +395,25 @@ const TaskCard = ({
       {/* Task Status Indicators */}
       {task.completedByHelper && task.status === 'in-progress' && (
         <div style={{ 
-          marginBottom: '1rem',
-          padding: '1rem',
-          background: '#FEF3C7',
-          borderRadius: '0.75rem',
-          border: '1px solid #F59E0B'
+          marginBottom: 'var(--space-lg)',
+          padding: 'var(--space-lg)',
+          background: 'rgba(245, 158, 11, 0.15)',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid rgba(245, 158, 11, 0.3)'
         }}>
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: '0.5rem',
-            marginBottom: '0.25rem'
+            gap: 'var(--space-sm)',
+            marginBottom: 'var(--space-sm)'
           }}>
-            <span style={{ fontSize: '1.2rem' }}>✅</span>
-            <strong style={{ color: '#92400E' }}>Work Submitted by Helper</strong>
+            <span style={{ fontSize: '1.5rem' }}>✅</span>
+            <strong style={{ color: 'var(--warning)' }}>Work Submitted by Helper</strong>
           </div>
           <p style={{ 
             margin: 0, 
             fontSize: '0.9rem',
-            color: '#92400E'
+            color: 'var(--warning)'
           }}>
             Awaiting task provider review and completion confirmation
           </p>
@@ -431,34 +423,27 @@ const TaskCard = ({
       {/* Action Buttons */}
       <div style={{ 
         display: 'flex', 
-        gap: '0.75rem',
+        gap: 'var(--space-md)',
         flexWrap: 'wrap',
         alignItems: 'center'
       }}>
         {canApply && (
           <button 
             onClick={() => setShowApplicationForm(!showApplicationForm)} 
+            className="btn btn-primary"
             style={{
-              background: 'linear-gradient(135deg, #10B981, #059669)',
-              color: 'white',
+              background: 'var(--primary-gradient)',
               border: 'none',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '0.75rem',
-              fontWeight: '600',
+              padding: 'var(--space-md) var(--space-xl)',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: '700',
               fontSize: '0.9rem',
               cursor: 'pointer',
-              transition: 'all 0.3s ease',
+              transition: 'all var(--transition-normal)',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 10px 15px -3px rgba(16, 185, 129, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              gap: 'var(--space-sm)',
+              boxShadow: 'var(--shadow-md)'
             }}
           >
             <span>🚀</span>
@@ -467,18 +452,16 @@ const TaskCard = ({
         )}
 
         {userHasApplied && (
-          <div style={{
-            padding: '0.75rem 1rem',
-            borderRadius: '0.75rem',
-            background: task.userApplicationStatus === 'accepted' ? '#D1FAE5' : 
-                       task.userApplicationStatus === 'rejected' ? '#FEF2F2' : '#FEF3C7',
-            color: task.userApplicationStatus === 'accepted' ? '#065F46' : 
-                   task.userApplicationStatus === 'rejected' ? '#991B1B' : '#92400E',
+          <div className={`badge badge-${
+            task.userApplicationStatus === 'accepted' ? 'success' : 
+            task.userApplicationStatus === 'rejected' ? 'error' : 'warning'
+          }`} style={{
+            padding: 'var(--space-md) var(--space-lg)',
             fontSize: '0.9rem',
-            fontWeight: '600',
+            fontWeight: '700',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: 'var(--space-sm)'
           }}>
             <span>
               {task.userApplicationStatus === 'accepted' ? '✅' : 
@@ -492,33 +475,13 @@ const TaskCard = ({
           <>
             <button 
               onClick={() => onEdit(task._id)} 
-              style={{
-                background: '#F3F4F6',
-                color: '#4B5563',
-                border: '1px solid #D1D5DB',
-                padding: '0.75rem 1rem',
-                borderRadius: '0.75rem',
-                fontWeight: '600',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
+              className="btn btn-secondary"
             >
               ✏️ Edit
             </button>
             <button 
               onClick={() => onDelete(task._id)} 
-              style={{
-                background: '#FEF2F2',
-                color: '#DC2626',
-                border: '1px solid #FECACA',
-                padding: '0.75rem 1rem',
-                borderRadius: '0.75rem',
-                fontWeight: '600',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
+              className="btn btn-danger"
             >
               🗑️ Delete
             </button>
@@ -528,19 +491,11 @@ const TaskCard = ({
         {showViewApplications && (
           <button 
             onClick={() => onViewApplications(task)} 
+            className="btn btn-secondary"
             style={{
-              background: '#EBF8FF',
-              color: '#2B6CB0',
-              border: '1px solid #BEE3F8',
-              padding: '0.75rem 1rem',
-              borderRadius: '0.75rem',
-              fontWeight: '600',
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: 'var(--space-sm)'
             }}
           >
             📥 View Applications ({task.applicants?.length || 0})
@@ -549,12 +504,12 @@ const TaskCard = ({
         
         {!canApply && !userHasApplied && task.status !== 'open' && (
           <div style={{ 
-            color: '#6B7280',
+            color: 'var(--text-muted)',
             fontSize: '0.9rem',
             fontStyle: 'italic',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: 'var(--space-sm)'
           }}>
             <span>
               {task.status === 'assigned' ? '👤' : 
@@ -573,29 +528,31 @@ const TaskCard = ({
       {/* Application Form */}
       {showApplicationForm && (
         <div style={{ 
-          marginTop: '1.5rem', 
-          padding: '1.5rem', 
-          background: 'linear-gradient(135deg, #F0F9FF, #E0F2FE)', 
-          borderRadius: '1rem',
-          border: '2px solid #0EA5E9'
+          marginTop: 'var(--space-xl)', 
+          padding: 'var(--space-xl)', 
+          background: 'rgba(0, 212, 255, 0.1)', 
+          borderRadius: 'var(--radius-lg)',
+          border: '2px solid rgba(0, 212, 255, 0.3)'
         }}>
           <h4 style={{ 
-            marginBottom: '1rem',
-            color: '#0C4A6E',
+            marginBottom: 'var(--space-lg)',
+            color: 'var(--primary-cyan)',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: 'var(--space-sm)',
+            fontSize: '1.2rem',
+            fontWeight: '700'
           }}>
             🚀 Apply for this Task
           </h4>
           
           <form onSubmit={handleSubmitApplication}>
-            <div style={{ marginBottom: '1rem' }}>
+            <div className="form-group">
               <label style={{
                 display: 'block',
-                marginBottom: '0.5rem',
+                marginBottom: 'var(--space-sm)',
                 fontWeight: '600',
-                color: '#0C4A6E',
+                color: 'var(--text-primary)',
                 fontSize: '0.9rem'
               }}>
                 Why are you the perfect fit for this task?
@@ -611,26 +568,28 @@ const TaskCard = ({
                 rows="4"
                 style={{
                   width: '100%',
-                  padding: '0.75rem',
-                  border: '2px solid #E0F2FE',
-                  borderRadius: '0.5rem',
+                  padding: 'var(--space-md)',
+                  background: 'var(--bg-input)',
+                  border: '2px solid var(--border-primary)',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--text-primary)',
                   fontSize: '0.9rem',
                   lineHeight: '1.5',
                   resize: 'vertical',
                   outline: 'none',
-                  transition: 'border-color 0.3s ease'
+                  transition: 'border-color var(--transition-normal)'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#0EA5E9'}
-                onBlur={(e) => e.target.style.borderColor = '#E0F2FE'}
+                onFocus={(e) => e.target.style.borderColor = 'var(--border-accent)'}
+                onBlur={(e) => e.target.style.borderColor = 'var(--border-primary)'}
               />
             </div>
 
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div className="form-group">
               <label style={{
                 display: 'block',
-                marginBottom: '0.5rem',
+                marginBottom: 'var(--space-sm)',
                 fontWeight: '600',
-                color: '#0C4A6E',
+                color: 'var(--text-primary)',
                 fontSize: '0.9rem'
               }}>
                 Proposed Credits:
@@ -647,38 +606,35 @@ const TaskCard = ({
                 required
                 style={{
                   width: '100%',
-                  padding: '0.75rem',
-                  border: '2px solid #E0F2FE',
-                  borderRadius: '0.5rem',
+                  padding: 'var(--space-md)',
+                  background: 'var(--bg-input)',
+                  border: '2px solid var(--border-primary)',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--text-primary)',
                   fontSize: '0.9rem',
                   outline: 'none',
-                  transition: 'border-color 0.3s ease'
+                  transition: 'border-color var(--transition-normal)'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#0EA5E9'}
-                onBlur={(e) => e.target.style.borderColor = '#E0F2FE'}
+                onFocus={(e) => e.target.style.borderColor = 'var(--border-accent)'}
+                onBlur={(e) => e.target.style.borderColor = 'var(--border-primary)'}
               />
               <div style={{ 
                 fontSize: '0.8rem', 
-                color: '#0369A1',
-                marginTop: '0.25rem'
+                color: 'var(--text-secondary)',
+                marginTop: 'var(--space-xs)'
               }}>
                 Client offered {task.credits} credits (you can propose up to {Math.floor(task.credits * 1.5)})
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{ display: 'flex', gap: 'var(--space-lg)' }}>
               <button 
                 type="submit" 
+                className="btn btn-primary"
                 style={{
-                  background: 'linear-gradient(135deg, #0EA5E9, #0284C7)',
-                  color: 'white',
+                  background: 'var(--primary-gradient)',
                   border: 'none',
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '0.75rem',
-                  fontWeight: '600',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
+                  fontWeight: '700'
                 }}
               >
                 🚀 Submit Application
@@ -686,17 +642,7 @@ const TaskCard = ({
               <button 
                 type="button" 
                 onClick={() => setShowApplicationForm(false)}
-                style={{
-                  background: '#F8FAFC',
-                  color: '#475569',
-                  border: '1px solid #CBD5E1',
-                  padding: '0.75rem 1rem',
-                  borderRadius: '0.75rem',
-                  fontWeight: '600',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
+                className="btn btn-secondary"
               >
                 Cancel
               </button>
