@@ -19,7 +19,7 @@ const Dashboard = () => {
     applicationsAccepted: 0,
     applicationSuccessRate: 0
   });
-  const [recentBookings, setRecentBookings] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
   const [quickStats, setQuickStats] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +28,6 @@ const Dashboard = () => {
       navigate('/login');
       return;
     }
-
     fetchDashboardData();
   }, [currentUser, navigate]);
 
@@ -40,42 +39,45 @@ const Dashboard = () => {
       ]);
 
       setStats(statsRes.data);
-      setRecentBookings(bookingsRes.data.slice(0, 5));
+      setRecentActivity(bookingsRes.data.slice(0, 6));
       
-      // Calculate quick stats for cards
       const data = statsRes.data;
       setQuickStats([
         {
-          title: 'Credits Balance',
+          title: 'Active Credits',
           value: data.credits,
-          change: '+12%',
-          changeType: 'positive',
+          change: '+12% this month',
+          trend: 'up',
           icon: '💰',
-          color: 'var(--primary-gradient)'
+          color: '#00D4FF',
+          bgGradient: 'linear-gradient(135deg, #00D4FF20, #00D4FF10)'
         },
         {
           title: 'Success Rate',
           value: `${data.applicationSuccessRate}%`,
-          change: '+5%',
-          changeType: 'positive',
+          change: '+5% improvement',
+          trend: 'up',
           icon: '🎯',
-          color: 'linear-gradient(135deg, var(--success), #059669)'
+          color: '#10B981',
+          bgGradient: 'linear-gradient(135deg, #10B98120, #10B98110)'
         },
         {
-          title: 'Rating',
+          title: 'Professional Rating',
           value: data.rating ? `${data.rating.toFixed(1)}/5` : 'New',
-          change: data.totalRatings > 0 ? `${data.totalRatings} reviews` : 'No reviews yet',
-          changeType: 'neutral',
+          change: `${data.totalRatings} reviews`,
+          trend: 'neutral',
           icon: '⭐',
-          color: 'linear-gradient(135deg, var(--warning), #D97706)'
+          color: '#F59E0B',
+          bgGradient: 'linear-gradient(135deg, #F59E0B20, #F59E0B10)'
         },
         {
-          title: 'Tasks Completed',
+          title: 'Completed Tasks',
           value: data.completedTasks,
-          change: 'This month',
-          changeType: 'neutral',
+          change: 'This quarter',
+          trend: 'neutral',
           icon: '✅',
-          color: 'linear-gradient(135deg, #8B5CF6, #EC4899)'
+          color: '#8B5CF6',
+          bgGradient: 'linear-gradient(135deg, #8B5CF620, #8B5CF610)'
         }
       ]);
     } catch (error) {
@@ -91,464 +93,866 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '60vh',
-        flexDirection: 'column',
-        gap: 'var(--space-lg)'
-      }}>
-        <div className="loading-spinner"></div>
-        <p style={{ color: 'var(--text-secondary)' }}>Loading your dashboard...</p>
+      <div className="dashboard-loading">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Preparing your workspace...</p>
+        </div>
       </div>
     );
   }
 
   const isPrimaryHelper = currentUser.primaryRole === 'helper';
 
-  const QuickActionCard = ({ title, description, icon, link, color }) => (
+  const DashboardWidget = ({ title, description, icon, link, color, priority = 'normal' }) => (
     <Link 
       to={link}
-      style={{
-        textDecoration: 'none',
-        background: 'var(--bg-card)',
-        borderRadius: 'var(--radius-lg)',
-        padding: 'var(--space-xl)',
-        border: '1px solid var(--border-primary)',
-        transition: 'all var(--transition-normal)',
-        display: 'block',
-        position: 'relative',
-        overflow: 'hidden',
-        height: '100%'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-4px)';
-        e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-        e.currentTarget.style.borderColor = 'var(--border-accent)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-        e.currentTarget.style.borderColor = 'var(--border-primary)';
-      }}
+      className={`dashboard-widget ${priority === 'high' ? 'priority-high' : ''}`}
     >
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '4px',
-        background: color || 'var(--primary-gradient)'
-      }}></div>
-      
-      <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-lg)' }}>{icon}</div>
-      <h3 style={{ 
-        color: 'var(--text-primary)', 
-        marginBottom: 'var(--space-sm)',
-        fontSize: '1.2rem',
-        fontWeight: '700'
-      }}>
-        {title}
-      </h3>
-      <p style={{ 
-        color: 'var(--text-secondary)', 
-        fontSize: '0.9rem',
-        lineHeight: '1.6',
-        margin: 0
-      }}>
-        {description}
-      </p>
+      <div className="widget-header">
+        <div className="widget-icon" style={{ background: color || 'var(--primary-gradient)' }}>
+          {icon}
+        </div>
+        {priority === 'high' && <div className="priority-badge">Priority</div>}
+      </div>
+      <div className="widget-content">
+        <h3>{title}</h3>
+        <p>{description}</p>
+      </div>
+      <div className="widget-arrow">→</div>
     </Link>
   );
 
   const StatCard = ({ stat }) => (
-    <div style={{
-      background: stat.color,
-      color: 'white',
-      borderRadius: 'var(--radius-lg)',
-      padding: 'var(--space-xl)',
-      position: 'relative',
-      overflow: 'hidden',
-      boxShadow: 'var(--shadow-md)'
-    }}>
-      <div style={{
-        position: 'absolute',
-        top: '-50%',
-        right: '-50%',
-        width: '100%',
-        height: '100%',
-        background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)',
-        animation: 'float 6s ease-in-out infinite'
-      }}></div>
-      
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'flex-start',
-          marginBottom: 'var(--space-lg)'
-        }}>
-          <span style={{ fontSize: '2.5rem' }}>{stat.icon}</span>
-          <div style={{
-            padding: 'var(--space-xs) var(--space-sm)',
-            borderRadius: 'var(--radius-xl)',
-            background: 'rgba(255,255,255,0.2)',
-            fontSize: '0.75rem',
-            fontWeight: '600'
-          }}>
-            {stat.change}
-          </div>
+    <div className="stat-card" style={{ background: stat.bgGradient }}>
+      <div className="stat-header">
+        <div className="stat-icon" style={{ color: stat.color }}>
+          {stat.icon}
         </div>
-        
-        <div style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: 'var(--space-xs)' }}>
+        <div className="stat-trend">
+          <span className={`trend-indicator ${stat.trend}`}>
+            {stat.trend === 'up' ? '↗' : stat.trend === 'down' ? '↘' : '→'}
+          </span>
+        </div>
+      </div>
+      <div className="stat-content">
+        <div className="stat-value" style={{ color: stat.color }}>
           {stat.value}
         </div>
-        <div style={{ fontSize: '1rem', opacity: 0.9, fontWeight: '500' }}>
-          {stat.title}
+        <div className="stat-title">{stat.title}</div>
+        <div className="stat-change">{stat.change}</div>
+      </div>
+    </div>
+  );
+
+  const ActivityItem = ({ activity, index }) => (
+    <div className="activity-item">
+      <div className="activity-avatar">
+        <div className="avatar-circle" style={{ '--delay': `${index * 0.1}s` }}>
+          {activity.helper._id === currentUser.id 
+            ? activity.taskProvider.username.charAt(0).toUpperCase()
+            : activity.helper.username.charAt(0).toUpperCase()
+          }
         </div>
+      </div>
+      <div className="activity-content">
+        <div className="activity-title">{activity.taskId.title}</div>
+        <div className="activity-meta">
+          <span className="activity-role">
+            {activity.helper._id === currentUser.id ? 'as Helper' : 'as Client'}
+          </span>
+          <span className="activity-divider">•</span>
+          <span className="activity-credits">{activity.agreedCredits} credits</span>
+        </div>
+        <div className="activity-time">
+          {new Date(activity.createdAt).toLocaleDateString()}
+        </div>
+      </div>
+      <div className={`activity-status status-${activity.status}`}>
+        {activity.status}
       </div>
     </div>
   );
 
   return (
-    <div className="page-container">
-      <div className="container">
-        {/* Header */}
-        <div style={{ marginBottom: 'var(--space-2xl)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-lg)' }}>
-            <div>
-              <h1 style={{ 
-                fontSize: '2.5rem', 
-                fontWeight: '800', 
-                color: 'var(--text-primary)',
-                marginBottom: 'var(--space-sm)'
-              }}>
-                Welcome back, {currentUser.username}! 👋
-              </h1>
-              <p style={{ 
-                color: 'var(--text-secondary)', 
-                fontSize: '1.1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--space-sm)'
-              }}>
-                <span style={{
-                  padding: 'var(--space-xs) var(--space-md)',
-                  borderRadius: 'var(--radius-xl)',
-                  background: isPrimaryHelper ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-                  color: isPrimaryHelper ? 'var(--success)' : 'var(--info)',
-                  fontSize: '0.8rem',
-                  fontWeight: '600',
-                  border: `1px solid ${isPrimaryHelper ? 'rgba(16, 185, 129, 0.3)' : 'rgba(59, 130, 246, 0.3)'}`
-                }}>
-                  {isPrimaryHelper ? '🤝 Helper Mode' : '📋 Client Mode'}
-                </span>
-                Ready to tackle today's opportunities
-              </p>
-            </div>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <div className="welcome-section">
+          <div className="welcome-text">
+            <h1 className="welcome-title">
+              Welcome back, {currentUser.username}
+              <span className="wave-emoji">👋</span>
+            </h1>
+            <p className="welcome-subtitle">
+              <span className={`role-indicator ${isPrimaryHelper ? 'helper' : 'client'}`}>
+                {isPrimaryHelper ? '🤝 Helper Mode' : '📋 Client Mode'}
+              </span>
+              Ready to make today productive
+            </p>
+          </div>
+          
+          {unreadCount > 0 && (
+            <Link to="/chat" className="urgent-notification">
+              <div className="notification-icon">💬</div>
+              <div className="notification-content">
+                <div className="notification-count">{unreadCount}</div>
+                <div className="notification-text">New Messages</div>
+              </div>
+            </Link>
+          )}
+        </div>
+      </div>
+
+      <div className="dashboard-grid">
+        {/* Stats Overview */}
+        <div className="stats-section">
+          <div className="section-header">
+            <h2>Performance Overview</h2>
+            <p>Your key metrics at a glance</p>
+          </div>
+          <div className="stats-grid">
+            {quickStats.map((stat, index) => (
+              <StatCard key={index} stat={stat} />
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="actions-section">
+          <div className="section-header">
+            <h2>Quick Actions</h2>
+            <p>Jump into your most important tasks</p>
+          </div>
+          <div className="actions-grid">
+            <DashboardWidget
+              title="Browse Premium Projects"
+              description="Discover high-quality opportunities from verified clients"
+              icon="🔍"
+              link="/browse-tasks"
+              color="linear-gradient(135deg, #3B82F6, #1E40AF)"
+              priority={isPrimaryHelper ? 'high' : 'normal'}
+            />
             
-            {unreadCount > 0 && (
-              <Link 
-                to="/chat"
-                className="btn btn-primary"
-                style={{
-                  background: 'linear-gradient(135deg, var(--error), #DC2626)',
-                  animation: 'pulse 2s infinite'
-                }}
-              >
-                💬 {unreadCount} New Message{unreadCount !== 1 ? 's' : ''}
-              </Link>
+            <DashboardWidget
+              title="Post New Project"
+              description="Get expert help from our verified professional community"
+              icon="✏️"
+              link="/create-task"
+              color="linear-gradient(135deg, #10B981, #059669)"
+              priority={!isPrimaryHelper ? 'high' : 'normal'}
+            />
+            
+            <DashboardWidget
+              title="Manage Applications"
+              description="Review and respond to project applications"
+              icon="📥"
+              link="/task-applications"
+              color="linear-gradient(135deg, #F59E0B, #D97706)"
+            />
+            
+            <DashboardWidget
+              title="Active Collaborations"
+              description="Track ongoing projects and communicate with your team"
+              icon="📁"
+              link="/my-bookings"
+              color="linear-gradient(135deg, #8B5CF6, #7C3AED)"
+            />
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="activity-section">
+          <div className="section-header">
+            <h2>Recent Activity</h2>
+            <Link to="/my-bookings" className="section-link">View All →</Link>
+          </div>
+          <div className="activity-container">
+            {recentActivity.length > 0 ? (
+              <div className="activity-list">
+                {recentActivity.map((activity, index) => (
+                  <ActivityItem key={activity._id} activity={activity} index={index} />
+                ))}
+              </div>
+            ) : (
+              <div className="empty-activity">
+                <div className="empty-icon">📋</div>
+                <h3>No recent activity</h3>
+                <p>Start by {isPrimaryHelper ? 'browsing projects' : 'posting your first project'}</p>
+                <Link 
+                  to={isPrimaryHelper ? "/browse-tasks" : "/create-task"}
+                  className="btn btn-primary"
+                >
+                  Get Started
+                </Link>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-4" style={{ marginBottom: 'var(--space-2xl)' }}>
-          {quickStats.map((stat, index) => (
-            <StatCard key={index} stat={stat} />
-          ))}
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-2" style={{ marginBottom: 'var(--space-2xl)' }}>
-          {/* Quick Actions */}
-          <div>
-            <h2 style={{ 
-              fontSize: '1.8rem', 
-              fontWeight: '700', 
-              color: 'var(--text-primary)',
-              marginBottom: 'var(--space-xl)'
-            }}>
-              Quick Actions
-            </h2>
+        {/* Insights Panel */}
+        <div className="insights-section">
+          <div className="section-header">
+            <h2>Professional Insights</h2>
+            <p>Analytics to boost your success</p>
+          </div>
+          <div className="insights-grid">
+            <div className="insight-card">
+              <div className="insight-metric">
+                <div className="metric-value">{stats.applicationsSubmitted}</div>
+                <div className="metric-label">Applications Sent</div>
+              </div>
+              <div className="insight-chart">📊</div>
+            </div>
             
-            <div className="grid grid-2" style={{ gap: 'var(--space-lg)' }}>
-              <QuickActionCard
-                title="Browse Premium Tasks"
-                description="Discover high-quality projects that match your expertise and interests"
-                icon="🔍"
-                link="/browse-tasks"
-                color="linear-gradient(135deg, #3B82F6, #1E40AF)"
-              />
-              
-              <QuickActionCard
-                title="Post a New Project"
-                description="Get help from verified professionals in our exclusive community"
-                icon="✏️"
-                link="/create-task"
-                color="linear-gradient(135deg, var(--success), #059669)"
-              />
-              
-              <QuickActionCard
-                title="View Applications"
-                description="Review and respond to applications for your posted projects"
-                icon="📥"
-                link="/task-applications"
-                color="linear-gradient(135deg, var(--warning), #D97706)"
-              />
-              
-              <QuickActionCard
-                title="My Active Bookings"
-                description="Manage ongoing collaborations and track project progress"
-                icon="📁"
-                link="/my-bookings"
-                color="linear-gradient(135deg, #8B5CF6, #7C3AED)"
-              />
+            <div className="insight-card">
+              <div className="insight-metric">
+                <div className="metric-value">{stats.applicationsAccepted}</div>
+                <div className="metric-label">Applications Accepted</div>
+              </div>
+              <div className="insight-chart">📈</div>
+            </div>
+            
+            <div className="insight-card">
+              <div className="insight-metric">
+                <div className="metric-value">{stats.tasksCreated}</div>
+                <div className="metric-label">Projects Created</div>
+              </div>
+              <div className="insight-chart">🎯</div>
+            </div>
+            
+            <div className="insight-card">
+              <div className="insight-metric">
+                <div className="metric-value">{stats.totalBookings}</div>
+                <div className="metric-label">Total Collaborations</div>
+              </div>
+              <div className="insight-chart">🤝</div>
             </div>
           </div>
+        </div>
 
-          {/* Recent Activity & Insights */}
-          <div>
-            <h2 style={{ 
-              fontSize: '1.8rem', 
-              fontWeight: '700', 
-              color: 'var(--text-primary)',
-              marginBottom: 'var(--space-xl)'
-            }}>
-              Recent Activity
-            </h2>
-            
-            <div className="card" style={{ padding: 0 }}>
-              {recentBookings.length > 0 ? (
-                <div>
-                  {recentBookings.map((booking, index) => (
-                    <div key={booking._id} style={{
-                      padding: 'var(--space-lg)',
-                      borderBottom: index < recentBookings.length - 1 ? '1px solid var(--border-primary)' : 'none'
-                    }}>
-                      <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'flex-start',
-                        marginBottom: 'var(--space-sm)'
-                      }}>
-                        <h4 style={{ 
-                          fontSize: '1rem', 
-                          fontWeight: '600',
-                          color: 'var(--text-primary)',
-                          margin: 0,
-                          lineHeight: '1.4'
-                        }}>
-                          {booking.taskId.title}
-                        </h4>
-                        <span className={`badge badge-${
-                          booking.status === 'completed' ? 'success' : 
-                          booking.status === 'in-progress' ? 'primary' : 'secondary'
-                        }`}>
-                          {booking.status}
-                        </span>
-                      </div>
-                      <p style={{ 
-                        fontSize: '0.9rem', 
-                        color: 'var(--text-secondary)',
-                        margin: '0 0 var(--space-sm) 0'
-                      }}>
-                        {booking.helper._id === currentUser.id 
-                          ? `Client: ${booking.taskProvider.username}` 
-                          : `Helper: ${booking.helper.username}`
-                        }
-                      </p>
-                      <div style={{ 
-                        fontSize: '0.8rem', 
-                        color: 'var(--text-muted)',
-                        display: 'flex',
-                        justifyContent: 'space-between'
-                      }}>
-                        <span>{booking.agreedCredits} credits</span>
-                        <span>{new Date(booking.createdAt).toLocaleDateString()}</span>
-                      </div>
+        {/* Tips Section */}
+        <div className="tips-section">
+          <div className="tips-card">
+            <div className="tips-header">
+              <div className="tips-icon">💡</div>
+              <h3>{isPrimaryHelper ? 'Helper Success Tips' : 'Client Success Tips'}</h3>
+            </div>
+            <div className="tips-content">
+              {isPrimaryHelper ? (
+                <div className="tips-grid">
+                  <div className="tip-item">
+                    <div className="tip-icon">🎯</div>
+                    <div>
+                      <strong>Stand Out</strong>
+                      <p>Write personalized applications and showcase relevant work</p>
                     </div>
-                  ))}
-                  
-                  <div style={{ padding: 'var(--space-lg)', textAlign: 'center' }}>
-                    <Link 
-                      to="/my-bookings"
-                      style={{
-                        color: 'var(--primary-cyan)',
-                        textDecoration: 'none',
-                        fontSize: '0.9rem',
-                        fontWeight: '600'
-                      }}
-                    >
-                      View All Activity →
-                    </Link>
+                  </div>
+                  <div className="tip-item">
+                    <div className="tip-icon">⚡</div>
+                    <div>
+                      <strong>Apply Smart</strong>
+                      <p>Focus on projects matching your skills and respond quickly</p>
+                    </div>
+                  </div>
+                  <div className="tip-item">
+                    <div className="tip-icon">🏆</div>
+                    <div>
+                      <strong>Build Reputation</strong>
+                      <p>Deliver consistently and communicate proactively</p>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <div style={{ 
-                  padding: 'var(--space-2xl)', 
-                  textAlign: 'center',
-                  color: 'var(--text-secondary)'
-                }}>
-                  <div style={{ fontSize: '3rem', marginBottom: 'var(--space-lg)' }}>📋</div>
-                  <p style={{ marginBottom: 'var(--space-lg)' }}>No recent activity</p>
-                  <Link 
-                    to={isPrimaryHelper ? "/browse-tasks" : "/create-task"}
-                    className="btn btn-primary"
-                  >
-                    {isPrimaryHelper ? 'Browse Tasks' : 'Post Your First Task'} →
-                  </Link>
+                <div className="tips-grid">
+                  <div className="tip-item">
+                    <div className="tip-icon">✨</div>
+                    <div>
+                      <strong>Attract Top Talent</strong>
+                      <p>Write clear descriptions and set realistic budgets</p>
+                    </div>
+                  </div>
+                  <div className="tip-item">
+                    <div className="tip-icon">🔍</div>
+                    <div>
+                      <strong>Choose Wisely</strong>
+                      <p>Review helper profiles and past work thoroughly</p>
+                    </div>
+                  </div>
+                  <div className="tip-item">
+                    <div className="tip-icon">💬</div>
+                    <div>
+                      <strong>Ensure Success</strong>
+                      <p>Provide clear feedback and maintain good communication</p>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
-
-        {/* Performance Insights */}
-        <div className="card">
-          <h2 style={{ 
-            fontSize: '1.8rem', 
-            fontWeight: '700', 
-            color: 'var(--text-primary)',
-            marginBottom: 'var(--space-xl)'
-          }}>
-            Performance Insights
-          </h2>
-          
-          <div className="grid grid-4">
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--info)', marginBottom: 'var(--space-sm)' }}>
-                {stats.applicationsSubmitted}
-              </div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Applications Sent</div>
-            </div>
-            
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--success)', marginBottom: 'var(--space-sm)' }}>
-                {stats.applicationsAccepted}
-              </div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Applications Accepted</div>
-            </div>
-            
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--warning)', marginBottom: 'var(--space-sm)' }}>
-                {stats.tasksCreated}
-              </div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Tasks Created</div>
-            </div>
-            
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--primary-cyan)', marginBottom: 'var(--space-sm)' }}>
-                {stats.totalBookings}
-              </div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Total Collaborations</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tips Based on Role */}
-        <div style={{
-          background: isPrimaryHelper 
-            ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(167, 243, 208, 0.1))' 
-            : 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(191, 219, 254, 0.1))',
-          borderRadius: 'var(--radius-lg)',
-          padding: 'var(--space-xl)',
-          border: `1px solid ${isPrimaryHelper ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)'}`
-        }}>
-          <h3 style={{ 
-            color: isPrimaryHelper ? 'var(--success)' : 'var(--info)',
-            marginBottom: 'var(--space-lg)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--space-sm)',
-            fontSize: '1.3rem',
-            fontWeight: '700'
-          }}>
-            💡 {isPrimaryHelper ? 'Helper Tips' : 'Client Tips'}
-          </h3>
-          
-          {isPrimaryHelper ? (
-            <div className="grid grid-2">
-              <div style={{ color: 'var(--text-primary)' }}>
-                <strong style={{ display: 'block', marginBottom: 'var(--space-sm)' }}>Increase Your Success Rate:</strong>
-                <ul style={{ marginLeft: 'var(--space-lg)', color: 'var(--text-secondary)' }}>
-                  <li>Write detailed, personalized applications</li>
-                  <li>Showcase relevant portfolio pieces</li>
-                  <li>Respond to applications quickly</li>
-                </ul>
-              </div>
-              <div style={{ color: 'var(--text-primary)' }}>
-                <strong style={{ display: 'block', marginBottom: 'var(--space-sm)' }}>Build Your Reputation:</strong>
-                <ul style={{ marginLeft: 'var(--space-lg)', color: 'var(--text-secondary)' }}>
-                  <li>Deliver high-quality work consistently</li>
-                  <li>Communicate proactively with clients</li>
-                  <li>Ask for reviews after successful projects</li>
-                </ul>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-2">
-              <div style={{ color: 'var(--text-primary)' }}>
-                <strong style={{ display: 'block', marginBottom: 'var(--space-sm)' }}>Attract Top Talent:</strong>
-                <ul style={{ marginLeft: 'var(--space-lg)', color: 'var(--text-secondary)' }}>
-                  <li>Write clear, detailed project descriptions</li>
-                  <li>Set realistic budgets and timelines</li>
-                  <li>Respond to applications promptly</li>
-                </ul>
-              </div>
-              <div style={{ color: 'var(--text-primary)' }}>
-                <strong style={{ display: 'block', marginBottom: 'var(--space-sm)' }}>Ensure Project Success:</strong>
-                <ul style={{ marginLeft: 'var(--space-lg)', color: 'var(--text-secondary)' }}>
-                  <li>Review helper profiles thoroughly</li>
-                  <li>Provide clear feedback and requirements</li>
-                  <li>Leave honest reviews to help the community</li>
-                </ul>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* CSS Animations */}
       <style jsx>{`
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-10px) rotate(180deg);
-          }
+        .dashboard-container {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 2rem 1rem;
         }
-        
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.8;
-          }
+
+        .dashboard-loading {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 60vh;
         }
-        
-        @media (max-width: 1024px) {
-          .grid-2 {
-            grid-template-columns: 1fr !important;
-          }
+
+        .loading-container {
+          text-align: center;
         }
-        
+
+        .loading-text {
+          margin-top: 1rem;
+          color: var(--text-secondary);
+          font-size: 1.1rem;
+        }
+
+        .dashboard-header {
+          margin-bottom: 3rem;
+        }
+
+        .welcome-section {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 1.5rem;
+        }
+
+        .welcome-title {
+          font-size: 2.5rem;
+          font-weight: 800;
+          color: var(--text-primary);
+          margin-bottom: 0.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .wave-emoji {
+          animation: wave 2s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(20deg); }
+          75% { transform: rotate(-10deg); }
+        }
+
+        .welcome-subtitle {
+          color: var(--text-secondary);
+          font-size: 1.1rem;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          flex-wrap: wrap;
+        }
+
+        .role-indicator {
+          padding: 0.5rem 1rem;
+          border-radius: 2rem;
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+
+        .role-indicator.helper {
+          background: rgba(16, 185, 129, 0.15);
+          color: var(--success);
+          border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .role-indicator.client {
+          background: rgba(59, 130, 246, 0.15);
+          color: var(--info);
+          border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .urgent-notification {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1rem 1.5rem;
+          background: linear-gradient(135deg, var(--error), #DC2626);
+          color: white;
+          border-radius: 1rem;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          animation: pulse 2s infinite;
+        }
+
+        .notification-icon {
+          font-size: 1.5rem;
+        }
+
+        .notification-count {
+          font-size: 1.2rem;
+          font-weight: 800;
+        }
+
+        .notification-text {
+          font-size: 0.9rem;
+          opacity: 0.9;
+        }
+
+        .dashboard-grid {
+          display: grid;
+          gap: 3rem;
+        }
+
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+          font-size: 1.8rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          margin: 0;
+        }
+
+        .section-header p {
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        .section-link {
+          color: var(--primary-cyan);
+          text-decoration: none;
+          font-weight: 600;
+          transition: all 0.3s ease;
+        }
+
+        .section-link:hover {
+          color: var(--primary-orange);
+        }
+
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 1.5rem;
+        }
+
+        .stat-card {
+          padding: 2rem;
+          border-radius: 1rem;
+          border: 1px solid var(--border-primary);
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .stat-card:hover {
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .stat-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+          font-size: 2rem;
+        }
+
+        .trend-indicator {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 800;
+          font-size: 1rem;
+        }
+
+        .trend-indicator.up {
+          background: rgba(16, 185, 129, 0.2);
+          color: var(--success);
+        }
+
+        .trend-indicator.down {
+          background: rgba(239, 68, 68, 0.2);
+          color: var(--error);
+        }
+
+        .trend-indicator.neutral {
+          background: rgba(156, 163, 175, 0.2);
+          color: var(--text-muted);
+        }
+
+        .stat-value {
+          font-size: 2.5rem;
+          font-weight: 800;
+          margin-bottom: 0.5rem;
+        }
+
+        .stat-title {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin-bottom: 0.25rem;
+        }
+
+        .stat-change {
+          font-size: 0.9rem;
+          color: var(--text-muted);
+        }
+
+        .actions-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1.5rem;
+        }
+
+        .dashboard-widget {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+          padding: 2rem;
+          background: var(--bg-card);
+          border: 2px solid var(--border-primary);
+          border-radius: 1rem;
+          text-decoration: none;
+          color: inherit;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .dashboard-widget:hover {
+          border-color: var(--border-accent);
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .dashboard-widget.priority-high {
+          border-color: var(--warning);
+          background: rgba(245, 158, 11, 0.05);
+        }
+
+        .widget-header {
+          position: relative;
+        }
+
+        .widget-icon {
+          width: 60px;
+          height: 60px;
+          border-radius: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.8rem;
+          color: white;
+        }
+
+        .priority-badge {
+          position: absolute;
+          top: -8px;
+          right: -8px;
+          background: var(--warning);
+          color: white;
+          font-size: 0.7rem;
+          font-weight: 700;
+          padding: 0.25rem 0.5rem;
+          border-radius: 0.5rem;
+          white-space: nowrap;
+        }
+
+        .widget-content {
+          flex: 1;
+        }
+
+        .widget-content h3 {
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          margin-bottom: 0.5rem;
+        }
+
+        .widget-content p {
+          color: var(--text-secondary);
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        .widget-arrow {
+          font-size: 1.5rem;
+          color: var(--primary-cyan);
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-widget:hover .widget-arrow {
+          transform: translateX(4px);
+        }
+
+        .activity-container {
+          background: var(--bg-card);
+          border: 1px solid var(--border-primary);
+          border-radius: 1rem;
+          overflow: hidden;
+        }
+
+        .activity-list {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .activity-item {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1.5rem;
+          border-bottom: 1px solid var(--border-primary);
+          transition: all 0.3s ease;
+        }
+
+        .activity-item:last-child {
+          border-bottom: none;
+        }
+
+        .activity-item:hover {
+          background: var(--bg-secondary);
+        }
+
+        .activity-avatar {
+          position: relative;
+        }
+
+        .avatar-circle {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: var(--primary-gradient);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: 700;
+          font-size: 1.1rem;
+        }
+
+        .activity-content {
+          flex: 1;
+        }
+
+        .activity-title {
+          font-weight: 600;
+          color: var(--text-primary);
+          margin-bottom: 0.25rem;
+        }
+
+        .activity-meta {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.9rem;
+          color: var(--text-secondary);
+          margin-bottom: 0.25rem;
+        }
+
+        .activity-divider {
+          color: var(--text-muted);
+        }
+
+        .activity-credits {
+          color: var(--primary-cyan);
+          font-weight: 600;
+        }
+
+        .activity-time {
+          font-size: 0.8rem;
+          color: var(--text-muted);
+        }
+
+        .activity-status {
+          padding: 0.5rem 1rem;
+          border-radius: 0.5rem;
+          font-size: 0.8rem;
+          font-weight: 600;
+          text-transform: capitalize;
+        }
+
+        .status-completed {
+          background: rgba(16, 185, 129, 0.15);
+          color: var(--success);
+        }
+
+        .status-in-progress {
+          background: rgba(139, 92, 246, 0.15);
+          color: #8B5CF6;
+        }
+
+        .status-confirmed {
+          background: rgba(59, 130, 246, 0.15);
+          color: var(--info);
+        }
+
+        .empty-activity {
+          text-align: center;
+          padding: 3rem 2rem;
+        }
+
+        .empty-icon {
+          font-size: 4rem;
+          margin-bottom: 1rem;
+        }
+
+        .empty-activity h3 {
+          color: var(--text-primary);
+          margin-bottom: 0.5rem;
+        }
+
+        .empty-activity p {
+          color: var(--text-secondary);
+          margin-bottom: 2rem;
+        }
+
+        .insights-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1.5rem;
+        }
+
+        .insight-card {
+          padding: 2rem;
+          background: var(--bg-card);
+          border: 1px solid var(--border-primary);
+          border-radius: 1rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: all 0.3s ease;
+        }
+
+        .insight-card:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+        }
+
+        .metric-value {
+          font-size: 2rem;
+          font-weight: 800;
+          color: var(--text-primary);
+          margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+          font-size: 0.9rem;
+          color: var(--text-secondary);
+        }
+
+        .insight-chart {
+          font-size: 2rem;
+          opacity: 0.3;
+        }
+
+        .tips-section {
+          margin-top: 2rem;
+        }
+
+        .tips-card {
+          background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 107, 53, 0.1));
+          border: 1px solid rgba(0, 212, 255, 0.2);
+          border-radius: 1rem;
+          padding: 2rem;
+        }
+
+        .tips-header {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .tips-icon {
+          font-size: 2rem;
+        }
+
+        .tips-header h3 {
+          color: var(--text-primary);
+          font-size: 1.3rem;
+          font-weight: 700;
+          margin: 0;
+        }
+
+        .tips-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1.5rem;
+        }
+
+        .tip-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+
+        .tip-icon {
+          font-size: 1.5rem;
+          margin-top: 0.25rem;
+        }
+
+        .tip-item strong {
+          display: block;
+          color: var(--text-primary);
+          margin-bottom: 0.25rem;
+        }
+
+        .tip-item p {
+          color: var(--text-secondary);
+          margin: 0;
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+
         @media (max-width: 768px) {
-          .grid-4 {
-            grid-template-columns: repeat(2, 1fr) !important;
+          .dashboard-container {
+            padding: 1rem;
+          }
+
+          .welcome-title {
+            font-size: 2rem;
+          }
+
+          .stats-grid,
+          .actions-grid,
+          .insights-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .welcome-section {
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: center;
+          }
+
+          .tips-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .dashboard-widget {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+          }
+
+          .widget-arrow {
+            display: none;
           }
         }
       `}</style>
