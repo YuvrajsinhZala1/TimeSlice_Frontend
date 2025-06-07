@@ -91,7 +91,7 @@ const Register = () => {
           return false;
         }
         if (formData.username.length < 3) {
-          setError('Username must be at least 3 characters');
+          setError('Username must be at least 3 characters long');
           return false;
         }
         if (!formData.email.trim()) {
@@ -107,66 +107,65 @@ const Register = () => {
           return false;
         }
         if (formData.password.length < 6) {
-          setError('Password must be at least 6 characters');
+          setError('Password must be at least 6 characters long');
           return false;
         }
         if (formData.password !== formData.confirmPassword) {
           setError('Passwords do not match');
           return false;
         }
-        break;
+        return true;
       case 2:
         if (!formData.primaryRole) {
           setError('Please select your primary role');
           return false;
         }
-        break;
+        return true;
       case 3:
         if (!formData.agreedToTerms) {
           setError('You must agree to the Terms of Service');
           return false;
         }
-        break;
+        return true;
       default:
-        break;
+        return true;
     }
-    setError('');
-    return true;
   };
 
   const nextStep = () => {
     if (validateStep(currentStep)) {
       setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+      setError('');
     }
   };
 
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateStep(currentStep)) return;
+    if (!validateStep(3)) return;
     
     setLoading(true);
     setError('');
 
     try {
-      const registrationData = {
+      await register({
         username: formData.username,
         email: formData.email,
         password: formData.password,
         primaryRole: formData.primaryRole,
         bio: formData.bio,
-        skills: formData.skills
-      };
-
-      await register(registrationData);
+        skills: formData.skills,
+        agreeToMarketing: formData.agreeToMarketing
+      });
+      
       navigate('/dashboard', { replace: true });
     } catch (error) {
-      console.error('Registration error:', error);
-      setError(error.response?.data?.message || 'Registration failed. Please try again.');
+      setError(error.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -322,12 +321,12 @@ const Register = () => {
           >
             <div className="role-icon">📋</div>
             <div className="role-content">
-              <h3>I'm a Task Provider</h3>
-              <p>I have projects and need skilled professionals to help</p>
+              <h3>I'm a Project Owner</h3>
+              <p>I have projects and need skilled professionals</p>
               <ul className="role-benefits">
-                <li>✓ Access to verified professionals</li>
+                <li>✓ Access to verified experts</li>
+                <li>✓ Quality-focused marketplace</li>
                 <li>✓ Secure payment system</li>
-                <li>✓ Project management tools</li>
               </ul>
             </div>
           </div>
@@ -336,25 +335,25 @@ const Register = () => {
 
       <div className="form-group">
         <label htmlFor="bio" className="form-label">
-          Bio (Optional)
+          Tell us about yourself
         </label>
-        <textarea
-          id="bio"
-          name="bio"
-          value={formData.bio}
-          onChange={handleInputChange}
-          placeholder="Tell us about yourself, your experience, and what you're passionate about..."
-          className="form-textarea"
-          rows="4"
-        />
+        <div className="input-wrapper">
+          <div className="input-icon">✍️</div>
+          <textarea
+            id="bio"
+            name="bio"
+            value={formData.bio}
+            onChange={handleInputChange}
+            placeholder="Describe your experience, interests, and what makes you unique..."
+            className="form-textarea"
+            rows="4"
+          />
+        </div>
       </div>
 
       <div className="form-group">
-        <label className="form-label">
-          Skills & Expertise (Optional)
-        </label>
-        
-        <div className="skills-input-section">
+        <label className="form-label">Skills & Expertise</label>
+        <div className="skills-section">
           <div className="skill-input-wrapper">
             <input
               type="text"
@@ -364,47 +363,48 @@ const Register = () => {
               className="form-input"
               onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
             />
-            <button type="button" onClick={addSkill} className="add-skill-btn">
+            <button
+              type="button"
+              onClick={addSkill}
+              className="btn btn-secondary add-skill-btn"
+            >
               Add
             </button>
           </div>
-        </div>
-
-        <div className="predefined-skills">
-          <h4>💡 Popular Skills:</h4>
-          <div className="skills-suggestions">
-            {availableSkills.filter(skill => !formData.skills.includes(skill)).slice(0, 8).map(skill => (
-              <button
-                key={skill}
-                type="button"
-                onClick={() => addPredefinedSkill(skill)}
-                className="skill-suggestion"
-              >
-                + {skill}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {formData.skills.length > 0 && (
-          <div className="selected-skills">
-            <h4>✅ Your Skills:</h4>
-            <div className="skills-list">
-              {formData.skills.map(skill => (
-                <div key={skill} className="skill-tag">
-                  <span>{skill}</span>
+          
+          {formData.skills.length > 0 && (
+            <div className="selected-skills">
+              {formData.skills.map((skill, index) => (
+                <span key={index} className="skill-tag">
+                  {skill}
                   <button
                     type="button"
                     onClick={() => removeSkill(skill)}
-                    className="skill-remove"
+                    className="remove-skill"
                   >
-                    ✕
+                    ×
                   </button>
-                </div>
+                </span>
+              ))}
+            </div>
+          )}
+          
+          <div className="suggested-skills">
+            <p className="suggested-label">Popular skills:</p>
+            <div className="suggested-skills-list">
+              {availableSkills.filter(skill => !formData.skills.includes(skill)).slice(0, 10).map((skill, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => addPredefinedSkill(skill)}
+                  className="suggested-skill"
+                >
+                  + {skill}
+                </button>
               ))}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
@@ -413,12 +413,12 @@ const Register = () => {
     <div className="step-content">
       <div className="step-header">
         <h2>Almost Done!</h2>
-        <p>Just a few final details to complete your registration</p>
+        <p>Review your information and complete your registration</p>
       </div>
 
       <div className="summary-section">
-        <h3>📋 Account Summary</h3>
-        <div className="summary-content">
+        <h3>Account Summary</h3>
+        <div className="summary-grid">
           <div className="summary-item">
             <span className="summary-label">Username:</span>
             <span className="summary-value">{formData.username}</span>
@@ -430,107 +430,89 @@ const Register = () => {
           <div className="summary-item">
             <span className="summary-label">Role:</span>
             <span className="summary-value">
-              {formData.primaryRole === 'helper' ? '🛠️ Helper' : '📋 Task Provider'}
+              {formData.primaryRole === 'helper' ? '🛠️ Helper' : '📋 Project Owner'}
             </span>
           </div>
           <div className="summary-item">
             <span className="summary-label">Skills:</span>
             <span className="summary-value">
-              {formData.skills.length > 0 ? formData.skills.join(', ') : 'None specified'}
+              {formData.skills.length > 0 ? formData.skills.join(', ') : 'None added'}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="terms-section">
-        <label className="checkbox-wrapper large">
-          <input
-            type="checkbox"
-            name="agreedToTerms"
-            checked={formData.agreedToTerms}
-            onChange={handleInputChange}
-            className="checkbox"
-            required
-          />
-          <span className="checkmark"></span>
-          <span className="checkbox-label">
-            I agree to the <Link to="/terms" target="_blank" className="link">Terms of Service</Link> and <Link to="/privacy" target="_blank" className="link">Privacy Policy</Link> <span className="required">*</span>
-          </span>
-        </label>
+      <div className="agreements-section">
+        <div className="form-group">
+          <label className="checkbox-wrapper">
+            <input
+              type="checkbox"
+              name="agreedToTerms"
+              checked={formData.agreedToTerms}
+              onChange={handleInputChange}
+              className="checkbox"
+              required
+            />
+            <span className="checkmark"></span>
+            <span className="checkbox-label">
+              I agree to the{' '}
+              <Link to="/terms" className="link">Terms of Service</Link>
+              {' '}and{' '}
+              <Link to="/privacy" className="link">Privacy Policy</Link>
+              <span className="required">*</span>
+            </span>
+          </label>
+        </div>
 
-        <label className="checkbox-wrapper large">
-          <input
-            type="checkbox"
-            name="agreeToMarketing"
-            checked={formData.agreeToMarketing}
-            onChange={handleInputChange}
-            className="checkbox"
-          />
-          <span className="checkmark"></span>
-          <span className="checkbox-label">
-            I'd like to receive updates about new features and opportunities
-          </span>
-        </label>
-      </div>
-
-      <div className="welcome-message">
-        <div className="welcome-icon">🎉</div>
-        <h3>Welcome to TimeSlice!</h3>
-        <p>You're about to join a community of talented professionals who are shaping the future of work. Get ready to discover amazing opportunities and build meaningful collaborations!</p>
+        <div className="form-group">
+          <label className="checkbox-wrapper">
+            <input
+              type="checkbox"
+              name="agreeToMarketing"
+              checked={formData.agreeToMarketing}
+              onChange={handleInputChange}
+              className="checkbox"
+            />
+            <span className="checkmark"></span>
+            <span className="checkbox-label">
+              I'd like to receive updates about new features and opportunities
+            </span>
+          </label>
+        </div>
       </div>
     </div>
   );
 
   return (
     <div className="register-container">
-      {/* Animated Background */}
-      <div className="background-animation">
-        <div className="floating-shapes">
-          <div className="shape shape-1"></div>
-          <div className="shape shape-2"></div>
-          <div className="shape shape-3"></div>
-          <div className="shape shape-4"></div>
-          <div className="shape shape-5"></div>
-        </div>
-        <div className="gradient-overlay"></div>
-      </div>
-
-      {/* Main Content */}
-      <div className="register-content">
-        <div className="form-container">
-          <div className="form-header">
-            <Link to="/" className="brand-logo">
-              <div className="logo-icon">⏰</div>
-              <span className="brand-name">TimeSlice</span>
-            </Link>
-            
-            <h1>Join TimeSlice</h1>
-            <p>Create your account and start your journey</p>
+      <div className="register-wrapper">
+        <div className="register-header">
+          <div className="logo-section">
+            <div className="brand-icon">⏰</div>
+            <h1 className="brand-title">TimeSlice</h1>
           </div>
-
           <StepIndicator />
+        </div>
 
+        <div className="register-content">
           {error && (
-            <div className="error-message">
+            <div className="alert alert-error">
               <span className="error-icon">⚠️</span>
-              <span className="error-text">{error}</span>
+              <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="register-form">
-            <div className="step-container">
-              {currentStep === 1 && renderStep1()}
-              {currentStep === 2 && renderStep2()}
-              {currentStep === 3 && renderStep3()}
-            </div>
+          <form onSubmit={handleSubmit}>
+            {currentStep === 1 && renderStep1()}
+            {currentStep === 2 && renderStep2()}
+            {currentStep === 3 && renderStep3()}
 
             <div className="form-navigation">
               {currentStep > 1 && (
                 <button
                   type="button"
                   onClick={prevStep}
-                  className="nav-button secondary"
-                  disabled={loading}
+                  className="btn btn-secondary"
                 >
                   ← Previous
                 </button>
@@ -542,26 +524,24 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="nav-button primary"
-                  disabled={loading}
+                  className="btn btn-primary"
                 >
                   Next →
                 </button>
               ) : (
                 <button
                   type="submit"
-                  className="nav-button success"
                   disabled={loading}
+                  className="btn btn-primary"
                 >
                   {loading ? (
                     <>
-                      <div className="loading-spinner"></div>
-                      <span>Creating Account...</span>
+                      <div className="loading-spinner" style={{ width: '20px', height: '20px' }}></div>
+                      Creating Account...
                     </>
                   ) : (
                     <>
-                      <span>Create Account</span>
-                      <span className="button-icon">🚀</span>
+                      🚀 Create Account
                     </>
                   )}
                 </button>
@@ -569,11 +549,13 @@ const Register = () => {
             </div>
           </form>
 
-          <div className="login-prompt">
-            <p>Already have an account?</p>
-            <Link to="/login" className="login-link">
-              Sign In Instead
-            </Link>
+          <div className="register-footer">
+            <p>
+              Already have an account?{' '}
+              <Link to="/login" className="login-link">
+                Sign In
+              </Link>
+            </p>
           </div>
         </div>
       </div>
@@ -581,304 +563,140 @@ const Register = () => {
       <style jsx>{`
         .register-container {
           min-height: 100vh;
-          position: relative;
-          overflow: hidden;
+          background: var(--bg-primary);
+          padding: var(--space-xl);
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 2rem 0;
         }
 
-        .background-animation {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 1;
-        }
-
-        .floating-shapes {
-          position: absolute;
+        .register-wrapper {
+          max-width: 800px;
           width: 100%;
-          height: 100%;
+          background: var(--bg-card);
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-xl);
+          overflow: hidden;
         }
 
-        .shape {
-          position: absolute;
-          border-radius: 50%;
-          background: rgba(102, 126, 234, 0.1);
-          animation: float 10s ease-in-out infinite;
+        .register-header {
+          background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+          padding: var(--space-2xl);
+          text-align: center;
         }
 
-        .shape-1 {
-          width: 100px;
-          height: 100px;
-          top: 20%;
-          left: 10%;
-          animation-delay: 0s;
+        .logo-section {
+          margin-bottom: var(--space-xl);
         }
 
-        .shape-2 {
-          width: 150px;
-          height: 150px;
-          top: 60%;
-          right: 20%;
-          animation-delay: 2s;
-        }
-
-        .shape-3 {
-          width: 80px;
-          height: 80px;
-          bottom: 30%;
-          left: 15%;
-          animation-delay: 4s;
-        }
-
-        .shape-4 {
-          width: 120px;
-          height: 120px;
-          top: 10%;
-          right: 10%;
-          animation-delay: 1s;
-        }
-
-        .shape-5 {
+        .brand-icon {
           width: 60px;
           height: 60px;
-          bottom: 20%;
-          right: 30%;
-          animation-delay: 3s;
-        }
-
-        @keyframes float {
-          0%, 100% { 
-            transform: translateY(0px) rotate(0deg);
-            opacity: 0.3;
-          }
-          33% { 
-            transform: translateY(-30px) rotate(120deg);
-            opacity: 0.6;
-          }
-          66% { 
-            transform: translateY(15px) rotate(240deg);
-            opacity: 0.4;
-          }
-        }
-
-        .gradient-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-          opacity: 0.9;
-        }
-
-        .register-content {
-          position: relative;
-          z-index: 2;
-          width: 100%;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 0 2rem;
-        }
-
-        .form-container {
-          background: rgba(255,255,255,0.95);
-          backdrop-filter: blur(20px);
-          border-radius: 25px;
-          padding: 3rem;
-          box-shadow: 0 25px 50px rgba(0,0,0,0.2);
-          border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .form-header {
-          text-align: center;
-          margin-bottom: 2rem;
-        }
-
-        .brand-logo {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.75rem;
-          text-decoration: none;
-          color: #333;
-          font-weight: 700;
-          font-size: 1.3rem;
-          margin-bottom: 1.5rem;
-          transition: transform 0.3s ease;
-        }
-
-        .brand-logo:hover {
-          transform: scale(1.05);
-        }
-
-        .logo-icon {
-          width: 40px;
-          height: 40px;
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          border-radius: 12px;
+          background: var(--primary-gradient);
+          border-radius: var(--radius-lg);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.2rem;
-          color: white;
+          font-size: 2rem;
+          margin: 0 auto var(--space-md);
+          box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
         }
 
-        .brand-name {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+        .brand-title {
+          font-size: 2.5rem;
+          font-weight: 800;
+          background: var(--primary-gradient);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-        }
-
-        .form-header h1 {
-          font-size: 2rem;
-          font-weight: 700;
-          color: #333;
-          margin: 0 0 0.5rem 0;
-        }
-
-        .form-header p {
-          color: #666;
-          font-size: 1.1rem;
-          margin: 0;
         }
 
         .step-indicator {
           display: flex;
           justify-content: center;
           align-items: center;
-          gap: 2rem;
-          margin: 2rem 0;
+          gap: var(--space-xl);
           position: relative;
         }
 
         .step-indicator::before {
           content: '';
           position: absolute;
-          top: 20px;
-          left: 25%;
-          right: 25%;
+          top: 50%;
+          left: 20%;
+          right: 20%;
           height: 2px;
-          background: rgba(102,126,234,0.2);
-          z-index: 1;
+          background: var(--border-primary);
+          z-index: 0;
         }
 
         .step-indicator-item {
           display: flex;
           flex-direction: column;
           align-items: center;
+          gap: var(--space-sm);
           position: relative;
-          z-index: 2;
+          z-index: 1;
         }
 
         .step-circle {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: rgba(102,126,234,0.1);
-          color: #666;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: 600;
-          margin-bottom: 0.5rem;
-          transition: all 0.3s ease;
-          border: 2px solid rgba(102,126,234,0.2);
+          font-weight: 700;
+          font-size: 0.9rem;
+          background: var(--bg-tertiary);
+          color: var(--text-muted);
+          transition: all var(--transition-normal);
         }
 
         .step-circle.active {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          background: var(--primary-gradient);
           color: white;
-          border-color: #667eea;
+          box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
         }
 
         .step-circle.completed {
-          background: linear-gradient(135deg, #2ecc71, #27ae60);
-          border-color: #2ecc71;
+          background: var(--success);
+          color: white;
         }
 
         .step-label {
           font-size: 0.85rem;
-          color: #666;
+          color: var(--text-secondary);
           font-weight: 500;
         }
 
-        .error-message {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          background: linear-gradient(135deg, #ff4757, #c44569);
-          color: white;
-          padding: 1rem;
-          border-radius: 12px;
-          margin-bottom: 1.5rem;
-          font-weight: 500;
-        }
-
-        .error-icon {
-          font-size: 1.2rem;
-        }
-
-        .register-form {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .step-container {
-          min-height: 400px;
-          margin-bottom: 2rem;
+        .register-content {
+          padding: var(--space-2xl);
         }
 
         .step-content {
-          animation: fadeInUp 0.5s ease-out;
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          margin-bottom: var(--space-xl);
         }
 
         .step-header {
           text-align: center;
-          margin-bottom: 2rem;
+          margin-bottom: var(--space-2xl);
         }
 
         .step-header h2 {
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #333;
-          margin: 0 0 0.5rem 0;
+          color: var(--text-primary);
+          font-size: 1.8rem;
+          font-weight: 700;
+          margin-bottom: var(--space-sm);
         }
 
         .step-header p {
-          color: #666;
+          color: var(--text-secondary);
           margin: 0;
         }
 
-        .form-group {
-          margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-          display: block;
-          font-weight: 600;
-          color: #333;
-          margin-bottom: 0.5rem;
-          font-size: 0.95rem;
-        }
-
         .required {
-          color: #e74c3c;
+          color: var(--error);
         }
 
         .input-wrapper {
@@ -889,27 +707,15 @@ const Register = () => {
 
         .input-icon {
           position: absolute;
-          left: 1rem;
+          left: var(--space-md);
           z-index: 1;
           font-size: 1.1rem;
-          color: #666;
+          color: var(--text-muted);
         }
 
-        .form-input, .form-textarea {
-          width: 100%;
-          padding: 1rem 1rem 1rem 3rem;
-          border: 2px solid rgba(0,0,0,0.1);
-          border-radius: 12px;
-          font-size: 1rem;
-          transition: all 0.3s ease;
-          background: rgba(255,255,255,0.8);
-          outline: none;
-        }
-
-        .form-input:focus, .form-textarea:focus {
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
-          background: white;
+        .form-input,
+        .form-textarea {
+          padding-left: 3rem;
         }
 
         .form-textarea {
@@ -920,240 +726,206 @@ const Register = () => {
 
         .password-toggle {
           position: absolute;
-          right: 1rem;
+          right: var(--space-md);
           background: none;
           border: none;
           cursor: pointer;
           font-size: 1.1rem;
-          color: #666;
-          transition: color 0.3s ease;
+          color: var(--text-muted);
+          transition: color var(--transition-normal);
         }
 
         .password-toggle:hover {
-          color: #667eea;
+          color: var(--primary-cyan);
         }
 
         .role-selection {
-          display: flex;
-          gap: 1rem;
-          margin-top: 1rem;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--space-lg);
+          margin-top: var(--space-md);
         }
 
         .role-card {
-          flex: 1;
-          background: white;
-          border: 2px solid rgba(0,0,0,0.1);
-          border-radius: 15px;
-          padding: 1.5rem;
+          background: var(--bg-secondary);
+          border: 2px solid var(--border-primary);
+          border-radius: var(--radius-lg);
+          padding: var(--space-xl);
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all var(--transition-normal);
           text-align: center;
         }
 
         .role-card:hover {
-          border-color: #667eea;
-          transform: translateY(-3px);
-          box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+          border-color: var(--border-accent);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
         }
 
         .role-card.selected {
-          border-color: #667eea;
-          background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+          border-color: var(--primary-cyan);
+          background: rgba(0, 212, 255, 0.05);
           transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(102,126,234,0.2);
+          box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
         }
 
         .role-icon {
           font-size: 2.5rem;
-          margin-bottom: 1rem;
+          margin-bottom: var(--space-md);
         }
 
         .role-content h3 {
-          margin: 0 0 0.5rem 0;
-          font-size: 1.1rem;
+          color: var(--text-primary);
+          font-size: 1.2rem;
           font-weight: 600;
-          color: #333;
+          margin-bottom: var(--space-sm);
         }
 
         .role-content p {
-          margin: 0 0 1rem 0;
-          color: #666;
-          font-size: 0.9rem;
+          color: var(--text-secondary);
+          margin-bottom: var(--space-md);
+          font-size: 0.95rem;
         }
 
         .role-benefits {
           list-style: none;
-          padding: 0;
-          margin: 0;
           text-align: left;
         }
 
         .role-benefits li {
-          color: #666;
+          color: var(--text-secondary);
           font-size: 0.85rem;
-          margin-bottom: 0.25rem;
+          margin-bottom: var(--space-xs);
         }
 
-        .skills-input-section {
-          margin-bottom: 1rem;
+        .skills-section {
+          space: var(--space-md);
         }
 
         .skill-input-wrapper {
           display: flex;
-          gap: 0.75rem;
+          gap: var(--space-md);
+          margin-bottom: var(--space-md);
         }
 
         .add-skill-btn {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          color: white;
-          border: none;
-          padding: 1rem 1.5rem;
-          border-radius: 12px;
-          cursor: pointer;
-          font-weight: 600;
-          transition: all 0.3s ease;
-          white-space: nowrap;
-        }
-
-        .add-skill-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(102,126,234,0.3);
-        }
-
-        .predefined-skills {
-          margin: 1rem 0;
-        }
-
-        .predefined-skills h4 {
-          margin: 0 0 0.75rem 0;
-          color: #333;
-          font-size: 0.95rem;
-        }
-
-        .skills-suggestions {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-        }
-
-        .skill-suggestion {
-          background: rgba(102,126,234,0.1);
-          border: 1px solid rgba(102,126,234,0.3);
-          color: #667eea;
-          padding: 0.5rem 0.75rem;
-          border-radius: 15px;
-          cursor: pointer;
-          font-size: 0.85rem;
-          transition: all 0.3s ease;
-        }
-
-        .skill-suggestion:hover {
-          background: #667eea;
-          color: white;
-          transform: translateY(-2px);
+          flex-shrink: 0;
+          padding: var(--space-md) var(--space-lg);
         }
 
         .selected-skills {
-          margin-top: 1rem;
-        }
-
-        .selected-skills h4 {
-          margin: 0 0 0.75rem 0;
-          color: #333;
-          font-size: 0.95rem;
-        }
-
-        .skills-list {
           display: flex;
           flex-wrap: wrap;
-          gap: 0.5rem;
+          gap: var(--space-sm);
+          margin-bottom: var(--space-md);
         }
 
         .skill-tag {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          background: var(--primary-gradient);
           color: white;
-          padding: 0.5rem 0.75rem;
-          border-radius: 15px;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
+          padding: var(--space-xs) var(--space-md);
+          border-radius: var(--radius-xl);
           font-size: 0.85rem;
           font-weight: 500;
-        }
-
-        .skill-remove {
-          background: rgba(255,255,255,0.2);
-          border: none;
-          color: white;
-          border-radius: 50%;
-          width: 18px;
-          height: 18px;
-          cursor: pointer;
           display: flex;
           align-items: center;
-          justify-content: center;
-          font-size: 0.7rem;
-          transition: background 0.2s ease;
+          gap: var(--space-sm);
         }
 
-        .skill-remove:hover {
-          background: rgba(255,255,255,0.3);
+        .remove-skill {
+          background: none;
+          border: none;
+          color: white;
+          cursor: pointer;
+          font-size: 1.2rem;
+          line-height: 1;
+          opacity: 0.7;
+          transition: opacity var(--transition-normal);
+        }
+
+        .remove-skill:hover {
+          opacity: 1;
+        }
+
+        .suggested-skills {
+          margin-top: var(--space-md);
+        }
+
+        .suggested-label {
+          color: var(--text-secondary);
+          font-size: 0.9rem;
+          margin-bottom: var(--space-sm);
+        }
+
+        .suggested-skills-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-sm);
+        }
+
+        .suggested-skill {
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-primary);
+          color: var(--text-secondary);
+          padding: var(--space-xs) var(--space-md);
+          border-radius: var(--radius-md);
+          font-size: 0.8rem;
+          cursor: pointer;
+          transition: all var(--transition-normal);
+        }
+
+        .suggested-skill:hover {
+          background: var(--bg-secondary);
+          border-color: var(--border-accent);
+          color: var(--primary-cyan);
         }
 
         .summary-section {
-          background: rgba(102,126,234,0.05);
-          border-radius: 15px;
-          padding: 1.5rem;
-          margin-bottom: 2rem;
+          background: var(--bg-secondary);
+          border-radius: var(--radius-lg);
+          padding: var(--space-xl);
+          margin-bottom: var(--space-xl);
         }
 
         .summary-section h3 {
-          margin: 0 0 1rem 0;
-          color: #333;
-          font-size: 1.1rem;
+          color: var(--text-primary);
+          font-size: 1.2rem;
+          font-weight: 600;
+          margin-bottom: var(--space-lg);
         }
 
-        .summary-content {
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
+        .summary-grid {
+          display: grid;
+          gap: var(--space-md);
         }
 
         .summary-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.75rem;
-          background: white;
-          border-radius: 8px;
+          display: grid;
+          grid-template-columns: 120px 1fr;
+          gap: var(--space-md);
+          align-items: start;
         }
 
         .summary-label {
-          font-weight: 600;
-          color: #667eea;
+          color: var(--text-secondary);
+          font-weight: 500;
+          font-size: 0.9rem;
         }
 
         .summary-value {
-          color: #333;
-          text-align: right;
-          max-width: 60%;
-          word-break: break-word;
+          color: var(--text-primary);
+          font-size: 0.9rem;
         }
 
-        .terms-section {
-          margin-bottom: 2rem;
+        .agreements-section .form-group {
+          margin-bottom: var(--space-md);
         }
 
         .checkbox-wrapper {
           display: flex;
           align-items: flex-start;
-          gap: 0.75rem;
+          gap: var(--space-md);
           cursor: pointer;
-          margin-bottom: 1rem;
-        }
-
-        .checkbox-wrapper.large {
-          font-size: 0.95rem;
           line-height: 1.5;
         }
 
@@ -1162,19 +934,19 @@ const Register = () => {
         }
 
         .checkmark {
-          width: 20px;
-          height: 20px;
-          border: 2px solid #ddd;
+          width: 18px;
+          height: 18px;
+          border: 2px solid var(--border-primary);
           border-radius: 4px;
           position: relative;
-          transition: all 0.3s ease;
+          transition: all var(--transition-normal);
           flex-shrink: 0;
           margin-top: 2px;
         }
 
         .checkbox:checked + .checkmark {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          border-color: #667eea;
+          background: var(--primary-gradient);
+          border-color: var(--primary-cyan);
         }
 
         .checkbox:checked + .checkmark::after {
@@ -1184,199 +956,111 @@ const Register = () => {
           left: 50%;
           transform: translate(-50%, -50%);
           color: white;
-          font-size: 0.8rem;
+          font-size: 0.7rem;
           font-weight: bold;
         }
 
         .checkbox-label {
-          color: #666;
+          color: var(--text-secondary);
+          font-size: 0.9rem;
         }
 
         .link {
-          color: #667eea;
+          color: var(--primary-cyan);
           text-decoration: none;
-          font-weight: 500;
+          transition: color var(--transition-normal);
         }
 
         .link:hover {
-          text-decoration: underline;
-        }
-
-        .welcome-message {
-          text-align: center;
-          background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
-          border-radius: 15px;
-          padding: 2rem;
-          margin-top: 2rem;
-        }
-
-        .welcome-icon {
-          font-size: 3rem;
-          margin-bottom: 1rem;
-        }
-
-        .welcome-message h3 {
-          margin: 0 0 1rem 0;
-          color: #333;
-          font-size: 1.3rem;
-        }
-
-        .welcome-message p {
-          margin: 0;
-          color: #666;
-          line-height: 1.6;
+          color: var(--primary-orange);
         }
 
         .form-navigation {
           display: flex;
+          justify-content: space-between;
           align-items: center;
-          gap: 1rem;
-          padding-top: 2rem;
-          border-top: 1px solid rgba(0,0,0,0.1);
+          padding-top: var(--space-xl);
+          border-top: 1px solid var(--border-primary);
         }
 
         .nav-spacer {
           flex: 1;
         }
 
-        .nav-button {
-          padding: 1rem 2rem;
-          border-radius: 12px;
-          border: none;
-          cursor: pointer;
-          font-weight: 600;
-          font-size: 1rem;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          min-width: 140px;
-          justify-content: center;
-        }
-
-        .nav-button:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-          transform: none !important;
-        }
-
-        .nav-button.primary {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          color: white;
-          box-shadow: 0 5px 15px rgba(102,126,234,0.3);
-        }
-
-        .nav-button.primary:not(:disabled):hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(102,126,234,0.4);
-        }
-
-        .nav-button.secondary {
-          background: rgba(102,126,234,0.1);
-          color: #667eea;
-          border: 2px solid #667eea;
-        }
-
-        .nav-button.secondary:not(:disabled):hover {
-          background: #667eea;
-          color: white;
-        }
-
-        .nav-button.success {
-          background: linear-gradient(135deg, #2ecc71, #27ae60);
-          color: white;
-          box-shadow: 0 5px 15px rgba(46,204,113,0.3);
-        }
-
-        .nav-button.success:not(:disabled):hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(46,204,113,0.4);
-        }
-
-        .loading-spinner {
-          width: 20px;
-          height: 20px;
-          border: 2px solid rgba(255,255,255,0.3);
-          border-top: 2px solid white;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        .button-icon {
-          font-size: 1.2rem;
-        }
-
-        .login-prompt {
+        .register-footer {
           text-align: center;
-          margin-top: 2rem;
-          padding-top: 2rem;
-          border-top: 1px solid rgba(0,0,0,0.1);
+          padding-top: var(--space-lg);
+          border-top: 1px solid var(--border-primary);
+          margin-top: var(--space-lg);
         }
 
-        .login-prompt p {
-          color: #666;
-          margin: 0 0 0.5rem 0;
-          font-size: 0.9rem;
+        .register-footer p {
+          color: var(--text-secondary);
+          margin: 0;
         }
 
         .login-link {
-          color: #667eea;
+          color: var(--primary-cyan);
           text-decoration: none;
           font-weight: 600;
-          font-size: 1rem;
-          transition: color 0.3s ease;
+          transition: color var(--transition-normal);
         }
 
         .login-link:hover {
-          color: #5a6fd8;
-          text-decoration: underline;
+          color: var(--primary-orange);
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
           .register-container {
-            padding: 1rem 0;
+            padding: var(--space-md);
           }
 
+          .register-header,
           .register-content {
-            padding: 0 1rem;
+            padding: var(--space-xl);
           }
 
-          .form-container {
-            padding: 2rem;
+          .step-indicator {
+            flex-direction: column;
+            gap: var(--space-md);
+          }
+
+          .step-indicator::before {
+            display: none;
+          }
+
+          .step-indicator-item {
+            flex-direction: row;
+            text-align: left;
+            gap: var(--space-md);
+          }
+
+          .step-circle {
+            margin-bottom: 0;
+            flex-shrink: 0;
           }
 
           .role-selection {
-            flex-direction: column;
+            grid-template-columns: 1fr;
           }
 
           .skill-input-wrapper {
             flex-direction: column;
+            align-items: stretch;
+          }
+
+          .summary-item {
+            grid-template-columns: 1fr;
+            gap: var(--space-sm);
           }
 
           .form-navigation {
             flex-direction: column-reverse;
-            gap: 1rem;
+            gap: var(--space-md);
           }
 
           .nav-spacer {
             display: none;
-          }
-
-          .summary-item {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-          }
-
-          .summary-value {
-            max-width: 100%;
-            text-align: left;
           }
         }
       `}</style>

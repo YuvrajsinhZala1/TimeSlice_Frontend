@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { login, currentUser } = useAuth();
   
   const [formData, setFormData] = useState({
@@ -19,10 +18,9 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (currentUser) {
-      const from = location.state?.from?.pathname || '/dashboard';
-      navigate(from, { replace: true });
+      navigate('/dashboard', { replace: true });
     }
-  }, [currentUser, navigate, location]);
+  }, [currentUser, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -30,54 +28,29 @@ const Login = () => {
       ...prev,
       [name]: value
     }));
+    
     // Clear error when user starts typing
     if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.email || !formData.password) {
-      setError('Please fill in all fields');
-      return;
-    }
-
-    setLoading(true);
     setError('');
+    setLoading(true);
 
     try {
-      await login(formData.email, formData.password);
-      
-      // Handle remember me functionality
-      if (rememberMe) {
-        localStorage.setItem('rememberMe', 'true');
+      if (!formData.email.trim()) {
+        throw new Error('Email is required');
       }
       
-      const from = location.state?.from?.pathname || '/dashboard';
-      navigate(from, { replace: true });
-    } catch (error) {
-      console.error('Login error:', error);
-      setError(error.response?.data?.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (!formData.password) {
+        throw new Error('Password is required');
+      }
 
-  const demoLogin = async (userType) => {
-    setLoading(true);
-    setError('');
-    
-    const credentials = {
-      helper: { email: 'demo.helper@timeslice.com', password: 'demo123' },
-      provider: { email: 'demo.provider@timeslice.com', password: 'demo123' }
-    };
-
-    try {
-      const { email, password } = credentials[userType];
-      await login(email, password);
+      await login(formData.email, formData.password);
       navigate('/dashboard', { replace: true });
     } catch (error) {
-      setError('Demo login failed. Please try manual login.');
+      setError(error.message || 'Failed to log in. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -85,61 +58,43 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      {/* Animated Background */}
-      <div className="background-animation">
-        <div className="floating-shapes">
-          <div className="shape shape-1"></div>
-          <div className="shape shape-2"></div>
-          <div className="shape shape-3"></div>
-          <div className="shape shape-4"></div>
-          <div className="shape shape-5"></div>
-          <div className="shape shape-6"></div>
-        </div>
-        <div className="gradient-overlay"></div>
-      </div>
-
-      {/* Main Content */}
-      <div className="login-content">
-        {/* Left Side - Branding */}
-        <div className="login-branding">
-          <div className="brand-content">
-            <div className="brand-logo">
-              <div className="logo-icon">⏰</div>
-              <h1 className="brand-name">TimeSlice</h1>
-            </div>
-            
-            <div className="brand-tagline">
-              <h2>Welcome Back!</h2>
-              <p>Continue your journey of seamless collaboration and professional growth</p>
+      <div className="login-wrapper">
+        {/* Left Side - Features */}
+        <div className="login-features">
+          <div className="features-content">
+            <div className="logo-section">
+              <div className="brand-icon">⏰</div>
+              <h1 className="brand-title">TimeSlice</h1>
+              <p className="brand-subtitle">Premium Freelance Marketplace</p>
             </div>
 
             <div className="features-list">
               <div className="feature-item">
                 <div className="feature-icon">🎯</div>
-                <div className="feature-text">
-                  <h4>Smart Project Matching</h4>
+                <div className="feature-content">
+                  <h3>Smart Project Matching</h3>
                   <p>Get matched with perfect opportunities</p>
                 </div>
               </div>
               
               <div className="feature-item">
                 <div className="feature-icon">💎</div>
-                <div className="feature-text">
-                  <h4>Secure Credit System</h4>
+                <div className="feature-content">
+                  <h3>Secure Credit System</h3>
                   <p>Fair payments with escrow protection</p>
                 </div>
               </div>
               
               <div className="feature-item">
                 <div className="feature-icon">💬</div>
-                <div className="feature-text">
-                  <h4>Real-time Communication</h4>
+                <div className="feature-content">
+                  <h3>Real-time Communication</h3>
                   <p>Chat and collaborate seamlessly</p>
                 </div>
               </div>
             </div>
 
-            <div className="testimonial-preview">
+            <div className="testimonial">
               <div className="testimonial-content">
                 <p>"TimeSlice transformed how I work with clients. The platform is intuitive and the community is amazing!"</p>
                 <div className="testimonial-author">
@@ -163,9 +118,9 @@ const Login = () => {
             </div>
 
             {error && (
-              <div className="error-message">
+              <div className="alert alert-error">
                 <span className="error-icon">⚠️</span>
-                <span className="error-text">{error}</span>
+                <span>{error}</span>
               </div>
             )}
 
@@ -235,56 +190,53 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="submit-button"
+                className="btn btn-primary submit-button"
               >
                 {loading ? (
                   <>
-                    <div className="loading-spinner"></div>
-                    <span>Signing In...</span>
+                    <div className="loading-spinner" style={{ width: '20px', height: '20px' }}></div>
+                    Signing In...
                   </>
                 ) : (
                   <>
-                    <span>Sign In</span>
-                    <span className="button-icon">🚀</span>
+                    🚀 Sign In
                   </>
                 )}
               </button>
-            </form>
 
-            <div className="divider">
-              <div className="divider-line"></div>
-              <span className="divider-text">or</span>
-              <div className="divider-line"></div>
-            </div>
-
-            <div className="demo-section">
-              <p className="demo-text">Try TimeSlice with demo accounts:</p>
-              <div className="demo-buttons">
-                <button
-                  onClick={() => demoLogin('helper')}
-                  disabled={loading}
-                  className="demo-button helper"
-                >
-                  <span className="demo-icon">🛠️</span>
-                  <span>Demo Helper</span>
-                </button>
-                <button
-                  onClick={() => demoLogin('provider')}
-                  disabled={loading}
-                  className="demo-button provider"
-                >
-                  <span className="demo-icon">📋</span>
-                  <span>Demo Provider</span>
-                </button>
+              <div className="form-divider">
+                <span>or</span>
               </div>
-            </div>
 
-            <div className="signup-prompt">
-              <p>Don't have an account?</p>
-              <Link to="/register" className="signup-link">
-                Create Account
-              </Link>
-            </div>
+              <div className="demo-accounts">
+                <p className="demo-text">Try TimeSlice with demo accounts:</p>
+                <div className="demo-buttons">
+                  <button
+                    type="button"
+                    className="btn btn-outline demo-btn"
+                    onClick={() => setFormData({ email: 'helper@demo.com', password: 'demo123' })}
+                  >
+                    🛠️ Demo Helper
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline demo-btn"
+                    onClick={() => setFormData({ email: 'provider@demo.com', password: 'demo123' })}
+                  >
+                    📋 Demo Provider
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-footer">
+                <p>
+                  Don't have an account?{' '}
+                  <Link to="/register" className="signup-link">
+                    Create Account
+                  </Link>
+                </p>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -292,206 +244,85 @@ const Login = () => {
       <style jsx>{`
         .login-container {
           min-height: 100vh;
-          position: relative;
-          overflow: hidden;
+          background: var(--bg-primary);
           display: flex;
           align-items: center;
-          justify-content: center;
+          padding: var(--space-xl);
         }
 
-        .background-animation {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 1;
-        }
-
-        .floating-shapes {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-        }
-
-        .shape {
-          position: absolute;
-          border-radius: 50%;
-          background: rgba(102, 126, 234, 0.1);
-          animation: float 8s ease-in-out infinite;
-        }
-
-        .shape-1 {
-          width: 80px;
-          height: 80px;
-          top: 10%;
-          left: 10%;
-          animation-delay: 0s;
-        }
-
-        .shape-2 {
-          width: 120px;
-          height: 120px;
-          top: 20%;
-          right: 20%;
-          animation-delay: 2s;
-        }
-
-        .shape-3 {
-          width: 60px;
-          height: 60px;
-          bottom: 30%;
-          left: 15%;
-          animation-delay: 4s;
-        }
-
-        .shape-4 {
-          width: 100px;
-          height: 100px;
-          bottom: 20%;
-          right: 10%;
-          animation-delay: 1s;
-        }
-
-        .shape-5 {
-          width: 140px;
-          height: 140px;
-          top: 50%;
-          left: 5%;
-          animation-delay: 3s;
-        }
-
-        .shape-6 {
-          width: 90px;
-          height: 90px;
-          top: 70%;
-          right: 30%;
-          animation-delay: 5s;
-        }
-
-        @keyframes float {
-          0%, 100% { 
-            transform: translateY(0px) rotate(0deg);
-            opacity: 0.3;
-          }
-          25% { 
-            transform: translateY(-20px) rotate(90deg);
-            opacity: 0.5;
-          }
-          50% { 
-            transform: translateY(0px) rotate(180deg);
-            opacity: 0.3;
-          }
-          75% { 
-            transform: translateY(15px) rotate(270deg);
-            opacity: 0.7;
-          }
-        }
-
-        .gradient-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-          opacity: 0.9;
-        }
-
-        .login-content {
-          position: relative;
-          z-index: 2;
-          width: 100%;
+        .login-wrapper {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 2rem;
+          background: var(--bg-card);
+          border-radius: var(--radius-xl);
+          overflow: hidden;
+          box-shadow: var(--shadow-xl);
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 4rem;
-          align-items: center;
-          min-height: 100vh;
+          min-height: 600px;
         }
 
-        .login-branding {
-          color: white;
-          z-index: 3;
-        }
-
-        .brand-content {
-          max-width: 500px;
-        }
-
-        .brand-logo {
+        .login-features {
+          background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+          padding: var(--space-2xl);
           display: flex;
-          align-items: center;
-          gap: 1rem;
-          margin-bottom: 3rem;
+          flex-direction: column;
+          justify-content: center;
         }
 
-        .logo-icon {
+        .features-content {
+          max-width: 400px;
+        }
+
+        .logo-section {
+          text-align: center;
+          margin-bottom: var(--space-2xl);
+        }
+
+        .brand-icon {
           width: 60px;
           height: 60px;
-          background: rgba(255,255,255,0.2);
-          backdrop-filter: blur(10px);
-          border-radius: 15px;
+          background: var(--primary-gradient);
+          border-radius: var(--radius-lg);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.8rem;
-          border: 1px solid rgba(255,255,255,0.3);
+          font-size: 2rem;
+          margin: 0 auto var(--space-md);
+          box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
         }
 
-        .brand-name {
+        .brand-title {
           font-size: 2.5rem;
           font-weight: 800;
-          margin: 0;
-          background: linear-gradient(135deg, #fff, #f0f0f0);
+          background: var(--primary-gradient);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
+          margin-bottom: var(--space-sm);
         }
 
-        .brand-tagline {
-          margin-bottom: 3rem;
-        }
-
-        .brand-tagline h2 {
-          font-size: 2.2rem;
-          font-weight: 700;
-          margin: 0 0 1rem 0;
-          line-height: 1.2;
-        }
-
-        .brand-tagline p {
-          font-size: 1.2rem;
-          opacity: 0.9;
-          line-height: 1.6;
-          margin: 0;
+        .brand-subtitle {
+          color: var(--text-secondary);
+          font-size: 1.1rem;
         }
 
         .features-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-          margin-bottom: 3rem;
+          margin-bottom: var(--space-2xl);
         }
 
         .feature-item {
           display: flex;
-          align-items: center;
-          gap: 1rem;
-          background: rgba(255,255,255,0.1);
-          backdrop-filter: blur(10px);
-          padding: 1rem;
-          border-radius: 15px;
-          border: 1px solid rgba(255,255,255,0.2);
+          gap: var(--space-lg);
+          margin-bottom: var(--space-xl);
         }
 
         .feature-icon {
           width: 50px;
           height: 50px;
-          background: rgba(255,255,255,0.2);
-          border-radius: 12px;
+          background: rgba(0, 212, 255, 0.1);
+          border: 1px solid rgba(0, 212, 255, 0.3);
+          border-radius: var(--radius-md);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -499,48 +330,49 @@ const Login = () => {
           flex-shrink: 0;
         }
 
-        .feature-text h4 {
-          margin: 0 0 0.25rem 0;
+        .feature-content h3 {
+          color: var(--text-primary);
           font-size: 1.1rem;
           font-weight: 600;
+          margin-bottom: var(--space-xs);
         }
 
-        .feature-text p {
-          margin: 0;
-          opacity: 0.8;
-          font-size: 0.9rem;
+        .feature-content p {
+          color: var(--text-secondary);
+          font-size: 0.95rem;
+          line-height: 1.5;
         }
 
-        .testimonial-preview {
-          background: rgba(255,255,255,0.1);
-          backdrop-filter: blur(10px);
-          padding: 2rem;
-          border-radius: 20px;
-          border: 1px solid rgba(255,255,255,0.2);
+        .testimonial {
+          background: rgba(0, 212, 255, 0.05);
+          border: 1px solid rgba(0, 212, 255, 0.2);
+          border-radius: var(--radius-lg);
+          padding: var(--space-xl);
         }
 
         .testimonial-content p {
-          font-size: 1.1rem;
-          line-height: 1.6;
-          margin: 0 0 1.5rem 0;
+          color: var(--text-primary);
           font-style: italic;
+          margin-bottom: var(--space-lg);
+          font-size: 1.05rem;
+          line-height: 1.6;
         }
 
         .testimonial-author {
           display: flex;
           align-items: center;
-          gap: 1rem;
+          gap: var(--space-md);
         }
 
         .author-avatar {
-          width: 50px;
-          height: 50px;
-          background: rgba(255,255,255,0.2);
+          width: 45px;
+          height: 45px;
+          background: var(--primary-gradient);
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.5rem;
+          font-size: 1.2rem;
         }
 
         .author-info {
@@ -549,82 +381,50 @@ const Login = () => {
         }
 
         .author-name {
+          color: var(--text-primary);
           font-weight: 600;
-          margin-bottom: 0.25rem;
+          font-size: 0.95rem;
         }
 
         .author-role {
-          opacity: 0.8;
-          font-size: 0.9rem;
+          color: var(--text-secondary);
+          font-size: 0.85rem;
         }
 
         .login-form-section {
+          background: var(--bg-card);
+          padding: var(--space-2xl);
           display: flex;
-          justify-content: center;
           align-items: center;
         }
 
         .form-container {
-          background: rgba(255,255,255,0.95);
-          backdrop-filter: blur(20px);
-          border-radius: 25px;
-          padding: 3rem;
-          box-shadow: 0 25px 50px rgba(0,0,0,0.2);
-          border: 1px solid rgba(255,255,255,0.3);
           width: 100%;
-          max-width: 450px;
+          max-width: 400px;
+          margin: 0 auto;
         }
 
         .form-header {
           text-align: center;
-          margin-bottom: 2rem;
+          margin-bottom: var(--space-2xl);
         }
 
         .form-header h2 {
+          color: var(--text-primary);
           font-size: 1.8rem;
           font-weight: 700;
-          color: #333;
-          margin: 0 0 0.5rem 0;
+          margin-bottom: var(--space-sm);
         }
 
         .form-header p {
-          color: #666;
-          font-size: 1rem;
+          color: var(--text-secondary);
           margin: 0;
-        }
-
-        .error-message {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          background: linear-gradient(135deg, #ff4757, #c44569);
-          color: white;
-          padding: 1rem;
-          border-radius: 12px;
-          margin-bottom: 1.5rem;
-          font-weight: 500;
-        }
-
-        .error-icon {
-          font-size: 1.2rem;
         }
 
         .login-form {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
-        }
-
-        .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .form-label {
-          font-weight: 600;
-          color: #333;
-          font-size: 0.95rem;
+          gap: var(--space-lg);
         }
 
         .input-wrapper {
@@ -635,58 +435,44 @@ const Login = () => {
 
         .input-icon {
           position: absolute;
-          left: 1rem;
+          left: var(--space-md);
           z-index: 1;
           font-size: 1.1rem;
-          color: #666;
+          color: var(--text-muted);
         }
 
         .form-input {
-          width: 100%;
-          padding: 1rem 1rem 1rem 3rem;
-          border: 2px solid rgba(0,0,0,0.1);
-          border-radius: 12px;
-          font-size: 1rem;
-          transition: all 0.3s ease;
-          background: rgba(255,255,255,0.8);
-          outline: none;
-        }
-
-        .form-input:focus {
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
-          background: white;
+          padding-left: 3rem;
         }
 
         .password-toggle {
           position: absolute;
-          right: 1rem;
+          right: var(--space-md);
           background: none;
           border: none;
           cursor: pointer;
           font-size: 1.1rem;
-          color: #666;
-          transition: color 0.3s ease;
+          color: var(--text-muted);
+          transition: color var(--transition-normal);
         }
 
         .password-toggle:hover {
-          color: #667eea;
+          color: var(--primary-cyan);
         }
 
         .form-options {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-top: 0.5rem;
         }
 
         .checkbox-wrapper {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
+          gap: var(--space-sm);
           cursor: pointer;
           font-size: 0.9rem;
-          color: #666;
+          color: var(--text-secondary);
         }
 
         .checkbox {
@@ -694,17 +480,17 @@ const Login = () => {
         }
 
         .checkmark {
-          width: 20px;
-          height: 20px;
-          border: 2px solid #ddd;
+          width: 18px;
+          height: 18px;
+          border: 2px solid var(--border-primary);
           border-radius: 4px;
           position: relative;
-          transition: all 0.3s ease;
+          transition: all var(--transition-normal);
         }
 
         .checkbox:checked + .checkmark {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          border-color: #667eea;
+          background: var(--primary-gradient);
+          border-color: var(--primary-cyan);
         }
 
         .checkbox:checked + .checkmark::after {
@@ -714,213 +500,117 @@ const Login = () => {
           left: 50%;
           transform: translate(-50%, -50%);
           color: white;
-          font-size: 0.8rem;
+          font-size: 0.7rem;
           font-weight: bold;
         }
 
         .forgot-password {
-          color: #667eea;
+          color: var(--primary-cyan);
           text-decoration: none;
           font-size: 0.9rem;
           font-weight: 500;
-          transition: color 0.3s ease;
+          transition: color var(--transition-normal);
         }
 
         .forgot-password:hover {
-          color: #5a6fd8;
-          text-decoration: underline;
+          color: var(--primary-orange);
         }
 
         .submit-button {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          color: white;
-          border: none;
-          padding: 1rem 2rem;
-          border-radius: 12px;
-          font-size: 1.1rem;
+          width: 100%;
+          padding: var(--space-lg);
+          font-size: 1rem;
           font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.75rem;
-          margin-top: 1rem;
-          box-shadow: 0 8px 25px rgba(102,126,234,0.3);
         }
 
-        .submit-button:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 35px rgba(102,126,234,0.4);
-        }
-
-        .submit-button:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-          transform: none;
-        }
-
-        .loading-spinner {
-          width: 20px;
-          height: 20px;
-          border: 2px solid rgba(255,255,255,0.3);
-          border-top: 2px solid white;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        .button-icon {
-          font-size: 1.2rem;
-        }
-
-        .divider {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          margin: 2rem 0;
-        }
-
-        .divider-line {
-          flex: 1;
-          height: 1px;
-          background: rgba(0,0,0,0.1);
-        }
-
-        .divider-text {
-          color: #666;
-          font-size: 0.9rem;
-          font-weight: 500;
-        }
-
-        .demo-section {
+        .form-divider {
+          position: relative;
           text-align: center;
-          margin-bottom: 2rem;
+          margin: var(--space-lg) 0;
+        }
+
+        .form-divider::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: var(--border-primary);
+        }
+
+        .form-divider span {
+          background: var(--bg-card);
+          color: var(--text-muted);
+          padding: 0 var(--space-md);
+          font-size: 0.9rem;
+        }
+
+        .demo-accounts {
+          text-align: center;
         }
 
         .demo-text {
-          color: #666;
-          margin: 0 0 1rem 0;
+          color: var(--text-secondary);
           font-size: 0.9rem;
+          margin-bottom: var(--space-md);
         }
 
         .demo-buttons {
           display: flex;
-          gap: 1rem;
+          gap: var(--space-md);
         }
 
-        .demo-button {
+        .demo-btn {
           flex: 1;
-          background: rgba(102,126,234,0.1);
-          border: 2px solid rgba(102,126,234,0.3);
-          color: #667eea;
-          padding: 0.75rem 1rem;
-          border-radius: 10px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          font-weight: 500;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
+          padding: var(--space-sm) var(--space-md);
         }
 
-        .demo-button:hover:not(:disabled) {
-          background: rgba(102,126,234,0.2);
-          transform: translateY(-2px);
-        }
-
-        .demo-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .demo-icon {
-          font-size: 1rem;
-        }
-
-        .signup-prompt {
+        .form-footer {
           text-align: center;
-          padding-top: 2rem;
-          border-top: 1px solid rgba(0,0,0,0.1);
+          padding-top: var(--space-lg);
+          border-top: 1px solid var(--border-primary);
         }
 
-        .signup-prompt p {
-          color: #666;
-          margin: 0 0 0.5rem 0;
-          font-size: 0.9rem;
+        .form-footer p {
+          color: var(--text-secondary);
+          margin: 0;
         }
 
         .signup-link {
-          color: #667eea;
+          color: var(--primary-cyan);
           text-decoration: none;
           font-weight: 600;
-          font-size: 1rem;
-          transition: color 0.3s ease;
+          transition: color var(--transition-normal);
         }
 
         .signup-link:hover {
-          color: #5a6fd8;
-          text-decoration: underline;
+          color: var(--primary-orange);
         }
 
-        /* Responsive Design */
         @media (max-width: 1024px) {
-          .login-content {
+          .login-wrapper {
             grid-template-columns: 1fr;
-            gap: 2rem;
-            text-align: center;
+            max-width: 500px;
           }
 
-          .login-branding {
-            order: 2;
-          }
-
-          .login-form-section {
-            order: 1;
-          }
-
-          .brand-content {
-            max-width: 600px;
-            margin: 0 auto;
-          }
-
-          .features-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+          .login-features {
+            display: none;
           }
         }
 
         @media (max-width: 768px) {
-          .login-content {
-            padding: 1rem;
-            min-height: auto;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
+          .login-container {
+            padding: var(--space-md);
           }
 
-          .form-container {
-            padding: 2rem;
-          }
-
-          .brand-tagline h2 {
-            font-size: 1.8rem;
+          .login-form-section {
+            padding: var(--space-xl);
           }
 
           .demo-buttons {
             flex-direction: column;
-          }
-
-          .form-options {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: flex-start;
           }
         }
       `}</style>

@@ -4,85 +4,80 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
 const CreateTask = () => {
-  const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    skillsRequired: [],
-    dateTime: '',
+    category: '',
+    skills: [],
+    urgency: 'normal',
     duration: '',
     credits: '',
-    urgency: 'medium',
-    category: 'Web Development'
+    dateTime: '',
+    isRemote: true,
+    location: ''
   });
-
   const [newSkill, setNewSkill] = useState('');
-  const [availableSkills] = useState([
-    'Web Development', 'Mobile Development', 'UI/UX Design', 'Graphic Design',
-    'Content Writing', 'Digital Marketing', 'SEO', 'Data Analysis',
-    'Video Editing', 'Photography', 'Translation', 'Virtual Assistant',
-    'Accounting', 'Legal Consulting', 'Tutoring', 'Research'
-  ]);
-
-  const categories = [
-    { value: 'Web Development', icon: '💻', color: '#667eea' },
-    { value: 'Mobile Development', icon: '📱', color: '#764ba2' },
-    { value: 'Design', icon: '🎨', color: '#f093fb' },
-    { value: 'Writing', icon: '✍️', color: '#4facfe' },
-    { value: 'Marketing', icon: '📈', color: '#43e97b' },
-    { value: 'Photography', icon: '📸', color: '#fa709a' },
-    { value: 'Video', icon: '🎬', color: '#ff9a9e' },
-    { value: 'Business', icon: '💼', color: '#a8edea' },
-    { value: 'Education', icon: '📚', color: '#ffecd2' },
-    { value: 'Other', icon: '🔧', color: '#d299c2' }
-  ];
-
-  const urgencyLevels = [
-    { value: 'low', label: 'Low Priority', icon: '🟢', description: 'Flexible timeline, no rush' },
-    { value: 'medium', label: 'Medium Priority', icon: '🟡', description: 'Standard timeline expected' },
-    { value: 'high', label: 'High Priority', icon: '🔴', description: 'Urgent, quick turnaround needed' }
-  ];
-
-  const durationOptions = [
-    { value: '30 minutes', label: '30 minutes', icon: '⚡' },
-    { value: '1 hour', label: '1 hour', icon: '🕐' },
-    { value: '2 hours', label: '2 hours', icon: '🕑' },
-    { value: '4 hours', label: '4 hours', icon: '🕓' },
-    { value: '1 day', label: '1 day', icon: '📅' },
-    { value: '2 days', label: '2 days', icon: '📆' },
-    { value: '1 week', label: '1 week', icon: '🗓️' },
-    { value: '2 weeks', label: '2 weeks', icon: '📋' },
-    { value: 'custom', label: 'Custom Duration', icon: '⚙️' }
-  ];
 
   const totalSteps = 4;
 
+  const categories = [
+    { id: 'web-dev', name: 'Web Development', icon: '🌐', popular: true },
+    { id: 'mobile-dev', name: 'Mobile Development', icon: '📱', popular: true },
+    { id: 'design', name: 'UI/UX Design', icon: '🎨', popular: true },
+    { id: 'writing', name: 'Content Writing', icon: '✍️', popular: true },
+    { id: 'marketing', name: 'Digital Marketing', icon: '📊', popular: false },
+    { id: 'data', name: 'Data Analysis', icon: '📈', popular: false },
+    { id: 'video', name: 'Video Editing', icon: '🎬', popular: false },
+    { id: 'other', name: 'Other', icon: '💼', popular: false }
+  ];
+
+  const urgencyLevels = [
+    { id: 'low', name: 'Low Priority', description: 'Flexible timeline', color: '#10B981', days: '7-14 days' },
+    { id: 'normal', name: 'Normal', description: 'Standard delivery', color: '#3B82F6', days: '3-7 days' },
+    { id: 'high', name: 'High Priority', description: 'Quick turnaround', color: '#F59E0B', days: '1-3 days' },
+    { id: 'urgent', name: 'Urgent', description: 'Rush delivery', color: '#EF4444', days: '<24 hours' }
+  ];
+
+  const durationOptions = [
+    { id: 'short', name: 'Short Term', description: 'Less than 1 week', icon: '⚡' },
+    { id: 'medium', name: 'Medium Term', description: '1-4 weeks', icon: '📅' },
+    { id: 'long', name: 'Long Term', description: '1+ months', icon: '🗓️' },
+    { id: 'ongoing', name: 'Ongoing', description: 'Continuous work', icon: '🔄' }
+  ];
+
+  const popularSkills = [
+    'React', 'JavaScript', 'Python', 'Node.js', 'UI/UX Design',
+    'WordPress', 'SEO', 'Content Writing', 'Social Media', 'Photography'
+  ];
+
   useEffect(() => {
-    if (!currentUser?.canCreateTasks) {
-      navigate('/browse-tasks');
+    if (!currentUser) {
+      navigate('/login');
+      return;
     }
   }, [currentUser, navigate]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
+    
+    if (error) setError('');
   };
 
   const addSkill = () => {
-    if (newSkill.trim() && !formData.skillsRequired.includes(newSkill.trim())) {
+    if (newSkill.trim() && !formData.skills.includes(newSkill.trim())) {
       setFormData(prev => ({
         ...prev,
-        skillsRequired: [...prev.skillsRequired, newSkill.trim()]
+        skills: [...prev.skills, newSkill.trim()]
       }));
       setNewSkill('');
     }
@@ -91,15 +86,15 @@ const CreateTask = () => {
   const removeSkill = (skillToRemove) => {
     setFormData(prev => ({
       ...prev,
-      skillsRequired: prev.skillsRequired.filter(skill => skill !== skillToRemove)
+      skills: prev.skills.filter(skill => skill !== skillToRemove)
     }));
   };
 
-  const addPredefinedSkill = (skill) => {
-    if (!formData.skillsRequired.includes(skill)) {
+  const addPopularSkill = (skill) => {
+    if (!formData.skills.includes(skill)) {
       setFormData(prev => ({
         ...prev,
-        skillsRequired: [...prev.skillsRequired, skill]
+        skills: [...prev.skills, skill]
       }));
     }
   };
@@ -111,83 +106,81 @@ const CreateTask = () => {
           setError('Project title is required');
           return false;
         }
-        if (!formData.category) {
-          setError('Please select a category');
+        if (formData.title.length < 10) {
+          setError('Project title must be at least 10 characters');
           return false;
         }
-        break;
-      case 2:
         if (!formData.description.trim()) {
           setError('Project description is required');
           return false;
         }
-        if (formData.skillsRequired.length === 0) {
-          setError('At least one skill is required');
+        if (formData.description.length < 50) {
+          setError('Project description must be at least 50 characters');
           return false;
         }
-        break;
+        return true;
+      case 2:
+        if (!formData.category) {
+          setError('Please select a category');
+          return false;
+        }
+        if (formData.skills.length === 0) {
+          setError('Please add at least one skill requirement');
+          return false;
+        }
+        return true;
       case 3:
-        if (!formData.dateTime) {
-          setError('Please set a deadline');
-          return false;
-        }
         if (!formData.duration) {
-          setError('Please select duration');
+          setError('Please select project duration');
           return false;
         }
-        const selectedDate = new Date(formData.dateTime);
-        const now = new Date();
-        if (selectedDate <= now) {
-          setError('Deadline must be in the future');
+        if (!formData.urgency) {
+          setError('Please select urgency level');
           return false;
         }
-        break;
+        return true;
       case 4:
-        if (!formData.credits || formData.credits < 1) {
-          setError('Credits must be at least 1');
+        if (!formData.credits || formData.credits < 10) {
+          setError('Credits must be at least 10');
           return false;
         }
-        break;
+        return true;
       default:
-        break;
+        return true;
     }
-    setError('');
-    return true;
   };
 
   const nextStep = () => {
     if (validateStep(currentStep)) {
       setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+      setError('');
     }
   };
 
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateStep(currentStep)) return;
+    if (!validateStep(4)) return;
     
     setLoading(true);
     setError('');
-    
+
     try {
-      const taskData = {
+      await api.post('/tasks', {
         ...formData,
         credits: parseInt(formData.credits)
-      };
+      });
       
-      const response = await api.post('/tasks', taskData);
-      
-      setSuccess('Task created successfully! Redirecting...');
-      setTimeout(() => {
-        navigate('/my-tasks');
-      }, 2000);
+      navigate('/my-tasks', { 
+        state: { message: 'Project created successfully!' }
+      });
     } catch (error) {
-      console.error('Error creating task:', error);
-      setError(error.response?.data?.message || 'Failed to create task. Please try again.');
+      setError(error.response?.data?.message || 'Failed to create project. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -214,47 +207,50 @@ const CreateTask = () => {
   const renderStep1 = () => (
     <div className="step-content">
       <div className="step-header">
-        <h2>📋 Project Details</h2>
-        <p>The more specific you are, the better quality applications you'll receive</p>
+        <h2>🚀 Create New Project</h2>
+        <p>Share your project and connect with talented helpers</p>
       </div>
 
-      <div className="form-section">
-        <div className="form-group">
-          <label htmlFor="title" className="form-label">
-            🎯 Project Title <span className="required">*</span>
-          </label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleInputChange}
-            placeholder="e.g., Build a responsive e-commerce website with payment integration"
-            className="form-input large-input"
-            maxLength={100}
-          />
-          <div className="input-helper">
-            {formData.title.length}/100 characters
-          </div>
+      <div className="form-group">
+        <label htmlFor="title" className="form-label">
+          Project Title <span className="required">*</span>
+        </label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          value={formData.title}
+          onChange={handleInputChange}
+          placeholder="e.g., Build a responsive e-commerce website with payment integration"
+          className="form-input"
+          maxLength="100"
+          required
+        />
+        <div className="input-help">
+          The more specific you are, the better quality applications you'll receive
         </div>
+        <div className="char-counter">
+          {formData.title.length}/100 characters
+        </div>
+      </div>
 
-        <div className="form-group">
-          <label className="form-label">
-            📂 Category <span className="required">*</span>
-          </label>
-          <div className="category-grid">
-            {categories.map(category => (
-              <div
-                key={category.value}
-                className={`category-card ${formData.category === category.value ? 'selected' : ''}`}
-                onClick={() => setFormData(prev => ({ ...prev, category: category.value }))}
-                style={{ '--category-color': category.color }}
-              >
-                <div className="category-icon">{category.icon}</div>
-                <div className="category-name">{category.value}</div>
-              </div>
-            ))}
-          </div>
+      <div className="form-group">
+        <label htmlFor="description" className="form-label">
+          Project Description <span className="required">*</span>
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          value={formData.description}
+          onChange={handleInputChange}
+          placeholder="Describe your project in detail. Include:&#10;• What you want to build&#10;• Key features and functionality&#10;• Any specific requirements or preferences&#10;• Expected deliverables&#10;• Success criteria"
+          className="form-textarea"
+          rows="8"
+          maxLength="2000"
+          required
+        />
+        <div className="char-counter">
+          {formData.description.length}/2000 characters
         </div>
       </div>
     </div>
@@ -264,85 +260,83 @@ const CreateTask = () => {
     <div className="step-content">
       <div className="step-header">
         <h2>📝 Description & Skills</h2>
-        <p>Provide detailed information about your project requirements</p>
+        <p>Help us match you with the right professionals</p>
       </div>
 
-      <div className="form-section">
-        <div className="form-group">
-          <label htmlFor="description" className="form-label">
-            📋 Project Description <span className="required">*</span>
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleInputChange}
-            placeholder="Describe your project in detail. Include specific requirements, deliverables, and any preferences you have..."
-            className="form-textarea large-textarea"
-            rows="8"
-            maxLength={1000}
-          />
-          <div className="input-helper">
-            {formData.description.length}/1000 characters
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">
-            🛠️ Required Skills <span className="required">*</span>
-          </label>
-          
-          <div className="skills-input-section">
-            <div className="skill-input-wrapper">
-              <input
-                type="text"
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
-                placeholder="Add a skill requirement..."
-                className="form-input"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-              />
-              <button type="button" onClick={addSkill} className="btn btn-secondary">
-                Add Skill
-              </button>
+      <div className="form-group">
+        <label className="form-label">
+          Project Category <span className="required">*</span>
+        </label>
+        <div className="category-grid">
+          {categories.map((category) => (
+            <div
+              key={category.id}
+              className={`category-card ${formData.category === category.id ? 'selected' : ''} ${category.popular ? 'popular' : ''}`}
+              onClick={() => setFormData(prev => ({ ...prev, category: category.id }))}
+            >
+              <div className="category-icon">{category.icon}</div>
+              <div className="category-name">{category.name}</div>
+              {category.popular && <div className="popular-badge">Popular</div>}
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          <div className="predefined-skills">
-            <h4>💡 Suggested Skills:</h4>
-            <div className="skills-suggestions">
-              {availableSkills.filter(skill => !formData.skillsRequired.includes(skill)).map(skill => (
+      <div className="form-group">
+        <label className="form-label">
+          Required Skills <span className="required">*</span>
+        </label>
+        <div className="skills-section">
+          <div className="skill-input-wrapper">
+            <input
+              type="text"
+              value={newSkill}
+              onChange={(e) => setNewSkill(e.target.value)}
+              placeholder="Add a skill requirement..."
+              className="form-input"
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+            />
+            <button
+              type="button"
+              onClick={addSkill}
+              className="btn btn-secondary add-skill-btn"
+            >
+              Add
+            </button>
+          </div>
+          
+          {formData.skills.length > 0 && (
+            <div className="selected-skills">
+              {formData.skills.map((skill, index) => (
+                <span key={index} className="skill-tag">
+                  {skill}
+                  <button
+                    type="button"
+                    onClick={() => removeSkill(skill)}
+                    className="remove-skill"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          
+          <div className="popular-skills">
+            <p className="popular-label">Popular skills:</p>
+            <div className="popular-skills-list">
+              {popularSkills.filter(skill => !formData.skills.includes(skill)).slice(0, 8).map((skill, index) => (
                 <button
-                  key={skill}
+                  key={index}
                   type="button"
-                  onClick={() => addPredefinedSkill(skill)}
-                  className="skill-suggestion"
+                  onClick={() => addPopularSkill(skill)}
+                  className="popular-skill"
                 >
                   + {skill}
                 </button>
               ))}
             </div>
           </div>
-
-          {formData.skillsRequired.length > 0 && (
-            <div className="selected-skills">
-              <h4>✅ Selected Skills:</h4>
-              <div className="skills-list">
-                {formData.skillsRequired.map(skill => (
-                  <div key={skill} className="skill-tag">
-                    <span>{skill}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeSkill(skill)}
-                      className="skill-remove"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -352,59 +346,98 @@ const CreateTask = () => {
     <div className="step-content">
       <div className="step-header">
         <h2>⏰ Timeline & Duration</h2>
-        <p>Set your project deadline and estimated duration</p>
+        <p>Set your project timeline and delivery expectations</p>
       </div>
 
-      <div className="form-section">
-        <div className="form-group">
-          <label htmlFor="dateTime" className="form-label">
-            📅 Project Deadline <span className="required">*</span>
-          </label>
-          <input
-            type="datetime-local"
-            id="dateTime"
-            name="dateTime"
-            value={formData.dateTime}
-            onChange={handleInputChange}
-            className="form-input large-input"
-            min={new Date().toISOString().slice(0, 16)}
-          />
-          <div className="input-helper">
-            When do you need this project completed?
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">
-            ⏱️ Estimated Duration <span className="required">*</span>
-          </label>
-          <div className="duration-grid">
-            {durationOptions.map(option => (
-              <div
-                key={option.value}
-                className={`duration-card ${formData.duration === option.value ? 'selected' : ''}`}
-                onClick={() => setFormData(prev => ({ ...prev, duration: option.value }))}
-              >
-                <div className="duration-icon">{option.icon}</div>
-                <div className="duration-label">{option.label}</div>
+      <div className="form-group">
+        <label className="form-label">
+          Project Duration <span className="required">*</span>
+        </label>
+        <div className="duration-grid">
+          {durationOptions.map((option) => (
+            <div
+              key={option.id}
+              className={`duration-card ${formData.duration === option.id ? 'selected' : ''}`}
+              onClick={() => setFormData(prev => ({ ...prev, duration: option.id }))}
+            >
+              <div className="duration-icon">{option.icon}</div>
+              <div className="duration-content">
+                <h4>{option.name}</h4>
+                <p>{option.description}</p>
               </div>
-            ))}
-          </div>
-          
-          {formData.duration === 'custom' && (
-            <div className="custom-duration">
-              <input
-                type="text"
-                placeholder="Enter custom duration (e.g., 3 weeks, 5 days)"
-                className="form-input"
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  duration: e.target.value || 'custom' 
-                }))}
-              />
             </div>
-          )}
+          ))}
         </div>
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">
+          Priority Level <span className="required">*</span>
+        </label>
+        <div className="urgency-grid">
+          {urgencyLevels.map((level) => (
+            <div
+              key={level.id}
+              className={`urgency-card ${formData.urgency === level.id ? 'selected' : ''}`}
+              onClick={() => setFormData(prev => ({ ...prev, urgency: level.id }))}
+              style={{ '--urgency-color': level.color }}
+            >
+              <div className="urgency-header">
+                <h4>{level.name}</h4>
+                <span className="urgency-timeline">{level.days}</span>
+              </div>
+              <p>{level.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="dateTime" className="form-label">
+          Preferred Deadline (Optional)
+        </label>
+        <input
+          type="datetime-local"
+          id="dateTime"
+          name="dateTime"
+          value={formData.dateTime}
+          onChange={handleInputChange}
+          className="form-input"
+          min={new Date().toISOString().slice(0, 16)}
+        />
+      </div>
+
+      <div className="form-group">
+        <div className="checkbox-group">
+          <label className="checkbox-wrapper">
+            <input
+              type="checkbox"
+              name="isRemote"
+              checked={formData.isRemote}
+              onChange={handleInputChange}
+              className="checkbox"
+            />
+            <span className="checkmark"></span>
+            <span className="checkbox-label">This is a remote project</span>
+          </label>
+        </div>
+        
+        {!formData.isRemote && (
+          <div className="form-group">
+            <label htmlFor="location" className="form-label">
+              Project Location
+            </label>
+            <input
+              type="text"
+              id="location"
+              name="location"
+              value={formData.location}
+              onChange={handleInputChange}
+              placeholder="City, Country"
+              className="form-input"
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -413,75 +446,105 @@ const CreateTask = () => {
     <div className="step-content">
       <div className="step-header">
         <h2>💰 Budget & Priority</h2>
-        <p>Set your budget and project priority level</p>
+        <p>Set your budget and finalize project details</p>
       </div>
 
-      <div className="form-section">
-        <div className="form-group">
-          <label htmlFor="credits" className="form-label">
-            💎 Project Budget (Credits) <span className="required">*</span>
-          </label>
-          <div className="credits-input-wrapper">
-            <div className="credits-icon">💎</div>
-            <input
-              type="number"
-              id="credits"
-              name="credits"
-              value={formData.credits}
-              onChange={handleInputChange}
-              min="1"
-              max="10000"
-              placeholder="100"
-              className="form-input credits-input"
-            />
-            <div className="credits-label">credits</div>
-          </div>
-          <div className="input-helper">
-            💡 Tip: Higher budgets attract more experienced helpers
+      <div className="form-group">
+        <label htmlFor="credits" className="form-label">
+          Project Budget (Credits) <span className="required">*</span>
+        </label>
+        <div className="budget-input-wrapper">
+          <div className="budget-icon">💎</div>
+          <input
+            type="number"
+            id="credits"
+            name="credits"
+            value={formData.credits}
+            onChange={handleInputChange}
+            placeholder="50"
+            className="form-input budget-input"
+            min="10"
+            max="1000"
+            required
+          />
+          <div className="budget-suffix">credits</div>
+        </div>
+        <div className="budget-help">
+          <div className="budget-suggestions">
+            <span>💡 Typical ranges:</span>
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, credits: '25' }))}
+              className="budget-suggestion"
+            >
+              25 (Small tasks)
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, credits: '50' }))}
+              className="budget-suggestion"
+            >
+              50 (Medium projects)
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, credits: '100' }))}
+              className="budget-suggestion"
+            >
+              100 (Large projects)
+            </button>
           </div>
         </div>
+      </div>
 
-        <div className="form-group">
-          <label className="form-label">
-            🚨 Priority Level
-          </label>
-          <div className="urgency-grid">
-            {urgencyLevels.map(level => (
-              <div
-                key={level.value}
-                className={`urgency-card ${formData.urgency === level.value ? 'selected' : ''}`}
-                onClick={() => setFormData(prev => ({ ...prev, urgency: level.value }))}
-              >
-                <div className="urgency-icon">{level.icon}</div>
-                <div className="urgency-content">
-                  <div className="urgency-label">{level.label}</div>
-                  <div className="urgency-description">{level.description}</div>
-                </div>
+      <div className="project-summary">
+        <h3>📋 Project Summary</h3>
+        <div className="summary-content">
+          <div className="summary-section">
+            <h4>Project Details</h4>
+            <div className="summary-item">
+              <span className="summary-label">Title:</span>
+              <span className="summary-value">{formData.title}</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Category:</span>
+              <span className="summary-value">
+                {categories.find(c => c.id === formData.category)?.name || 'Not selected'}
+              </span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Duration:</span>
+              <span className="summary-value">
+                {durationOptions.find(d => d.id === formData.duration)?.name || 'Not selected'}
+              </span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Priority:</span>
+              <span className="summary-value">
+                {urgencyLevels.find(u => u.id === formData.urgency)?.name || 'Not selected'}
+              </span>
+            </div>
+          </div>
+          
+          <div className="summary-section">
+            <h4>Requirements</h4>
+            <div className="summary-item">
+              <span className="summary-label">Skills:</span>
+              <div className="summary-skills">
+                {formData.skills.map((skill, index) => (
+                  <span key={index} className="summary-skill-tag">{skill}</span>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="project-summary">
-          <h3>📋 Project Summary</h3>
-          <div className="summary-content">
-            <div className="summary-item">
-              <strong>Title:</strong> {formData.title || 'Not specified'}
             </div>
             <div className="summary-item">
-              <strong>Category:</strong> {formData.category}
+              <span className="summary-label">Location:</span>
+              <span className="summary-value">
+                {formData.isRemote ? 'Remote' : formData.location || 'Not specified'}
+              </span>
             </div>
             <div className="summary-item">
-              <strong>Skills:</strong> {formData.skillsRequired.join(', ') || 'None specified'}
-            </div>
-            <div className="summary-item">
-              <strong>Duration:</strong> {formData.duration || 'Not specified'}
-            </div>
-            <div className="summary-item">
-              <strong>Budget:</strong> {formData.credits || '0'} credits
-            </div>
-            <div className="summary-item">
-              <strong>Priority:</strong> {formData.urgency}
+              <span className="summary-label">Budget:</span>
+              <span className="summary-value budget-highlight">💎 {formData.credits} credits</span>
             </div>
           </div>
         </div>
@@ -490,669 +553,644 @@ const CreateTask = () => {
   );
 
   return (
-    <div className="create-task-container">
-      {(error || success) && (
-        <div className={`alert ${error ? 'alert-error' : 'alert-success'}`}>
-          <span>{error || success}</span>
-          <button onClick={() => { setError(''); setSuccess(''); }} className="alert-close">✕</button>
-        </div>
-      )}
-
-      <div className="create-task-wrapper">
-        <div className="create-task-header">
-          <h1>🚀 Create New Project</h1>
-          <p>Share your project and connect with talented helpers</p>
-        </div>
-
-        <StepIndicator />
-
-        <form onSubmit={handleSubmit} className="create-task-form">
-          <div className="form-container">
-            {currentStep === 1 && renderStep1()}
-            {currentStep === 2 && renderStep2()}
-            {currentStep === 3 && renderStep3()}
-            {currentStep === 4 && renderStep4()}
+    <div className="page-container">
+      <div className="container">
+        <div className="create-task-wrapper">
+          <div className="create-task-header">
+            <StepIndicator />
           </div>
 
-          <div className="form-navigation">
-            {currentStep > 1 && (
-              <button
-                type="button"
-                onClick={prevStep}
-                className="btn btn-secondary"
-                disabled={loading}
-              >
-                ← Previous Step
-              </button>
+          <div className="create-task-content">
+            {error && (
+              <div className="alert alert-error">
+                <span className="error-icon">⚠️</span>
+                <span>{error}</span>
+              </div>
             )}
-            
-            <div className="nav-spacer"></div>
-            
-            {currentStep < totalSteps ? (
-              <button
-                type="button"
-                onClick={nextStep}
-                className="btn btn-primary"
-                disabled={loading}
-              >
-                Next Step →
-              </button>
-            ) : (
-              <button
-                type="submit"
-                className="btn btn-success"
-                disabled={loading}
-              >
-                {loading ? 'Creating Project...' : '🚀 Create Project'}
-              </button>
-            )}
+
+            <form onSubmit={handleSubmit}>
+              {currentStep === 1 && renderStep1()}
+              {currentStep === 2 && renderStep2()}
+              {currentStep === 3 && renderStep3()}
+              {currentStep === 4 && renderStep4()}
+
+              <div className="form-navigation">
+                {currentStep > 1 && (
+                  <button
+                    type="button"
+                    onClick={prevStep}
+                    className="btn btn-secondary"
+                  >
+                    ← Previous
+                  </button>
+                )}
+                
+                <div className="nav-spacer"></div>
+                
+                {currentStep < totalSteps ? (
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="btn btn-primary"
+                  >
+                    Next →
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn btn-primary"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="loading-spinner" style={{ width: '20px', height: '20px' }}></div>
+                        Creating Project...
+                      </>
+                    ) : (
+                      <>
+                        🚀 Create Project
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
 
       <style jsx>{`
-        .create-task-container {
-          min-height: calc(100vh - 120px);
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 2rem;
-        }
-
-        .alert {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          padding: 1rem 1.5rem;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          z-index: 1000;
-          box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-          color: white;
-          font-weight: 500;
-        }
-
-        .alert-error {
-          background: linear-gradient(135deg, #ff4757, #c44569);
-        }
-
-        .alert-success {
-          background: linear-gradient(135deg, #2ecc71, #27ae60);
-        }
-
-        .alert-close {
-          background: none;
-          border: none;
-          color: white;
-          cursor: pointer;
-          font-size: 1.2rem;
-          font-weight: bold;
-        }
-
         .create-task-wrapper {
-          max-width: 900px;
+          max-width: 800px;
           margin: 0 auto;
-          background: rgba(255,255,255,0.95);
-          border-radius: 25px;
-          padding: 3rem;
-          backdrop-filter: blur(10px);
-          box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+          background: var(--bg-card);
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-xl);
+          overflow: hidden;
         }
 
         .create-task-header {
-          text-align: center;
-          margin-bottom: 3rem;
-        }
-
-        .create-task-header h1 {
-          margin: 0 0 0.5rem 0;
-          font-size: 2.5rem;
-          font-weight: 700;
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-
-        .create-task-header p {
-          margin: 0;
-          font-size: 1.2rem;
-          color: #666;
+          background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+          padding: var(--space-2xl);
         }
 
         .step-indicator {
           display: flex;
-          justify-content: space-between;
-          margin-bottom: 3rem;
+          justify-content: center;
+          align-items: center;
+          gap: var(--space-xl);
           position: relative;
         }
 
         .step-indicator::before {
           content: '';
           position: absolute;
-          top: 20px;
-          left: 10%;
-          right: 10%;
+          top: 50%;
+          left: 15%;
+          right: 15%;
           height: 2px;
-          background: rgba(102,126,234,0.2);
-          z-index: 1;
+          background: var(--border-primary);
+          z-index: 0;
         }
 
         .step-indicator-item {
           display: flex;
           flex-direction: column;
           align-items: center;
+          gap: var(--space-sm);
           position: relative;
-          z-index: 2;
-          flex: 1;
+          z-index: 1;
+          text-align: center;
         }
 
         .step-circle {
-          width: 40px;
-          height: 40px;
+          width: 45px;
+          height: 45px;
           border-radius: 50%;
-          background: rgba(102,126,234,0.1);
-          color: #666;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: 600;
-          margin-bottom: 0.75rem;
-          transition: all 0.3s ease;
-          border: 2px solid rgba(102,126,234,0.2);
+          font-weight: 700;
+          font-size: 1rem;
+          background: var(--bg-tertiary);
+          color: var(--text-muted);
+          transition: all var(--transition-normal);
         }
 
         .step-circle.active {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          background: var(--primary-gradient);
           color: white;
-          border-color: #667eea;
-          box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+          box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
         }
 
         .step-circle.completed {
-          background: linear-gradient(135deg, #2ecc71, #27ae60);
-          border-color: #2ecc71;
+          background: var(--success);
+          color: white;
         }
 
         .step-label {
-          font-size: 0.9rem;
-          color: #666;
+          font-size: 0.85rem;
+          color: var(--text-secondary);
           font-weight: 500;
-          text-align: center;
           max-width: 120px;
         }
 
-        .create-task-form {
-          display: flex;
-          flex-direction: column;
-          gap: 2rem;
-        }
-
-        .form-container {
-          min-height: 500px;
+        .create-task-content {
+          padding: var(--space-2xl);
         }
 
         .step-content {
-          animation: fadeInUp 0.5s ease-out;
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          margin-bottom: var(--space-xl);
         }
 
         .step-header {
           text-align: center;
-          margin-bottom: 2.5rem;
+          margin-bottom: var(--space-2xl);
         }
 
         .step-header h2 {
-          margin: 0 0 0.5rem 0;
+          color: var(--text-primary);
           font-size: 2rem;
-          font-weight: 600;
-          color: #333;
+          font-weight: 700;
+          margin-bottom: var(--space-sm);
+          background: var(--primary-gradient);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
         .step-header p {
+          color: var(--text-secondary);
           margin: 0;
-          font-size: 1.1rem;
-          color: #666;
-        }
-
-        .form-section {
-          display: flex;
-          flex-direction: column;
-          gap: 2rem;
-        }
-
-        .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .form-label {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: #333;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
         }
 
         .required {
-          color: #e74c3c;
-          font-weight: bold;
+          color: var(--error);
         }
 
-        .form-input, .form-textarea {
-          padding: 1rem 1.25rem;
-          border: 2px solid rgba(0,0,0,0.1);
-          border-radius: 12px;
-          font-size: 1rem;
-          transition: all 0.3s ease;
-          background: white;
-          outline: none;
+        .input-help {
+          font-size: 0.85rem;
+          color: var(--text-muted);
+          margin-top: var(--space-xs);
         }
 
-        .large-input {
-          padding: 1.25rem 1.5rem;
-          font-size: 1.1rem;
-        }
-
-        .large-textarea {
-          padding: 1.25rem 1.5rem;
-          font-size: 1.1rem;
-          resize: vertical;
-          min-height: 150px;
-        }
-
-        .form-input:focus, .form-textarea:focus {
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
-        }
-
-        .input-helper {
-          font-size: 0.9rem;
-          color: #666;
-          margin-top: -0.5rem;
+        .char-counter {
+          font-size: 0.8rem;
+          color: var(--text-muted);
+          text-align: right;
+          margin-top: var(--space-xs);
         }
 
         .category-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 1rem;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: var(--space-md);
+          margin-top: var(--space-md);
         }
 
         .category-card {
-          background: white;
-          border: 2px solid rgba(0,0,0,0.1);
-          border-radius: 15px;
-          padding: 1.5rem;
+          background: var(--bg-secondary);
+          border: 2px solid var(--border-primary);
+          border-radius: var(--radius-lg);
+          padding: var(--space-lg);
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all var(--transition-normal);
           text-align: center;
           position: relative;
-          overflow: hidden;
-        }
-
-        .category-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 4px;
-          background: var(--category-color);
-          transform: scaleX(0);
-          transition: transform 0.3s ease;
-        }
-
-        .category-card:hover::before,
-        .category-card.selected::before {
-          transform: scaleX(1);
         }
 
         .category-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-          border-color: var(--category-color);
+          border-color: var(--border-accent);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
         }
 
         .category-card.selected {
-          border-color: var(--category-color);
-          background: rgba(102,126,234,0.05);
+          border-color: var(--primary-cyan);
+          background: rgba(0, 212, 255, 0.05);
           transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
+        }
+
+        .category-card.popular::before {
+          content: '';
+          position: absolute;
+          top: -1px;
+          right: -1px;
+          width: 0;
+          height: 0;
+          border-left: 20px solid transparent;
+          border-top: 20px solid var(--primary-orange);
+          border-radius: 0 var(--radius-lg) 0 0;
         }
 
         .category-icon {
           font-size: 2rem;
-          margin-bottom: 0.75rem;
+          margin-bottom: var(--space-md);
         }
 
         .category-name {
           font-weight: 600;
-          color: #333;
+          color: var(--text-primary);
         }
 
-        .skills-input-section {
-          margin-bottom: 1.5rem;
+        .popular-badge {
+          position: absolute;
+          top: 0;
+          right: 0;
+          background: var(--primary-orange);
+          color: white;
+          font-size: 0.7rem;
+          font-weight: 600;
+          padding: 2px 6px;
+          border-radius: 0 var(--radius-lg) 0 var(--radius-sm);
+        }
+
+        .skills-section {
+          margin-top: var(--space-md);
         }
 
         .skill-input-wrapper {
           display: flex;
-          gap: 1rem;
-          align-items: center;
+          gap: var(--space-md);
+          margin-bottom: var(--space-md);
         }
 
-        .predefined-skills {
-          margin-bottom: 1.5rem;
+        .add-skill-btn {
+          flex-shrink: 0;
+          padding: var(--space-md) var(--space-lg);
         }
 
-        .predefined-skills h4 {
-          margin: 0 0 1rem 0;
-          color: #333;
-          font-size: 1rem;
-        }
-
-        .skills-suggestions {
+        .selected-skills {
           display: flex;
           flex-wrap: wrap;
-          gap: 0.75rem;
-        }
-
-        .skill-suggestion {
-          background: rgba(102,126,234,0.1);
-          border: 1px solid rgba(102,126,234,0.3);
-          color: #667eea;
-          padding: 0.5rem 1rem;
-          border-radius: 20px;
-          cursor: pointer;
-          font-size: 0.9rem;
-          transition: all 0.3s ease;
-        }
-
-        .skill-suggestion:hover {
-          background: #667eea;
-          color: white;
-          transform: translateY(-2px);
-        }
-
-        .selected-skills h4 {
-          margin: 0 0 1rem 0;
-          color: #333;
-          font-size: 1rem;
-        }
-
-        .skills-list {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.75rem;
+          gap: var(--space-sm);
+          margin-bottom: var(--space-md);
         }
 
         .skill-tag {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          background: var(--primary-gradient);
           color: white;
-          padding: 0.5rem 1rem;
-          border-radius: 20px;
+          padding: var(--space-xs) var(--space-md);
+          border-radius: var(--radius-xl);
+          font-size: 0.85rem;
+          font-weight: 500;
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          font-size: 0.9rem;
-          font-weight: 500;
+          gap: var(--space-sm);
         }
 
-        .skill-remove {
-          background: rgba(255,255,255,0.2);
+        .remove-skill {
+          background: none;
           border: none;
           color: white;
-          border-radius: 50%;
-          width: 20px;
-          height: 20px;
           cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 0.8rem;
-          transition: background 0.2s ease;
+          font-size: 1.2rem;
+          line-height: 1;
+          opacity: 0.7;
+          transition: opacity var(--transition-normal);
         }
 
-        .skill-remove:hover {
-          background: rgba(255,255,255,0.3);
+        .remove-skill:hover {
+          opacity: 1;
+        }
+
+        .popular-skills {
+          margin-top: var(--space-md);
+        }
+
+        .popular-label {
+          color: var(--text-secondary);
+          font-size: 0.9rem;
+          margin-bottom: var(--space-sm);
+        }
+
+        .popular-skills-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-sm);
+        }
+
+        .popular-skill {
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-primary);
+          color: var(--text-secondary);
+          padding: var(--space-xs) var(--space-md);
+          border-radius: var(--radius-md);
+          font-size: 0.8rem;
+          cursor: pointer;
+          transition: all var(--transition-normal);
+        }
+
+        .popular-skill:hover {
+          background: var(--bg-secondary);
+          border-color: var(--border-accent);
+          color: var(--primary-cyan);
         }
 
         .duration-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-          gap: 1rem;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: var(--space-md);
+          margin-top: var(--space-md);
         }
 
-        .duration-card, .urgency-card {
-          background: white;
-          border: 2px solid rgba(0,0,0,0.1);
-          border-radius: 12px;
-          padding: 1.25rem;
+        .duration-card {
+          background: var(--bg-secondary);
+          border: 2px solid var(--border-primary);
+          border-radius: var(--radius-lg);
+          padding: var(--space-lg);
           cursor: pointer;
-          transition: all 0.3s ease;
-          text-align: center;
+          transition: all var(--transition-normal);
+          display: flex;
+          align-items: center;
+          gap: var(--space-md);
         }
 
-        .duration-card:hover, .urgency-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-          border-color: #667eea;
-        }
-
-        .duration-card.selected, .urgency-card.selected {
-          border-color: #667eea;
-          background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+        .duration-card:hover {
+          border-color: var(--border-accent);
           transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(102,126,234,0.2);
+          box-shadow: var(--shadow-md);
+        }
+
+        .duration-card.selected {
+          border-color: var(--primary-cyan);
+          background: rgba(0, 212, 255, 0.05);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
         }
 
         .duration-icon {
           font-size: 1.5rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .duration-label {
-          font-weight: 600;
-          color: #333;
-          font-size: 0.9rem;
-        }
-
-        .custom-duration {
-          margin-top: 1rem;
-        }
-
-        .credits-input-wrapper {
-          display: flex;
-          align-items: center;
-          background: white;
-          border: 2px solid rgba(0,0,0,0.1);
-          border-radius: 12px;
-          padding: 0.5rem 1rem;
-          transition: all 0.3s ease;
-        }
-
-        .credits-input-wrapper:focus-within {
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
-        }
-
-        .credits-icon {
-          font-size: 1.25rem;
-          margin-right: 0.75rem;
-        }
-
-        .credits-input {
-          border: none;
-          outline: none;
-          background: none;
-          flex: 1;
-          padding: 0.75rem 0;
-          font-size: 1.1rem;
-          font-weight: 600;
-        }
-
-        .credits-label {
-          color: #666;
-          font-weight: 500;
-          margin-left: 0.5rem;
-        }
-
-        .urgency-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .urgency-card {
-          text-align: left;
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        .urgency-icon {
-          font-size: 1.5rem;
           flex-shrink: 0;
         }
 
-        .urgency-content {
-          flex: 1;
-        }
-
-        .urgency-label {
+        .duration-content h4 {
+          color: var(--text-primary);
           font-weight: 600;
-          color: #333;
-          margin-bottom: 0.25rem;
+          margin: 0 0 var(--space-xs) 0;
         }
 
-        .urgency-description {
+        .duration-content p {
+          color: var(--text-secondary);
+          margin: 0;
           font-size: 0.9rem;
-          color: #666;
+        }
+
+        .urgency-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: var(--space-md);
+          margin-top: var(--space-md);
+        }
+
+        .urgency-card {
+          background: var(--bg-secondary);
+          border: 2px solid var(--border-primary);
+          border-radius: var(--radius-lg);
+          padding: var(--space-lg);
+          cursor: pointer;
+          transition: all var(--transition-normal);
+        }
+
+        .urgency-card:hover {
+          border-color: var(--border-accent);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+        }
+
+        .urgency-card.selected {
+          border-color: var(--urgency-color);
+          background: color-mix(in srgb, var(--urgency-color) 5%, transparent);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px color-mix(in srgb, var(--urgency-color) 20%, transparent);
+        }
+
+        .urgency-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: var(--space-sm);
+        }
+
+        .urgency-header h4 {
+          color: var(--text-primary);
+          font-weight: 600;
+          margin: 0;
+        }
+
+        .urgency-timeline {
+          background: var(--urgency-color);
+          color: white;
+          padding: var(--space-xs) var(--space-sm);
+          border-radius: var(--radius-md);
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+
+        .urgency-card p {
+          color: var(--text-secondary);
+          margin: 0;
+          font-size: 0.9rem;
+        }
+
+        .checkbox-group {
+          margin-top: var(--space-md);
+        }
+
+        .checkbox-wrapper {
+          display: flex;
+          align-items: center;
+          gap: var(--space-md);
+          cursor: pointer;
+        }
+
+        .checkbox {
+          display: none;
+        }
+
+        .checkmark {
+          width: 18px;
+          height: 18px;
+          border: 2px solid var(--border-primary);
+          border-radius: 4px;
+          position: relative;
+          transition: all var(--transition-normal);
+          flex-shrink: 0;
+        }
+
+        .checkbox:checked + .checkmark {
+          background: var(--primary-gradient);
+          border-color: var(--primary-cyan);
+        }
+
+        .checkbox:checked + .checkmark::after {
+          content: '✓';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: white;
+          font-size: 0.7rem;
+          font-weight: bold;
+        }
+
+        .checkbox-label {
+          color: var(--text-primary);
+          font-weight: 500;
+        }
+
+        .budget-input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .budget-icon {
+          position: absolute;
+          left: var(--space-md);
+          font-size: 1.2rem;
+          z-index: 1;
+        }
+
+        .budget-input {
+          padding-left: 3rem;
+          padding-right: 5rem;
+        }
+
+        .budget-suffix {
+          position: absolute;
+          right: var(--space-md);
+          color: var(--text-muted);
+          font-weight: 500;
+        }
+
+        .budget-help {
+          margin-top: var(--space-md);
+        }
+
+        .budget-suggestions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-sm);
+          align-items: center;
+        }
+
+        .budget-suggestions span {
+          color: var(--text-secondary);
+          font-size: 0.9rem;
+          margin-right: var(--space-sm);
+        }
+
+        .budget-suggestion {
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-primary);
+          color: var(--text-secondary);
+          padding: var(--space-xs) var(--space-md);
+          border-radius: var(--radius-md);
+          font-size: 0.8rem;
+          cursor: pointer;
+          transition: all var(--transition-normal);
+        }
+
+        .budget-suggestion:hover {
+          background: var(--bg-secondary);
+          border-color: var(--border-accent);
+          color: var(--primary-cyan);
         }
 
         .project-summary {
-          background: rgba(102,126,234,0.05);
-          border-radius: 15px;
-          padding: 2rem;
-          margin-top: 2rem;
+          background: var(--bg-secondary);
+          border-radius: var(--radius-lg);
+          padding: var(--space-xl);
+          margin-top: var(--space-xl);
         }
 
         .project-summary h3 {
-          margin: 0 0 1.5rem 0;
-          color: #333;
+          color: var(--text-primary);
           font-size: 1.3rem;
+          font-weight: 600;
+          margin: 0 0 var(--space-lg) 0;
         }
 
         .summary-content {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 1rem;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: var(--space-xl);
+        }
+
+        .summary-section h4 {
+          color: var(--text-primary);
+          font-size: 1rem;
+          font-weight: 600;
+          margin: 0 0 var(--space-md) 0;
         }
 
         .summary-item {
-          background: white;
-          padding: 1rem;
-          border-radius: 10px;
-          border-left: 4px solid #667eea;
+          display: grid;
+          grid-template-columns: 100px 1fr;
+          gap: var(--space-md);
+          margin-bottom: var(--space-md);
+          align-items: start;
         }
 
-        .summary-item strong {
-          color: #667eea;
-          display: block;
-          margin-bottom: 0.25rem;
+        .summary-label {
+          color: var(--text-secondary);
+          font-weight: 500;
+          font-size: 0.9rem;
+        }
+
+        .summary-value {
+          color: var(--text-primary);
+          font-size: 0.9rem;
+        }
+
+        .summary-skills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-xs);
+        }
+
+        .summary-skill-tag {
+          background: var(--primary-gradient);
+          color: white;
+          padding: var(--space-xs) var(--space-sm);
+          border-radius: var(--radius-md);
+          font-size: 0.75rem;
+          font-weight: 500;
+        }
+
+        .budget-highlight {
+          font-weight: 600;
+          color: var(--primary-cyan);
         }
 
         .form-navigation {
           display: flex;
+          justify-content: space-between;
           align-items: center;
-          gap: 1rem;
-          padding-top: 2rem;
-          border-top: 2px solid rgba(0,0,0,0.05);
+          padding-top: var(--space-xl);
+          border-top: 1px solid var(--border-primary);
+          margin-top: var(--space-xl);
         }
 
         .nav-spacer {
           flex: 1;
         }
 
-        .btn {
-          padding: 1rem 2rem;
-          border-radius: 12px;
-          border: none;
-          cursor: pointer;
-          font-weight: 600;
-          font-size: 1rem;
-          transition: all 0.3s ease;
-          text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          min-width: 150px;
-        }
-
-        .btn:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-          transform: none !important;
-        }
-
-        .btn-primary {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          color: white;
-          box-shadow: 0 5px 15px rgba(102,126,234,0.3);
-        }
-
-        .btn-primary:not(:disabled):hover {
-          transform: translateY(-3px);
-          box-shadow: 0 8px 25px rgba(102,126,234,0.4);
-        }
-
-        .btn-secondary {
-          background: rgba(102,126,234,0.1);
-          color: #667eea;
-          border: 2px solid #667eea;
-        }
-
-        .btn-secondary:not(:disabled):hover {
-          background: #667eea;
-          color: white;
-          transform: translateY(-2px);
-        }
-
-        .btn-success {
-          background: linear-gradient(135deg, #2ecc71, #27ae60);
-          color: white;
-          box-shadow: 0 5px 15px rgba(46,204,113,0.3);
-        }
-
-        .btn-success:not(:disabled):hover {
-          transform: translateY(-3px);
-          box-shadow: 0 8px 25px rgba(46,204,113,0.4);
-        }
-
         @media (max-width: 768px) {
-          .create-task-container {
-            padding: 1rem;
+          .create-task-wrapper {
+            margin: var(--space-md);
           }
 
-          .create-task-wrapper {
-            padding: 2rem 1.5rem;
+          .create-task-header,
+          .create-task-content {
+            padding: var(--space-xl);
           }
 
           .step-indicator {
             flex-direction: column;
-            gap: 1rem;
+            gap: var(--space-md);
           }
 
           .step-indicator::before {
@@ -1162,7 +1200,7 @@ const CreateTask = () => {
           .step-indicator-item {
             flex-direction: row;
             text-align: left;
-            gap: 1rem;
+            gap: var(--space-md);
           }
 
           .step-circle {
@@ -1170,12 +1208,10 @@ const CreateTask = () => {
             flex-shrink: 0;
           }
 
-          .category-grid {
-            grid-template-columns: 1fr 1fr;
-          }
-
-          .duration-grid {
-            grid-template-columns: 1fr 1fr;
+          .category-grid,
+          .duration-grid,
+          .urgency-grid {
+            grid-template-columns: 1fr;
           }
 
           .skill-input-wrapper {
@@ -1189,11 +1225,16 @@ const CreateTask = () => {
 
           .form-navigation {
             flex-direction: column-reverse;
-            gap: 1rem;
+            gap: var(--space-md);
           }
 
           .nav-spacer {
             display: none;
+          }
+
+          .summary-item {
+            grid-template-columns: 1fr;
+            gap: var(--space-sm);
           }
         }
       `}</style>

@@ -1,768 +1,555 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
-import api from '../utils/api';
 
-const Chat = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+const ChatPage = () => {
   const { currentUser } = useAuth();
+  const { messages, sendMessage, markAsRead } = useChat();
+  const navigate = useNavigate();
   
-  // Add proper destructuring with default values to prevent undefined errors
-  const { 
-    chats = [], 
-    activeChat = null, 
-    messages = {}, 
-    setActiveChat = () => {}, 
-    sendMessage = () => {}, 
-    markAsRead = () => {} 
-  } = useChat() || {}; // Add fallback for entire useChat hook
-
+  const [conversations, setConversations] = useState([]);
+  const [activeChat, setActiveChat] = useState(null);
   const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showUserInfo, setShowUserInfo] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [isTyping, setIsTyping] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [error, setError] = useState('');
-  
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const messagesEndRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const typingTimeoutRef = useRef(null);
-
-  const commonEmojis = [
-    '👍', '👎', '❤️', '😊', '😂', '😢', '😮', '😡',
-    '🎉', '🎊', '👏', '🙌', '💪', '🔥', '⭐', '✅',
-    '❌', '⚡', '💰', '🚀', '💡', '📝', '📋', '🎯'
-  ];
-
-  // Safe array check function
-  const ensureArray = (value) => {
-    return Array.isArray(value) ? value : [];
-  };
-
-  // Safe object check function
-  const ensureObject = (value) => {
-    return value && typeof value === 'object' ? value : {};
-  };
 
   useEffect(() => {
-    const bookingId = searchParams.get('booking');
-    const taskId = searchParams.get('task');
-    
-    if (bookingId || taskId) {
-      handleDirectMessage(bookingId, taskId);
+    if (!currentUser) {
+      navigate('/login');
+      return;
     }
-  }, [searchParams]);
+    
+    fetchConversations();
+  }, [currentUser, navigate]);
 
   useEffect(() => {
     scrollToBottom();
-    if (activeChat && activeChat._id && markAsRead) {
-      markAsRead(activeChat._id);
-    }
-  }, [messages, activeChat, markAsRead]);
+  }, [activeChat, messages]);
 
-  const handleDirectMessage = async (bookingId, taskId) => {
+  const fetchConversations = async () => {
     try {
-      setError('');
-      const chatsArray = ensureArray(chats);
-      let conversation = chatsArray.find(conv => 
-        (conv && conv.bookingId === bookingId) || (conv && conv.taskId === taskId)
-      );
-      
-      if (!conversation) {
-        const response = await api.post('/chat/conversations', { bookingId, taskId });
-        if (response && response.data) {
-          conversation = response.data;
+      // Mock conversations data - replace with actual API call
+      const mockConversations = [
+        {
+          _id: 'conv1',
+          participants: [
+            {
+              _id: 'user1',
+              username: 'designpro',
+              avatar: '🎨',
+              lastSeen: new Date(Date.now() - 5 * 60 * 1000),
+              isOnline: true
+            }
+          ],
+          taskId: {
+            _id: 'task1',
+            title: 'E-commerce Website Design',
+            status: 'in-progress'
+          },
+          lastMessage: {
+            content: 'I\'ve uploaded the latest mockups for review',
+            timestamp: new Date(Date.now() - 30 * 60 * 1000),
+            sender: 'user1'
+          },
+          unreadCount: 2
+        },
+        {
+          _id: 'conv2',
+          participants: [
+            {
+              _id: 'user2',
+              username: 'johndeveloper',
+              avatar: '👨‍💻',
+              lastSeen: new Date(Date.now() - 2 * 60 * 60 * 1000),
+              isOnline: false
+            }
+          ],
+          taskId: {
+            _id: 'task2',
+            title: 'React Dashboard Development',
+            status: 'completed'
+          },
+          lastMessage: {
+            content: 'Thanks for the feedback! Project delivered successfully.',
+            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
+            sender: 'user2'
+          },
+          unreadCount: 0
+        },
+        {
+          _id: 'conv3',
+          participants: [
+            {
+              _id: 'user3',
+              username: 'contentwriter',
+              avatar: '✍️',
+              lastSeen: new Date(Date.now() - 6 * 60 * 60 * 1000),
+              isOnline: false
+            }
+          ],
+          taskId: {
+            _id: 'task3',
+            title: 'Blog Content Creation',
+            status: 'pending'
+          },
+          lastMessage: {
+            content: 'When would you like me to start on the blog posts?',
+            timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+            sender: 'user3'
+          },
+          unreadCount: 1
         }
-      }
+      ];
       
-      if (conversation && setActiveChat) {
-        setActiveChat(conversation);
+      setConversations(mockConversations);
+      
+      // Auto-select first conversation if available
+      if (mockConversations.length > 0) {
+        setActiveChat(mockConversations[0]);
       }
     } catch (error) {
-      console.error('Error setting up direct message:', error);
-      setError('Failed to start conversation. Please try again.');
-    }
-  };
-
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    
-    if ((!newMessage || !newMessage.trim()) && !selectedFile) return;
-    if (!activeChat || !activeChat._id) return;
-    
-    setLoading(true);
-    setError('');
-    
-    try {
-      const messageData = {
-        content: newMessage.trim(),
-        file: selectedFile
-      };
-      
-      if (sendMessage) {
-        await sendMessage(activeChat._id, messageData);
-      }
-      setNewMessage('');
-      setSelectedFile(null);
-      setShowEmojiPicker(false);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setError('Failed to send message. Please try again.');
+      console.error('Error fetching conversations:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEmojiSelect = (emoji) => {
-    setNewMessage(prev => (prev || '') + emoji);
-    setShowEmojiPicker(false);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleFileSelect = (e) => {
-    const file = e.target?.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  };
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !activeChat) return;
 
-  const handleTyping = () => {
-    if (!isTyping) {
-      setIsTyping(true);
-    }
-    
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-    
-    typingTimeoutRef.current = setTimeout(() => {
-      setIsTyping(false);
-    }, 3000);
-  };
-
-  const getFilteredConversations = () => {
-    const chatsArray = ensureArray(chats);
-    
-    if (!searchQuery || !searchQuery.trim()) {
-      return chatsArray;
-    }
-    
-    return chatsArray.filter(conv => {
-      if (!conv) return false;
-      
-      const participants = ensureArray(conv.participants);
-      const otherUser = participants.find(p => p && p._id !== currentUser?.id);
-      const taskTitle = conv.taskId?.title || '';
-      const searchLower = searchQuery.toLowerCase();
-      
-      return (
-        (otherUser?.username || '').toLowerCase().includes(searchLower) ||
-        taskTitle.toLowerCase().includes(searchLower)
-      );
-    });
-  };
-
-  const formatMessageTime = (timestamp) => {
-    if (!timestamp) return '';
-    
     try {
-      const date = new Date(timestamp);
-      const now = new Date();
-      const diff = now - date;
-      
-      if (diff < 60000) return 'now';
-      if (diff < 3600000) return `${Math.floor(diff / 60000)}m`;
-      if (diff < 86400000) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      if (diff < 604800000) return date.toLocaleDateString([], { weekday: 'short' });
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      const messageData = {
+        conversationId: activeChat._id,
+        content: newMessage.trim(),
+        timestamp: new Date()
+      };
+
+      await sendMessage(messageData);
+      setNewMessage('');
     } catch (error) {
-      console.error('Error formatting time:', error);
-      return '';
+      console.error('Error sending message:', error);
     }
   };
 
-  const getOtherUser = (conversation) => {
-    if (!conversation) return null;
-    const participants = ensureArray(conversation.participants);
-    return participants.find(p => p && p._id !== currentUser?.id) || null;
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
+
+  const formatTimestamp = (timestamp) => {
+    const now = new Date();
+    const messageDate = new Date(timestamp);
+    const diffInHours = Math.abs(now - messageDate) / 36e5;
+
+    if (diffInHours < 24) {
+      return messageDate.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } else if (diffInHours < 168) { // 7 days
+      return messageDate.toLocaleDateString('en-US', {
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } else {
+      return messageDate.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending': return '#F59E0B';
+      case 'in-progress': return '#3B82F6';
+      case 'completed': return '#10B981';
+      case 'cancelled': return '#EF4444';
+      default: return '#6B7280';
+    }
+  };
+
+  const currentMessages = [
+    {
+      _id: 'msg1',
+      content: 'Hi! I\'ve started working on your e-commerce design project.',
+      sender: { _id: 'user1', username: 'designpro' },
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      isOwn: false
+    },
+    {
+      _id: 'msg2',
+      content: 'Great! I\'m excited to see what you come up with. Do you have any initial questions about the requirements?',
+      sender: { _id: currentUser?.id, username: currentUser?.username },
+      timestamp: new Date(Date.now() - 90 * 60 * 1000),
+      isOwn: true
+    },
+    {
+      _id: 'msg3',
+      content: 'I\'ve uploaded the latest mockups for review. Please check them out and let me know your thoughts!',
+      sender: { _id: 'user1', username: 'designpro' },
+      timestamp: new Date(Date.now() - 30 * 60 * 1000),
+      isOwn: false
+    }
+  ];
+
+  const MessageBubble = ({ message, isOwn, showAvatar }) => (
+    <div className={`message-bubble ${isOwn ? 'own' : 'other'}`}>
+      {!isOwn && showAvatar && (
+        <div className="message-avatar">
+          {message.sender?.username?.charAt(0).toUpperCase() || '?'}
+        </div>
+      )}
+      <div className="message-content">
+        <div className="message-text">
+          {message.content}
+        </div>
+        <div className="message-timestamp">
+          {formatTimestamp(message.timestamp)}
+        </div>
+      </div>
+    </div>
+  );
 
   const ConversationItem = ({ conversation, isActive, onClick }) => {
-    if (!conversation) return null;
-    
-    const otherUser = getOtherUser(conversation);
-    const lastMessage = conversation.lastMessage;
-    const unreadCount = conversation.unreadCount || 0;
-    const isOnline = otherUser?.isOnline || false;
-    
-    if (!otherUser) return null;
-    
+    const otherUser = conversation.participants[0];
+    const hasUnread = conversation.unreadCount > 0;
+
     return (
       <div 
-        className={`conversation-item ${isActive ? 'active' : ''}`}
-        onClick={() => onClick && onClick(conversation)}
+        className={`conversation-item ${isActive ? 'active' : ''} ${hasUnread ? 'unread' : ''}`}
+        onClick={onClick}
       >
         <div className="conversation-avatar">
-          <div className="avatar-circle">
-            {(otherUser.username || '?').charAt(0).toUpperCase()}
+          <div className="avatar-icon">
+            {otherUser.avatar}
           </div>
-          {isOnline && <div className="online-indicator"></div>}
+          {otherUser.isOnline && <div className="online-indicator"></div>}
         </div>
         
         <div className="conversation-content">
           <div className="conversation-header">
-            <h4 className="conversation-name">{otherUser.username || 'Unknown User'}</h4>
+            <span className="conversation-name">{otherUser.username}</span>
             <span className="conversation-time">
-              {lastMessage ? formatMessageTime(lastMessage.createdAt) : ''}
+              {formatTimestamp(conversation.lastMessage.timestamp)}
             </span>
           </div>
           
           <div className="conversation-preview">
-            <p className="last-message">
-              {lastMessage ? (
-                lastMessage.sender === currentUser?.id 
-                  ? `You: ${lastMessage.content || 'Sent a file'}` 
-                  : lastMessage.content || 'Sent a file'
-              ) : 'No messages yet'}
-            </p>
-            
-            {conversation.taskId && (
-              <div className="project-context">
-                📋 {conversation.taskId.title || 'Project'}
-              </div>
-            )}
+            <span className="project-title">{conversation.taskId.title}</span>
+            <p className="last-message">{conversation.lastMessage.content}</p>
           </div>
           
-          {unreadCount > 0 && (
-            <div className="unread-badge">{unreadCount}</div>
-          )}
+          <div className="conversation-meta">
+            <span 
+              className="project-status"
+              style={{ color: getStatusColor(conversation.taskId.status) }}
+            >
+              {conversation.taskId.status}
+            </span>
+            {hasUnread && (
+              <span className="unread-count">{conversation.unreadCount}</span>
+            )}
+          </div>
         </div>
       </div>
     );
   };
 
-  const MessageBubble = ({ message, isOwn, showAvatar = true }) => {
-    if (!message) return null;
-    
-    const sender = ensureObject(message.sender);
-    const timestamp = formatMessageTime(message.createdAt);
-    
+  const filteredConversations = conversations.filter(conv =>
+    conv.participants[0].username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    conv.taskId.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
     return (
-      <div className={`message-container ${isOwn ? 'own' : 'other'}`}>
-        {!isOwn && showAvatar && (
-          <div className="message-avatar">
-            <div className="avatar-circle">
-              {(sender.username || '?').charAt(0).toUpperCase()}
-            </div>
-          </div>
-        )}
-        
-        <div className={`message-bubble ${isOwn ? 'own' : 'other'}`}>
-          <div className="message-content">
-            {message.content && <p className="message-text">{message.content}</p>}
-            
-            {message.file && (
-              <div className="message-file">
-                {message.file.type?.startsWith('image/') ? (
-                  <img 
-                    src={message.file.url} 
-                    alt="Shared image"
-                    className="message-image"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <div className="file-attachment">
-                    <span className="file-icon">📎</span>
-                    <span className="file-name">{message.file.name || 'File'}</span>
-                    <a 
-                      href={message.file.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="file-download"
-                    >
-                      Download
-                    </a>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          
-          <div className="message-meta">
-            <span className="message-time">{timestamp}</span>
-            {isOwn && message.read && <span className="read-indicator">✓</span>}
+      <div className="page-container">
+        <div className="container">
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Loading conversations...</p>
           </div>
         </div>
       </div>
     );
-  };
-
-  const EmptyState = () => (
-    <div className="chat-empty-state">
-      <div className="empty-icon">💬</div>
-      <h3>Select a conversation</h3>
-      <p>Choose a conversation from the sidebar to start messaging</p>
-    </div>
-  );
-
-  const NoConversations = () => (
-    <div className="no-conversations">
-      <div className="empty-icon">📭</div>
-      <h3>No conversations yet</h3>
-      <p>Start collaborating on projects to begin conversations</p>
-      <button 
-        onClick={() => navigate('/browse-tasks')}
-        className="btn btn-primary"
-      >
-        🔍 Browse Projects
-      </button>
-    </div>
-  );
-
-  // Safe access to current messages
-  const getCurrentMessages = () => {
-    if (!activeChat || !activeChat._id || !messages) return [];
-    const currentMessages = messages[activeChat._id];
-    return ensureArray(currentMessages);
-  };
-
-  const filteredConversations = getFilteredConversations();
-  const currentMessages = getCurrentMessages();
+  }
 
   return (
-    <div className="chat-container">
-      {/* Error Display */}
-      {error && (
-        <div className="error-banner">
-          <span className="error-text">{error}</span>
-          <button onClick={() => setError('')} className="error-close">✕</button>
+    <div className="page-container">
+      <div className="container">
+        <div className="page-header">
+          <h1 className="page-title">💬 Messages</h1>
+          <p className="page-subtitle">Communicate with your project collaborators</p>
         </div>
-      )}
 
-      {/* Sidebar */}
-      <div className="chat-sidebar">
-        <div className="sidebar-header">
-          <h2>Messages</h2>
-          <div className="sidebar-controls">
-            <button 
-              onClick={() => navigate('/browse-tasks')}
-              className="new-chat-btn"
-              title="Start new conversation"
-            >
-              ✏️
-            </button>
-          </div>
-        </div>
-        
-        <div className="search-section">
-          <div className="search-input-wrapper">
-            <span className="search-icon">🔍</span>
-            <input
-              type="text"
-              placeholder="Search conversations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value || '')}
-              className="search-input"
-            />
-          </div>
-        </div>
-        
-        <div className="conversations-list">
-          {filteredConversations.length === 0 ? (
-            <NoConversations />
-          ) : (
-            filteredConversations.map((conversation, index) => (
-              conversation ? (
-                <ConversationItem
-                  key={conversation._id || index}
-                  conversation={conversation}
-                  isActive={activeChat?._id === conversation._id}
-                  onClick={setActiveChat}
+        <div className="chat-container">
+          {/* Conversations Sidebar */}
+          <div className="conversations-sidebar">
+            <div className="sidebar-header">
+              <h3>Conversations</h3>
+              <div className="search-wrapper">
+                <input
+                  type="text"
+                  placeholder="Search conversations..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
                 />
-              ) : null
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Main Chat Area */}
-      <div className="chat-main">
-        {!activeChat ? (
-          <EmptyState />
-        ) : (
-          <>
-            {/* Chat Header */}
-            <div className="chat-header">
-              <div className="chat-user-info">
-                <div className="user-avatar">
-                  <div className="avatar-circle">
-                    {(getOtherUser(activeChat)?.username || '?').charAt(0).toUpperCase()}
-                  </div>
-                  <div className="online-status"></div>
-                </div>
-                <div className="user-details">
-                  <h3 className="user-name">
-                    {getOtherUser(activeChat)?.username || 'Unknown User'}
-                  </h3>
-                  <p className="user-status">
-                    {getOtherUser(activeChat)?.isOnline ? (
-                      <span className="status-online">🟢 Online</span>
-                    ) : (
-                      <span className="status-offline">⚫ Offline</span>
-                    )}
-                  </p>
-                </div>
+                <span className="search-icon">🔍</span>
               </div>
-              
-              {activeChat.taskId && (
-                <div className="project-info">
-                  <div className="project-badge">
-                    <span className="project-icon">📋</span>
-                    <span className="project-title">
-                      {activeChat.taskId.title || 'Project'}
-                    </span>
-                  </div>
-                  <button 
-                    onClick={() => setShowUserInfo(!showUserInfo)}
-                    className="info-btn"
-                  >
-                    ℹ️
-                  </button>
+            </div>
+
+            <div className="conversations-list">
+              {filteredConversations.length > 0 ? (
+                filteredConversations.map((conversation) => (
+                  <ConversationItem
+                    key={conversation._id}
+                    conversation={conversation}
+                    isActive={activeChat?._id === conversation._id}
+                    onClick={() => setActiveChat(conversation)}
+                  />
+                ))
+              ) : (
+                <div className="no-conversations">
+                  <div className="no-conversations-icon">💬</div>
+                  <p>No conversations found</p>
                 </div>
               )}
             </div>
-            
-            {/* Project Info Panel */}
-            {showUserInfo && activeChat.taskId && (
-              <div className="project-info-panel">
-                <div className="project-details">
-                  <h4>📋 Project Details</h4>
-                  <p><strong>Title:</strong> {activeChat.taskId.title || 'N/A'}</p>
-                  <p><strong>Budget:</strong> {activeChat.taskId.credits || 0} credits</p>
-                  <p><strong>Deadline:</strong> {
-                    activeChat.taskId.dateTime 
-                      ? new Date(activeChat.taskId.dateTime).toLocaleDateString()
-                      : 'Flexible'
-                  }</p>
-                  <div className="project-actions">
-                    <button 
-                      onClick={() => navigate(`/tasks/${activeChat.taskId._id}`)}
-                      className="btn btn-secondary"
-                    >
-                      📋 View Project
-                    </button>
-                    {activeChat.bookingId && (
-                      <button 
-                        onClick={() => navigate(`/my-bookings`)}
-                        className="btn btn-primary"
-                      >
-                        📁 Manage Booking
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+          </div>
 
-            {/* Messages Area */}
-            <div className="messages-container">
-              <div className="messages-list">
-                {currentMessages.map((message, index) => {
-                  if (!message) return null;
-                  
-                  const isOwn = message.sender?._id === currentUser?.id;
-                  const prevMessage = currentMessages[index - 1];
-                  const showAvatar = !prevMessage || prevMessage.sender?._id !== message.sender?._id;
-                  
-                  return (
-                    <MessageBubble
-                      key={message._id || `msg-${index}`}
-                      message={message}
-                      isOwn={isOwn}
-                      showAvatar={showAvatar}
-                    />
-                  );
-                })}
-                
-                {isTyping && (
-                  <div className="typing-indicator">
-                    <div className="typing-bubble">
-                      <div className="typing-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+          {/* Chat Area */}
+          <div className="chat-area">
+            {activeChat ? (
+              <>
+                {/* Chat Header */}
+                <div className="chat-header">
+                  <div className="chat-user-info">
+                    <div className="chat-avatar">
+                      <div className="avatar-icon">
+                        {activeChat.participants[0].avatar}
                       </div>
+                      {activeChat.participants[0].isOnline && (
+                        <div className="online-indicator"></div>
+                      )}
+                    </div>
+                    <div className="chat-user-details">
+                      <h3>{activeChat.participants[0].username}</h3>
+                      <p className="user-status">
+                        {activeChat.participants[0].isOnline 
+                          ? 'Online' 
+                          : `Last seen ${formatTimestamp(activeChat.participants[0].lastSeen)}`
+                        }
+                      </p>
                     </div>
                   </div>
-                )}
-                
-                <div ref={messagesEndRef} />
-              </div>
-            </div>
 
-            {/* Message Input */}
-            <div className="message-input-container">
-              {selectedFile && (
-                <div className="file-preview">
-                  <div className="file-info">
-                    <span className="file-icon">📎</span>
-                    <span className="file-name">{selectedFile.name}</span>
-                    <button 
-                      onClick={() => setSelectedFile(null)}
-                      className="remove-file"
-                    >
-                      ✕
+                  <div className="chat-actions">
+                    <button className="action-btn" title="Project Details">
+                      📋
+                    </button>
+                    <button className="action-btn" title="Video Call">
+                      📹
+                    </button>
+                    <button className="action-btn" title="More Options">
+                      ⋯
                     </button>
                   </div>
                 </div>
-              )}
-              
-              <form onSubmit={handleSendMessage} className="message-form">
-                <div className="input-actions">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="action-btn"
-                    title="Attach file"
-                  >
-                    📎
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="action-btn"
-                    title="Add emoji"
-                  >
-                    😊
-                  </button>
-                </div>
-                
-                <div className="message-input-wrapper">
-                  <textarea
-                    value={newMessage}
-                    onChange={(e) => {
-                      setNewMessage(e.target.value || '');
-                      handleTyping();
-                    }}
-                    placeholder="Type your message..."
-                    className="message-input"
-                    rows="1"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage(e);
-                      }
-                    }}
-                  />
-                  
-                  <button
-                    type="submit"
-                    disabled={loading || ((!newMessage || !newMessage.trim()) && !selectedFile)}
-                    className="send-btn"
-                  >
-                    {loading ? '⏳' : '🚀'}
-                  </button>
-                </div>
-                
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  onChange={handleFileSelect}
-                  style={{ display: 'none' }}
-                  accept="image/*,.pdf,.doc,.docx,.txt"
-                />
-              </form>
-              
-              {showEmojiPicker && (
-                <div className="emoji-picker">
-                  <div className="emoji-grid">
-                    {commonEmojis.map(emoji => (
-                      <button
-                        key={emoji}
-                        onClick={() => handleEmojiSelect(emoji)}
-                        className="emoji-btn"
+
+                {/* Project Info */}
+                <div className="project-info-bar">
+                  <div className="project-details">
+                    <span className="project-icon">📋</span>
+                    <div className="project-text">
+                      <span className="project-name">{activeChat.taskId.title}</span>
+                      <span 
+                        className="project-status"
+                        style={{ color: getStatusColor(activeChat.taskId.status) }}
                       >
-                        {emoji}
-                      </button>
-                    ))}
+                        {activeChat.taskId.status}
+                      </span>
+                    </div>
+                  </div>
+                  <button className="btn btn-secondary btn-sm">
+                    📋 View Project
+                  </button>
+                </div>
+
+                {/* Messages Area */}
+                <div className="messages-container">
+                  <div className="messages-list">
+                    {currentMessages.map((message, index) => {
+                      const prevMessage = currentMessages[index - 1];
+                      const showAvatar = !prevMessage || prevMessage.sender?._id !== message.sender?._id;
+                      
+                      return (
+                        <MessageBubble
+                          key={message._id}
+                          message={message}
+                          isOwn={message.isOwn}
+                          showAvatar={showAvatar}
+                        />
+                      );
+                    })}
+                    <div ref={messagesEndRef} />
                   </div>
                 </div>
-              )}
-            </div>
-          </>
-        )}
+
+                {/* Message Input */}
+                <div className="message-input-container">
+                  <div className="message-input-wrapper">
+                    <button className="attachment-btn" title="Attach File">
+                      📎
+                    </button>
+                    <textarea
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Type your message..."
+                      className="message-input"
+                      rows="1"
+                    />
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim()}
+                      className="send-btn"
+                      title="Send Message"
+                    >
+                      🚀
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="no-chat-selected">
+                <div className="no-chat-icon">💬</div>
+                <h3>Select a conversation</h3>
+                <p>Choose a conversation from the sidebar to start messaging</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <style jsx>{`
         .chat-container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 1rem;
-          height: calc(100vh - 120px);
           display: grid;
           grid-template-columns: 350px 1fr;
-          gap: 1rem;
+          height: 600px;
+          background: var(--bg-card);
+          border-radius: var(--radius-lg);
+          border: 1px solid var(--border-primary);
           overflow: hidden;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 20px;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
 
-        .error-banner {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          background: #ff4757;
-          color: white;
-          padding: 1rem;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          z-index: 1000;
-          box-shadow: 0 5px 15px rgba(255,71,87,0.3);
-        }
-
-        .error-close {
-          background: none;
-          border: none;
-          color: white;
-          cursor: pointer;
-          font-size: 1.2rem;
-        }
-
-        .chat-sidebar {
-          background: rgba(255,255,255,0.95);
-          border-radius: 15px;
-          backdrop-filter: blur(10px);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        .conversations-sidebar {
+          background: var(--bg-secondary);
+          border-right: 1px solid var(--border-primary);
           display: flex;
           flex-direction: column;
-          overflow: hidden;
         }
 
         .sidebar-header {
-          padding: 1.5rem;
-          border-bottom: 1px solid rgba(0,0,0,0.1);
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          color: white;
+          padding: var(--space-xl);
+          border-bottom: 1px solid var(--border-primary);
         }
 
-        .sidebar-header h2 {
-          margin: 0;
-          font-size: 1.5rem;
-          font-weight: 600;
-        }
-
-        .new-chat-btn {
-          background: rgba(255,255,255,0.2);
-          border: none;
-          color: white;
-          padding: 0.5rem;
-          border-radius: 50%;
-          cursor: pointer;
+        .sidebar-header h3 {
+          color: var(--text-primary);
           font-size: 1.2rem;
-          transition: all 0.3s ease;
+          font-weight: 600;
+          margin: 0 0 var(--space-md) 0;
         }
 
-        .new-chat-btn:hover {
-          background: rgba(255,255,255,0.3);
-          transform: scale(1.1);
-        }
-
-        .search-section {
-          padding: 1rem;
-          border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .search-input-wrapper {
+        .search-wrapper {
           position: relative;
-          display: flex;
-          align-items: center;
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 12px;
-          z-index: 1;
-          opacity: 0.6;
         }
 
         .search-input {
           width: 100%;
-          padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-          border: 2px solid rgba(0,0,0,0.1);
-          border-radius: 25px;
-          outline: none;
+          padding: var(--space-md) var(--space-md) var(--space-md) 2.5rem;
+          background: var(--bg-input);
+          border: 1px solid var(--border-primary);
+          border-radius: var(--radius-md);
+          color: var(--text-primary);
           font-size: 0.9rem;
-          transition: all 0.3s ease;
-          background: rgba(255,255,255,0.8);
+          outline: none;
+          transition: all var(--transition-normal);
         }
 
         .search-input:focus {
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+          border-color: var(--border-accent);
+          box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        .search-icon {
+          position: absolute;
+          left: var(--space-md);
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--text-muted);
         }
 
         .conversations-list {
           flex: 1;
           overflow-y: auto;
-          padding: 0.5rem;
+          padding: var(--space-md);
         }
 
         .conversation-item {
           display: flex;
-          align-items: center;
-          padding: 1rem;
+          gap: var(--space-md);
+          padding: var(--space-md);
+          border-radius: var(--radius-md);
           cursor: pointer;
-          border-radius: 12px;
-          margin-bottom: 0.5rem;
-          transition: all 0.3s ease;
-          background: rgba(255,255,255,0.5);
+          transition: all var(--transition-normal);
+          margin-bottom: var(--space-sm);
         }
 
         .conversation-item:hover {
-          background: rgba(102,126,234,0.1);
-          transform: translateY(-2px);
+          background: var(--bg-tertiary);
         }
 
         .conversation-item.active {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          background: var(--primary-gradient);
           color: white;
-          box-shadow: 0 5px 15px rgba(102,126,234,0.3);
+        }
+
+        .conversation-item.unread {
+          background: rgba(0, 212, 255, 0.05);
+          border-left: 3px solid var(--primary-cyan);
         }
 
         .conversation-avatar {
           position: relative;
-          margin-right: 1rem;
+          flex-shrink: 0;
         }
 
-        .avatar-circle {
-          width: 48px;
-          height: 48px;
+        .avatar-icon {
+          width: 45px;
+          height: 45px;
+          background: var(--bg-tertiary);
           border-radius: 50%;
-          background: linear-gradient(135deg, #667eea, #764ba2);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: white;
-          font-weight: 600;
-          font-size: 1.2rem;
+          font-size: 1.5rem;
+        }
+
+        .conversation-item.active .avatar-icon {
+          background: rgba(255, 255, 255, 0.2);
         }
 
         .online-indicator {
@@ -771,9 +558,9 @@ const Chat = () => {
           right: 2px;
           width: 12px;
           height: 12px;
+          background: var(--success);
+          border: 2px solid var(--bg-card);
           border-radius: 50%;
-          background: #2ed573;
-          border: 2px solid white;
         }
 
         .conversation-content {
@@ -785,442 +572,294 @@ const Chat = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 0.25rem;
+          margin-bottom: var(--space-xs);
         }
 
         .conversation-name {
-          margin: 0;
-          font-size: 1rem;
           font-weight: 600;
-          color: inherit;
+          color: var(--text-primary);
+        }
+
+        .conversation-item.active .conversation-name {
+          color: white;
         }
 
         .conversation-time {
           font-size: 0.8rem;
-          opacity: 0.7;
+          color: var(--text-muted);
+        }
+
+        .conversation-item.active .conversation-time {
+          color: rgba(255, 255, 255, 0.8);
         }
 
         .conversation-preview {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
+          margin-bottom: var(--space-xs);
+        }
+
+        .project-title {
+          font-size: 0.85rem;
+          color: var(--text-accent);
+          font-weight: 500;
+          display: block;
+          margin-bottom: var(--space-xs);
+        }
+
+        .conversation-item.active .project-title {
+          color: rgba(255, 255, 255, 0.9);
         }
 
         .last-message {
+          font-size: 0.85rem;
+          color: var(--text-secondary);
           margin: 0;
-          font-size: 0.9rem;
-          opacity: 0.8;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .project-context {
-          font-size: 0.8rem;
-          background: rgba(102,126,234,0.2);
-          padding: 0.25rem 0.5rem;
-          border-radius: 12px;
-          display: inline-block;
-          margin-top: 0.25rem;
-        }
-
-        .unread-badge {
-          position: absolute;
-          top: 0.5rem;
-          right: 0.5rem;
-          background: #ff4757;
-          color: white;
-          padding: 0.25rem 0.5rem;
-          border-radius: 12px;
-          font-size: 0.8rem;
-          font-weight: 600;
-          min-width: 20px;
-          text-align: center;
-        }
-
-        .chat-main {
-          background: rgba(255,255,255,0.95);
-          border-radius: 15px;
-          backdrop-filter: blur(10px);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-          display: flex;
-          flex-direction: column;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
           overflow: hidden;
         }
 
-        .chat-empty-state, .no-conversations {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          text-align: center;
-          padding: 2rem;
+        .conversation-item.active .last-message {
+          color: rgba(255, 255, 255, 0.8);
         }
 
-        .empty-icon {
-          font-size: 4rem;
-          margin-bottom: 1rem;
-          opacity: 0.5;
-        }
-
-        .chat-empty-state h3, .no-conversations h3 {
-          margin: 0 0 0.5rem 0;
-          color: #333;
-          font-size: 1.5rem;
-        }
-
-        .chat-empty-state p, .no-conversations p {
-          margin: 0 0 1.5rem 0;
-          color: #666;
-          font-size: 1rem;
-        }
-
-        .btn {
-          padding: 0.75rem 1.5rem;
-          border-radius: 25px;
-          border: none;
-          cursor: pointer;
-          font-weight: 600;
-          transition: all 0.3s ease;
-          text-decoration: none;
-          display: inline-block;
-        }
-
-        .btn-primary {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          color: white;
-          box-shadow: 0 5px 15px rgba(102,126,234,0.3);
-        }
-
-        .btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(102,126,234,0.4);
-        }
-
-        .btn-secondary {
-          background: rgba(102,126,234,0.1);
-          color: #667eea;
-          border: 2px solid #667eea;
-        }
-
-        .btn-secondary:hover {
-          background: #667eea;
-          color: white;
-        }
-
-        .chat-header {
-          padding: 1.5rem;
-          border-bottom: 1px solid rgba(0,0,0,0.1);
+        .conversation-meta {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .project-status {
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .unread-count {
+          background: var(--error);
           color: white;
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .no-conversations {
+          text-align: center;
+          padding: var(--space-2xl);
+          color: var(--text-muted);
+        }
+
+        .no-conversations-icon {
+          font-size: 3rem;
+          margin-bottom: var(--space-md);
+          opacity: 0.5;
+        }
+
+        .chat-area {
+          display: flex;
+          flex-direction: column;
+          background: var(--bg-card);
+        }
+
+        .chat-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--space-lg) var(--space-xl);
+          border-bottom: 1px solid var(--border-primary);
+          background: var(--bg-secondary);
         }
 
         .chat-user-info {
           display: flex;
           align-items: center;
-          gap: 1rem;
+          gap: var(--space-md);
         }
 
-        .user-avatar {
+        .chat-avatar {
           position: relative;
         }
 
-        .user-details h3 {
-          margin: 0;
-          font-size: 1.2rem;
+        .chat-user-details h3 {
+          color: var(--text-primary);
+          font-size: 1.1rem;
           font-weight: 600;
+          margin: 0 0 var(--space-xs) 0;
         }
 
-        .user-details p {
+        .user-status {
+          color: var(--text-secondary);
+          font-size: 0.85rem;
           margin: 0;
-          font-size: 0.9rem;
-          opacity: 0.8;
         }
 
-        .status-online, .status-offline {
+        .chat-actions {
           display: flex;
-          align-items: center;
-          gap: 0.25rem;
+          gap: var(--space-sm);
         }
 
-        .project-info {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        .project-badge {
-          background: rgba(255,255,255,0.2);
-          padding: 0.5rem 1rem;
-          border-radius: 20px;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .info-btn {
-          background: rgba(255,255,255,0.2);
-          border: none;
-          color: white;
-          padding: 0.5rem;
-          border-radius: 50%;
+        .action-btn {
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-primary);
+          color: var(--text-secondary);
+          width: 40px;
+          height: 40px;
+          border-radius: var(--radius-md);
           cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .info-btn:hover {
-          background: rgba(255,255,255,0.3);
-          transform: scale(1.1);
-        }
-
-        .project-info-panel {
-          padding: 1rem 1.5rem;
-          background: rgba(102,126,234,0.1);
-          border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .project-details h4 {
-          margin: 0 0 1rem 0;
-          color: #333;
-        }
-
-        .project-details p {
-          margin: 0.5rem 0;
-          color: #666;
-        }
-
-        .project-actions {
+          transition: all var(--transition-normal);
           display: flex;
-          gap: 1rem;
-          margin-top: 1rem;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.1rem;
+        }
+
+        .action-btn:hover {
+          background: var(--bg-card);
+          border-color: var(--border-accent);
+          color: var(--text-primary);
+        }
+
+        .project-info-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--space-md) var(--space-xl);
+          background: rgba(0, 212, 255, 0.05);
+          border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .project-details {
+          display: flex;
+          align-items: center;
+          gap: var(--space-md);
+        }
+
+        .project-icon {
+          font-size: 1.2rem;
+        }
+
+        .project-text {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .project-name {
+          color: var(--text-primary);
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+
+        .btn-sm {
+          padding: var(--space-sm) var(--space-md);
+          font-size: 0.8rem;
         }
 
         .messages-container {
           flex: 1;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
+          overflow-y: auto;
+          padding: var(--space-lg);
         }
 
         .messages-list {
-          flex: 1;
-          overflow-y: auto;
-          padding: 1rem;
           display: flex;
           flex-direction: column;
-          gap: 1rem;
-        }
-
-        .message-container {
-          display: flex;
-          align-items: flex-end;
-          gap: 0.5rem;
-        }
-
-        .message-container.own {
-          flex-direction: row-reverse;
-        }
-
-        .message-avatar {
-          width: 32px;
-          height: 32px;
-          flex-shrink: 0;
-        }
-
-        .message-avatar .avatar-circle {
-          width: 32px;
-          height: 32px;
-          font-size: 0.9rem;
+          gap: var(--space-md);
         }
 
         .message-bubble {
+          display: flex;
+          gap: var(--space-md);
           max-width: 70%;
-          padding: 1rem;
-          border-radius: 20px;
-          position: relative;
         }
 
         .message-bubble.own {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          color: white;
-          border-bottom-right-radius: 5px;
+          align-self: flex-end;
+          flex-direction: row-reverse;
         }
 
         .message-bubble.other {
-          background: rgba(0,0,0,0.05);
-          color: #333;
-          border-bottom-left-radius: 5px;
+          align-self: flex-start;
+        }
+
+        .message-avatar {
+          width: 35px;
+          height: 35px;
+          background: var(--primary-gradient);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: 600;
+          font-size: 0.9rem;
+          flex-shrink: 0;
         }
 
         .message-content {
-          margin-bottom: 0.5rem;
+          flex: 1;
         }
 
         .message-text {
-          margin: 0;
-          line-height: 1.4;
+          background: var(--bg-secondary);
+          color: var(--text-primary);
+          padding: var(--space-md) var(--space-lg);
+          border-radius: var(--radius-lg);
+          line-height: 1.5;
           word-wrap: break-word;
         }
 
-        .message-file {
-          margin-top: 0.5rem;
+        .message-bubble.own .message-text {
+          background: var(--primary-gradient);
+          color: white;
         }
 
-        .message-image {
-          max-width: 200px;
-          border-radius: 10px;
-          cursor: pointer;
+        .message-timestamp {
+          color: var(--text-muted);
+          font-size: 0.75rem;
+          margin-top: var(--space-xs);
+          text-align: right;
         }
 
-        .file-attachment {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.5rem;
-          background: rgba(255,255,255,0.1);
-          border-radius: 10px;
-        }
-
-        .file-download {
-          color: inherit;
-          text-decoration: none;
-          font-weight: 600;
-        }
-
-        .message-meta {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          font-size: 0.8rem;
-          opacity: 0.7;
-        }
-
-        .typing-indicator {
-          display: flex;
-          justify-content: flex-start;
-          margin: 0.5rem 0;
-        }
-
-        .typing-bubble {
-          background: rgba(0,0,0,0.05);
-          padding: 1rem;
-          border-radius: 20px;
-          border-bottom-left-radius: 5px;
-        }
-
-        .typing-dots {
-          display: flex;
-          gap: 0.25rem;
-        }
-
-        .typing-dots span {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: #666;
-          animation: typing 1.4s infinite ease-in-out;
-        }
-
-        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes typing {
-          0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-          40% { transform: scale(1); opacity: 1; }
+        .message-bubble.other .message-timestamp {
+          text-align: left;
         }
 
         .message-input-container {
-          padding: 1rem 1.5rem;
-          border-top: 1px solid rgba(0,0,0,0.1);
-          background: rgba(255,255,255,0.8);
-        }
-
-        .file-preview {
-          margin-bottom: 1rem;
-          padding: 0.75rem;
-          background: rgba(102,126,234,0.1);
-          border-radius: 10px;
-        }
-
-        .file-info {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .remove-file {
-          background: none;
-          border: none;
-          color: #ff4757;
-          cursor: pointer;
-          font-weight: bold;
-          margin-left: auto;
-        }
-
-        .message-form {
-          display: flex;
-          align-items: flex-end;
-          gap: 1rem;
-        }
-
-        .input-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .action-btn {
-          background: rgba(102,126,234,0.1);
-          border: none;
-          padding: 0.75rem;
-          border-radius: 50%;
-          cursor: pointer;
-          font-size: 1.2rem;
-          transition: all 0.3s ease;
-        }
-
-        .action-btn:hover {
-          background: rgba(102,126,234,0.2);
-          transform: scale(1.1);
+          padding: var(--space-lg) var(--space-xl);
+          border-top: 1px solid var(--border-primary);
+          background: var(--bg-secondary);
         }
 
         .message-input-wrapper {
-          flex: 1;
           display: flex;
           align-items: flex-end;
-          gap: 0.5rem;
-          background: white;
-          border-radius: 25px;
-          padding: 0.5rem;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          gap: var(--space-md);
+          background: var(--bg-card);
+          border: 1px solid var(--border-primary);
+          border-radius: var(--radius-lg);
+          padding: var(--space-md);
         }
 
-        .message-input {
-          flex: 1;
-          border: none;
-          outline: none;
-          padding: 0.75rem;
-          font-size: 1rem;
-          resize: none;
-          max-height: 120px;
-          background: transparent;
-        }
-
+        .attachment-btn,
         .send-btn {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          background: none;
           border: none;
-          color: white;
-          padding: 0.75rem;
-          border-radius: 50%;
+          color: var(--text-muted);
           cursor: pointer;
           font-size: 1.2rem;
-          transition: all 0.3s ease;
-          min-width: 48px;
-          height: 48px;
+          transition: color var(--transition-normal);
+          flex-shrink: 0;
+        }
+
+        .attachment-btn:hover,
+        .send-btn:hover:not(:disabled) {
+          color: var(--primary-cyan);
         }
 
         .send-btn:disabled {
@@ -1228,55 +867,103 @@ const Chat = () => {
           cursor: not-allowed;
         }
 
-        .send-btn:not(:disabled):hover {
-          transform: scale(1.1);
-          box-shadow: 0 5px 15px rgba(102,126,234,0.3);
-        }
-
-        .emoji-picker {
-          position: absolute;
-          bottom: 100%;
-          left: 0;
-          background: white;
-          border-radius: 15px;
-          padding: 1rem;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-          z-index: 1000;
-        }
-
-        .emoji-grid {
-          display: grid;
-          grid-template-columns: repeat(8, 1fr);
-          gap: 0.5rem;
-        }
-
-        .emoji-btn {
+        .message-input {
+          flex: 1;
           background: none;
           border: none;
-          padding: 0.5rem;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 1.2rem;
-          transition: all 0.2s ease;
+          color: var(--text-primary);
+          font-size: 0.9rem;
+          resize: none;
+          outline: none;
+          min-height: 20px;
+          max-height: 100px;
+          line-height: 1.4;
         }
 
-        .emoji-btn:hover {
-          background: rgba(102,126,234,0.1);
-          transform: scale(1.2);
+        .message-input::placeholder {
+          color: var(--text-muted);
+        }
+
+        .no-chat-selected {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          color: var(--text-muted);
+          text-align: center;
+        }
+
+        .no-chat-icon {
+          font-size: 4rem;
+          margin-bottom: var(--space-lg);
+          opacity: 0.5;
+        }
+
+        .no-chat-selected h3 {
+          color: var(--text-primary);
+          font-size: 1.5rem;
+          margin: 0 0 var(--space-md) 0;
+        }
+
+        .no-chat-selected p {
+          margin: 0;
+          font-size: 1rem;
+        }
+
+        .loading-container {
+          text-align: center;
+          padding: var(--space-2xl);
+          color: var(--text-secondary);
+        }
+
+        .loading-container p {
+          margin-top: var(--space-lg);
+          font-size: 1.1rem;
+        }
+
+        @media (max-width: 1024px) {
+          .chat-container {
+            grid-template-columns: 300px 1fr;
+            height: 500px;
+          }
         }
 
         @media (max-width: 768px) {
           .chat-container {
             grid-template-columns: 1fr;
-            padding: 0.5rem;
+            height: 600px;
           }
-          
-          .chat-sidebar {
-            display: none;
+
+          .conversations-sidebar {
+            display: ${activeChat ? 'none' : 'flex'};
           }
-          
+
+          .chat-area {
+            display: ${activeChat ? 'flex' : 'none'};
+          }
+
           .message-bubble {
             max-width: 85%;
+          }
+
+          .chat-header {
+            padding: var(--space-md) var(--space-lg);
+          }
+
+          .project-info-bar {
+            padding: var(--space-sm) var(--space-lg);
+            flex-direction: column;
+            gap: var(--space-sm);
+            align-items: stretch;
+          }
+
+          .messages-container {
+            padding: var(--space-md);
+          }
+
+          .message-input-container {
+            padding: var(--space-md) var(--space-lg);
           }
         }
       `}</style>
@@ -1284,4 +971,4 @@ const Chat = () => {
   );
 };
 
-export default Chat;
+export default ChatPage;
